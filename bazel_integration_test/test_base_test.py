@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-# http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,8 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Integration test framework for using Bazel
-load("//tools:common.bzl", "BAZEL_VERSIONS")
-load("//tools:repositories.bzl", "bazel_binary", "bazel_binaries")
-load("//tools:bazel_java_integration_test.bzl", "bazel_java_integration_test", "bazel_java_integration_test_deps")
-load("//tools:bazel_py_integration_test.bzl", "bazel_py_integration_test")
+import os
+import unittest
+from bazel_integration_test import test_base
+
+
+class TestBaseTest(test_base.TestBase):
+
+    def testVersion(self):
+        self.ScratchFile('WORKSPACE')
+        exit_code, stdout, stderr = self.RunBazel(['info', 'release'])
+        self.AssertExitCode(exit_code, 0, stderr)
+        self.assertTrue(("release " + self.bazelVersion) in stdout[0])
+
+
+if __name__ == '__main__':
+    unittest.main()
