@@ -25,4 +25,12 @@ BAZEL_HASH_DICT = {
         'darwin-x86_64': '331fb70586ca7f775ad9f0fa262dcce84252263f8654517ac025003cdc86967e',
         'linux-x86_64': '9e77b400c062ae19c89839ee7cba19eea882ee007122d040520bf6024cdf704c',
     },
+    '0.6.1': {
+        'darwin-x86_64': '56feb62d8fc95e8a4f5fe21d9938d47cdda3a066f87111556a194c5adc571ee8',
+        'linux-x86_64': '9846ea8c7a7bf448f9895741dea3b018b3f7846aab4a9cac0c9a3024a68e4d37',
+    },
+    '0.7.0': {
+        'darwin-x86_64': '036b8281fb240f5f7beb7f76ca4290ece8177dcae1d891e5b34123b5391f249a',
+        'linux-x86_64': '5dfc7bf3737b1b9ade4709f2b7348d71e0e81f44e59f2ddd44bc04879e7ddab0',
+    },
 }
