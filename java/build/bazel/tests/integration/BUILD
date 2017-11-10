@@ -8,7 +8,7 @@ java_library(
         "LineListOutputStream.java",
     ],
     data = [
-        "@build_bazel_bazel_%s//:bazel_binary" % v.replace(".", "_")
+        "@build_bazel_bazel_%s//:bazel" % v.replace(".", "_")
         for v in BAZEL_VERSIONS
     ],
     deps = [
