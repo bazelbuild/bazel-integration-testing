@@ -50,16 +50,7 @@ def _bazel_repository_impl(rctx):
   _get_installer(rctx)
   _extract_bazel(rctx)
   rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
-  rctx.file("bazel.sh", """#!/bin/sh -e
-MYSELF="$0"
-while [ -h "${MYSELF}" ]; do
-  MYSELF="$(readlink "${MYSELF}")"
-done
-BASEDIR="$(dirname "${MYSELF}")"
-"${BASEDIR}/bin/bazel-real" \
-  --install_base="${BASEDIR}/install_base" \
-  "$@"
-""")
+  rctx.template("bazel.sh", Label("//tools:bazel.sh"))
   rctx.file("BUILD", """
 filegroup(
   name = "bazel_install_base",
