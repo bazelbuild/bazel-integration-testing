@@ -32,16 +32,38 @@ def _get_installer(rctx):
   rctx.download_and_extract(**args)
 
 
+def _extract_bazel(rctx):
+  result = rctx.execute([
+    rctx.path("bin/bazel-real"),
+    "--install_base",
+    rctx.path("install_base"),
+    "version"])
+  if result.return_code != 0:
+    fail("`bazel version` returned non zero return code (%s): %s%s" % (
+      result.return_code, result.stderr, result.stdout))
+  ver = result.stdout.strip().split("\n")[0].split(":")[1].strip()
+  if ver != rctx.attr.version:
+    fail("`bazel version` returned version %s (expected %s)" % (
+      ver, rctx.attr.version))
+
 def _bazel_repository_impl(rctx):
   _get_installer(rctx)
+  _extract_bazel(rctx)
   rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
+  rctx.template("bazel.sh", Label("//tools:bazel.sh"))
   rctx.file("BUILD", """
-genrule(
-  name = "bazel_binary",
-  outs = ["bazel"],
-  srcs = ["bin/bazel-real"],
-  cmd = "cp $< $@",
-  output_to_bindir = True,
+filegroup(
+  name = "bazel_install_base",
+  srcs = glob(["install_base/**"]),
+  visibility = ["//visibility:public"])
+
+sh_binary(
+  name = "bazel",
+  srcs = ["bazel.sh"],
+  data = [
+      ":bazel_install_base",
+      ":bin/bazel-real",
+  ],
   visibility = ["//visibility:public"])""")
 
 bazel_binary = repository_rule(
