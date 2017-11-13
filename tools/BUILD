@@ -5,3 +5,7 @@ py_binary(
     srcs = ["create_bazel_hashdict.py"],
     deps = ["@com_google_python_gflags//:gflags"],
 )
+filegroup(
+    name = "tools",
+    srcs = glob(["*"])
+)
