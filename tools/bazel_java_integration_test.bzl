@@ -60,7 +60,7 @@ def _java_package():
   return ".".join(segments[idx+1:])
 
 
-def bazel_java_integration_test(name, srcs=[], deps=[], runtime_deps=[],
+def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[],
                                 jvm_flags=[], test_class=None,
                                 versions=BAZEL_VERSIONS, **kwargs):
   """A wrapper around java_test that create several java tests, one per version
@@ -79,7 +79,7 @@ def bazel_java_integration_test(name, srcs=[], deps=[], runtime_deps=[],
     "@org_junit//jar",
   ]
   if srcs:
-    deps = deps + add_deps
+    deps = (deps or []) + add_deps
   else:
     runtime_deps = runtime_deps + add_deps
   for version in versions:
