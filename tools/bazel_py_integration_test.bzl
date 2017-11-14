@@ -38,3 +38,6 @@ def bazel_py_integration_test(name, srcs, main=None, deps=[], versions=BAZEL_VER
         main = main,
         deps = deps + add_deps,
         **kwargs)
+  native.test_suite(
+        name = name,
+        tests = [":%s/bazel%s" % (name, version) for version in versions])

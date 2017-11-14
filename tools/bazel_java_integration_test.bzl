@@ -91,6 +91,9 @@ def bazel_java_integration_test(name, srcs=[], deps=[], runtime_deps=[],
         deps = deps,
         runtime_deps = runtime_deps,
         **kwargs)
+  native.test_suite(
+        name = name,
+        tests = [":%s/bazel%s" % (name, version) for version in versions])
 
 def bazel_java_integration_test_deps(versions = BAZEL_VERSIONS):
   bazel_binaries(versions)
