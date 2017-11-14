@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -153,6 +154,9 @@ public abstract class BazelBaseTestCase {
    * {@code content}.
    */
   protected void scratchFile(String path, String... content) throws IOException {
+    scratchFile(path, Arrays.asList(content));
+  }
+  protected void scratchFile(String path, Iterable<String> content) throws IOException {
     File dest = new File(workspace,path);
     if (!dest.getParentFile().exists()) {
       dest.getParentFile().mkdirs();
