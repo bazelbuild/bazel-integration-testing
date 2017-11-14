@@ -14,26 +14,25 @@
 
 package build.bazel.tests.integration;
 
-import org.hamcrest.Description;
-import org.hamcrest.SelfDescribing;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
+import static com.google.common.truth.Truth.assertThat;
 import static org.hamcrest.core.Is.is;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.assertEquals;
+import org.hamcrest.Description;
+import org.hamcrest.SelfDescribing;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.junit.Test;
 
 /**
  * {@link BazelBaseTestCase}Test
@@ -42,179 +41,193 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings("SameParameterValue")
 public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
-    private static final String WORKSPACE_NAME = "workspace(name = 'build_bazel_integration_test')";
+  private static final String WORKSPACE_NAME = "workspace(name = 'build_bazel_integration_test')";
 
-    @Test
-    public void testVersion() throws Exception {
-        Command cmd = bazel("info", "release");
-        assertEquals(0, cmd.run());
-        assertThat(cmd.getOutputLines())
-                .contains("release " + System.getProperty("bazel.version"));
-    }
+  @Test
+  public void testVersion() throws Exception {
+    Command cmd = bazel("info", "release");
+    assertEquals(0, cmd.run());
+    assertThat(cmd.getOutputLines())
+        .contains("release " + System.getProperty("bazel.version"));
+  }
 
-    @Test
-    public void testTestSuiteExists() throws Exception {
-        loadIntegrationTestRuleIntoWorkspace();
-        setupPassingTest("IntegrationTestSuiteTest");
+  @Test
+  public void testTestSuiteExists() throws Exception {
+    loadIntegrationTestRuleIntoWorkspace();
+    setupPassingTest("IntegrationTestSuiteTest");
 
-        Command cmd = bazel("test", "//:IntegrationTestSuiteTest");
-        final int exitCode = cmd.run();
+    Command cmd = bazel("test", "//:IntegrationTestSuiteTest");
+    final int exitCode = cmd.run();
 
-        org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd, workspace)));
-    }
+    org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd, workspace)));
+  }
 
-    private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(final Command cmd, final File workspace) {
-        return new TypeSafeDiagnosingMatcher<Integer>() {
-            @Override
-            protected boolean matchesSafely(final Integer exitCode, final Description mismatchDescription) {
-                if (exitCode != 0) {
-                    mismatchDescription
-                            .appendText(" exit code was ")
-                            .appendValue(exitCode)
-                            .appendText("\n")
-                            .appendText("Workspace contents: \n")
-                            .appendValueList("","\n","\n", contents(workspace.toPath()))
-                            .appendDescriptionOf(commandDescription(cmd));
-                    return false;
-                }
-                return true;
-            }
-
-            @Override
-            public void describeTo(final Description description) {
-               description.appendText("successful exit code (0)");
-            }
-        };
-    }
-
-    private SelfDescribing commandDescription(final Command cmd) {
-        return description -> {
-            final String newLine = System.getProperty("line.separator");
-            final List<String> logContents = logsOfInternalTests(cmd.getErrorLines()).collect(Collectors.toList());
-            description
-                    .appendText("std-error:\n")
-                    .appendValueList("", newLine, newLine,cmd.getErrorLines());
-            if (!logContents.isEmpty()) {
-            description
-                    .appendText("Contents of internal test logs:\n")
-                    .appendText("*******************************\n")
-                    .appendValueList(newLine, newLine, newLine,
-                            logContents);
-            }
-        };
-    }
-
-    private List<String> contents(final Path workspacePath) {
-        try {
-            return Files.walk(workspacePath).map(Path::toString).collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+  private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(final Command cmd,
+      final File workspace) {
+    return new TypeSafeDiagnosingMatcher<Integer>() {
+      @Override
+      protected boolean matchesSafely(final Integer exitCode,
+          final Description mismatchDescription) {
+        if (exitCode != 0) {
+          mismatchDescription
+              .appendText(" exit code was ")
+              .appendValue(exitCode)
+              .appendText("\n")
+              .appendText("Workspace contents: \n")
+              .appendValueList("", "\n", "\n", contents(workspace.toPath()))
+              .appendDescriptionOf(commandDescription(cmd));
+          return false;
         }
-    }
+        return true;
+      }
 
-    private Stream<String> logsOfInternalTests(final List<String> errorLines) {
-        return errorLines.stream()
-                .filter(line -> line.contains("(see "))
-                .map(line -> line.split("see ")[1].replace(")", ""))
-                .map(Paths::get)
-                .map(logPath -> {
-                    try {
-                        LinkedList<String> logContents = new LinkedList<>(Files.readAllLines(logPath));
-                        logContents.addFirst("Log contents:");
-                        logContents.addFirst(logPath.toString());
-                        logContents.addFirst("Log path:");
-                        return logContents;
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .flatMap(Collection::stream);
-    }
+      @Override
+      public void describeTo(final Description description) {
+        description.appendText("successful exit code (0)");
+      }
+    };
+  }
 
-    private void setupPassingTest(final String testName) throws IOException {
-        writePassingTestJavaSource(testName);
-        writeTestBuildFile(testName);
-    }
+  private SelfDescribing commandDescription(final Command cmd) {
+    return description -> {
+      final String newLine = System.getProperty("line.separator");
+      final List<String> logContents = logsOfInternalTests(cmd.getErrorLines())
+          .collect(Collectors.toList());
+      description
+          .appendText("std-error:\n")
+          .appendValueList("", newLine, newLine, cmd.getErrorLines());
+      if (!logContents.isEmpty()) {
+        description
+            .appendText("Contents of internal test logs:\n")
+            .appendText("*******************************\n")
+            .appendValueList(newLine, newLine, newLine,
+                logContents);
+      }
+    };
+  }
 
-    private void writeTestBuildFile(final String testName) throws IOException {
-        scratchFile("BUILD", "load('//:bazel_integration_test.bzl', 'bazel_java_integration_test')",
-                "",
-                "bazel_java_integration_test(",
-                "    name = '" + testName + "',",
-                "    test_class = '" + testName + "',",
-                "    srcs = ['" + testName + ".java'],",
-                ")");
+  private List<String> contents(final Path workspacePath) {
+    try {
+      return Files.walk(workspacePath).map(Path::toString).collect(Collectors.toList());
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
-        setupRuleSkylarkFiles();
-        setupRuleCode();
-        addExternalRepositoryFor("org_junit", "junit-4.11.jar");
-        addExternalRepositoryFor("org_hamcrest_core", "hamcrest-core-1.3.jar");
-        writeWorkspaceFileWithRepositories("org_junit", "org_hamcrest_core");
-    }
+  private Stream<String> logsOfInternalTests(final List<String> errorLines) {
+    return errorLines.stream()
+        .filter(line -> line.contains("(see "))
+        .map(line -> line.split("see ")[1].replace(")", ""))
+        .map(Paths::get)
+        .map(logPath -> {
+          try {
+            LinkedList<String> logContents = new LinkedList<>(Files.readAllLines(logPath));
+            logContents.addFirst("Log contents:");
+            logContents.addFirst(logPath.toString());
+            logContents.addFirst("Log path:");
+            return logContents;
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        })
+        .flatMap(Collection::stream);
+  }
 
-    private void setupRuleCode() throws IOException {
-        copyFromRunfiles("build_bazel_integration_test/java/build/bazel/tests/integration/libintegration.jar", "java/build/bazel/tests/integration/libintegration.jar");
-        scratchFile("java/build/bazel/tests/integration/BUILD.bazel","java_import(",
-                "    name = 'integration',",
-                "    jars = ['libintegration.jar'],",
-                "    visibility = ['//visibility:public']",
-                ")");
-    }
+  private void setupPassingTest(final String testName) throws IOException {
+    writePassingTestJavaSource(testName);
+    writeTestBuildFile(testName);
+  }
 
-    private void setupRuleSkylarkFiles() throws IOException {
-        copyFromRunfiles("build_bazel_integration_test/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-        copyFromRunfiles("build_bazel_integration_test/tools/bazel_hash_dict.bzl", "tools/bazel_hash_dict.bzl");
-        copyFromRunfiles("build_bazel_integration_test/tools/bazel_java_integration_test.bzl", "tools/bazel_java_integration_test.bzl");
-        copyFromRunfiles("build_bazel_integration_test/tools/bazel_py_integration_test.bzl", "tools/bazel_py_integration_test.bzl");
-        copyFromRunfiles("build_bazel_integration_test/tools/BUILD", "tools/BUILD");
-        copyFromRunfiles("build_bazel_integration_test/tools/common.bzl", "tools/common.bzl");
-        copyFromRunfiles("build_bazel_integration_test/tools/bazel.sh", "tools/bazel.sh");
-        copyFromRunfiles("build_bazel_integration_test/tools/repositories.bzl", "tools/repositories.bzl");
-    }
+  private void writeTestBuildFile(final String testName) throws IOException {
+    scratchFile("BUILD", "load('//:bazel_integration_test.bzl', 'bazel_java_integration_test')",
+        "",
+        "bazel_java_integration_test(",
+        "    name = '" + testName + "',",
+        "    test_class = '" + testName + "',",
+        "    srcs = ['" + testName + ".java'],",
+        ")");
+  }
 
-    private void writeWorkspaceFileWithRepositories(final String junitRepoName, final String hamcrestRepoName) throws IOException {
-        scratchFile("./WORKSPACE",
-                aggregate(WORKSPACE_NAME, repositoryDeclarationFor(junitRepoName), repositoryDeclarationFor(hamcrestRepoName))
-        );
-    }
+  private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
+    setupRuleSkylarkFiles();
+    setupRuleCode();
+    addExternalRepositoryFor("org_junit", "junit-4.11.jar");
+    addExternalRepositoryFor("org_hamcrest_core", "hamcrest-core-1.3.jar");
+    writeWorkspaceFileWithRepositories("org_junit", "org_hamcrest_core");
+  }
 
-    private List<String> aggregate(final String workspaceName, final Stream<String> repo1, final Stream<String> repo2) {
-        return Stream.of(
-                Stream.of(workspaceName),
-                repo1,
-                repo2).flatMap(s -> s).collect(Collectors.toList());
-    }
+  private void setupRuleCode() throws IOException {
+    copyFromRunfiles(
+        "build_bazel_integration_test/java/build/bazel/tests/integration/libintegration.jar",
+        "java/build/bazel/tests/integration/libintegration.jar");
+    scratchFile("java/build/bazel/tests/integration/BUILD.bazel", "java_import(",
+        "    name = 'integration',",
+        "    jars = ['libintegration.jar'],",
+        "    visibility = ['//visibility:public']",
+        ")");
+  }
 
-    private Stream<String> repositoryDeclarationFor(final String repoName) {
-        return Stream.of("local_repository(",
-                "    name = '" + repoName + "',",
-                "    path = './external/" + repoName + "'",
-                ")");
-    }
+  private void setupRuleSkylarkFiles() throws IOException {
+    copyFromRunfiles("build_bazel_integration_test/bazel_integration_test.bzl",
+        "bazel_integration_test.bzl");
+    copyFromRunfiles("build_bazel_integration_test/tools/bazel_hash_dict.bzl",
+        "tools/bazel_hash_dict.bzl");
+    copyFromRunfiles("build_bazel_integration_test/tools/bazel_java_integration_test.bzl",
+        "tools/bazel_java_integration_test.bzl");
+    copyFromRunfiles("build_bazel_integration_test/tools/bazel_py_integration_test.bzl",
+        "tools/bazel_py_integration_test.bzl");
+    copyFromRunfiles("build_bazel_integration_test/tools/BUILD", "tools/BUILD");
+    copyFromRunfiles("build_bazel_integration_test/tools/common.bzl", "tools/common.bzl");
+    copyFromRunfiles("build_bazel_integration_test/tools/bazel.sh", "tools/bazel.sh");
+    copyFromRunfiles("build_bazel_integration_test/tools/repositories.bzl",
+        "tools/repositories.bzl");
+  }
 
-    private void addExternalRepositoryFor(final String repoName, final String repoJarName) throws IOException {
-        copyFromRunfiles("build_bazel_integration_test/external/" + repoName + "/jar/" + repoJarName,
-                "external/" + repoName + "/jar/" + repoJarName);
-        scratchFile("external/" + repoName + "/WORKSPACE","");
-        scratchFile("external/" + repoName + "/jar/BUILD.bazel","java_import(",
-                "    name = 'jar',",
-                "    jars = ['" + repoJarName + "'],",
-                "    visibility = ['//visibility:public']",
-                ")");
-    }
+  private void writeWorkspaceFileWithRepositories(final String junitRepoName,
+      final String hamcrestRepoName) throws IOException {
+    scratchFile("./WORKSPACE",
+        aggregate(WORKSPACE_NAME, repositoryDeclarationFor(junitRepoName),
+            repositoryDeclarationFor(hamcrestRepoName))
+    );
+  }
 
-    private void writePassingTestJavaSource(final String testName) throws IOException {
-        scratchFile(""+testName + ".java", somePassingTestNamed(testName));
-    }
+  private List<String> aggregate(final String workspaceName, final Stream<String> repo1,
+      final Stream<String> repo2) {
+    return Stream.of(
+        Stream.of(workspaceName),
+        repo1,
+        repo2).flatMap(s -> s).collect(Collectors.toList());
+  }
 
-    private List<String> somePassingTestNamed(final String testName) {
-        return  Arrays.asList("import org.junit.Test;",
-                "public class " + testName + " {",
-                " @Test",
-                " public void testSuccess() {",
-                "  }",
-                "}");
-    }
+  private Stream<String> repositoryDeclarationFor(final String repoName) {
+    return Stream.of("local_repository(",
+        "    name = '" + repoName + "',",
+        "    path = './external/" + repoName + "'",
+        ")");
+  }
+
+  private void addExternalRepositoryFor(final String repoName, final String repoJarName)
+      throws IOException {
+    copyFromRunfiles("build_bazel_integration_test/external/" + repoName + "/jar/" + repoJarName,
+        "external/" + repoName + "/jar/" + repoJarName);
+    scratchFile("external/" + repoName + "/WORKSPACE", "");
+    scratchFile("external/" + repoName + "/jar/BUILD.bazel", "java_import(",
+        "    name = 'jar',",
+        "    jars = ['" + repoJarName + "'],",
+        "    visibility = ['//visibility:public']",
+        ")");
+  }
+
+  private void writePassingTestJavaSource(final String testName) throws IOException {
+    scratchFile("" + testName + ".java", somePassingTestNamed(testName));
+  }
+
+  private List<String> somePassingTestNamed(final String testName) {
+    return Arrays.asList("import org.junit.Test;",
+        "public class " + testName + " {",
+        " @Test",
+        " public void testSuccess() {",
+        "  }",
+        "}");
+  }
 }
