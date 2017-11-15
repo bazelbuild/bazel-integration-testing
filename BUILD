@@ -1,5 +1,27 @@
+load("@io_bazel_rules_go//go:def.bzl", "gazelle")
+
+package_group(
+    name = "internal",
+    packages = ["//..."],
+)
+
 filegroup(
     name = "root_bzl",
     srcs = glob(["*.bzl"]),
-    visibility = ["//visibility:public"]
+    visibility = ["//:internal"],
+)
+
+filegroup(
+    name = "all_bzl",
+    srcs = [
+        ":root_bzl",
+        "//go:bzl",
+        "//tools",
+    ],
+    visibility = ["//:internal"],
+)
+
+gazelle(
+    name = "gazelle",
+    prefix = "github.com/bazelbuild/bazel-integration-testing",
 )
