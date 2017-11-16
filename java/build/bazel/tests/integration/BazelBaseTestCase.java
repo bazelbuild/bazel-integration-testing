@@ -14,20 +14,21 @@
 
 package build.bazel.tests.integration;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-
-/** A base class to do integration test that call Bazel */
+/**
+ * A base class to do integration test that call Bazel
+ */
 public abstract class BazelBaseTestCase {
 
   protected final static Joiner PATH_JOINER = Joiner.on(File.separator);
@@ -39,10 +40,13 @@ public abstract class BazelBaseTestCase {
 
   private File currentBazel = null;
 
-  /** The current workspace. */
+  /**
+   * The current workspace.
+   */
   protected File workspace = null;
 
   public static class BazelTestCaseException extends Exception {
+
     private static final long serialVersionUID = 1L;
 
     private BazelTestCaseException(String message) {
@@ -64,7 +68,9 @@ public abstract class BazelBaseTestCase {
     bazelVersions = new HashMap<>();
   }
 
-  /** Return a file in the runfiles whose path segments are given by the arguments. */
+  /**
+   * Return a file in the runfiles whose path segments are given by the arguments.
+   */
   protected static File getRunfile(String... segments) {
     return new File(PATH_JOINER.join(runfileDirectory, PATH_JOINER.join(segments)));
   }
@@ -87,14 +93,18 @@ public abstract class BazelBaseTestCase {
     }
   }
 
-  /** Specify with bazel version to use, required before calling bazel. */
+  /**
+   * Specify with bazel version to use, required before calling bazel.
+   */
   protected void bazelVersion(String version)
       throws BazelTestCaseException, IOException, InterruptedException {
     unpackBazel(version);
     currentBazel = bazelVersions.get(version);
   }
 
-  /** Create a new workspace, previous one can still be used. */
+  /**
+   * Create a new workspace, previous one can still be used.
+   */
   protected void newWorkspace() throws IOException {
     this.workspace = java.nio.file.Files.createTempDirectory(tmp.toPath(), "workspace").toFile();
     this.scratchFile("WORKSPACE");
@@ -109,12 +119,16 @@ public abstract class BazelBaseTestCase {
     newWorkspace();
   }
 
-  /** Prepare bazel for running, and return the {@link Command} object to run it. */
+  /**
+   * Prepare bazel for running, and return the {@link Command} object to run it.
+   */
   protected Command bazel(String... args) throws BazelTestCaseException, IOException {
     return bazel(ImmutableList.copyOf(args));
   }
 
-  /** Prepare bazel for running, and return the {@link Command} object to run it. */
+  /**
+   * Prepare bazel for running, and return the {@link Command} object to run it.
+   */
   protected Command bazel(Iterable<String> args) throws BazelTestCaseException, IOException {
     if (currentBazel == null) {
       throw new BazelTestCaseException("Cannot use bazel because no version was specified, "
@@ -142,7 +156,8 @@ public abstract class BazelBaseTestCase {
   }
 
   /**
-   * Copy a file from the runfiles under {@code path} into {@code path} under the current workspace.
+   * Copy a file from the runfiles under {@code path} into {@code path} under the current
+   * workspace.
    */
   protected void copyFromRunfiles(String path) throws IOException {
     copyFromRunfiles(path, path);
@@ -153,7 +168,11 @@ public abstract class BazelBaseTestCase {
    * {@code content}.
    */
   protected void scratchFile(String path, String... content) throws IOException {
-    File dest = new File(workspace,path);
+    scratchFile(path, Arrays.asList(content));
+  }
+
+  protected void scratchFile(String path, Iterable<String> content) throws IOException {
+    File dest = new File(workspace, path);
     if (!dest.getParentFile().exists()) {
       dest.getParentFile().mkdirs();
     }
