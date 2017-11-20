@@ -13,8 +13,8 @@ java_library(
     deps = ["@org_junit//jar"] 
 )
 
-#the below uses test_class instead of renaming the BazelIntegrationTestNoSourcesSrc target
-#to demonstrate a usage of test_class attribute
+# The below uses test_class instead of renaming the BazelIntegrationTestNoSourcesSrc target.
+# This demonstrates a usage of test_class attribute.
 bazel_java_integration_test(
     name = "BazelIntegrationTestNoSources",
     runtime_deps = [":BazelIntegrationTestNoSourcesSrc"],
