@@ -1,4 +1,4 @@
-workspace(name = "build_bazel_integration_test")
+workspace(name = "build_bazel_integration_testing")
 
 load("//:bazel_version.bzl", "check_bazel_version")
 load("//:bazel_integration_test.bzl", "bazel_java_integration_test_deps")
