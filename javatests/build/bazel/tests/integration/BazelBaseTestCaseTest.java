@@ -41,7 +41,7 @@ import org.junit.Test;
 @SuppressWarnings("SameParameterValue")
 public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
-  private static final String WORKSPACE_NAME = "workspace(name = 'build_bazel_integration_test')";
+  private static final String WORKSPACE_NAME = "workspace(name = 'build_bazel_integration_testing')";
 
   @Test
   public void testVersion() throws Exception {
@@ -158,7 +158,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
   private void setupRuleCode() throws IOException {
     copyFromRunfiles(
-        "build_bazel_integration_test/java/build/bazel/tests/integration/libintegration.jar",
+        "build_bazel_integration_testing/java/build/bazel/tests/integration/libintegration.jar",
         "java/build/bazel/tests/integration/libintegration.jar");
     scratchFile("java/build/bazel/tests/integration/BUILD.bazel", "java_import(",
         "    name = 'integration',",
@@ -168,18 +168,18 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private void setupRuleSkylarkFiles() throws IOException {
-    copyFromRunfiles("build_bazel_integration_test/bazel_integration_test.bzl",
+    copyFromRunfiles("build_bazel_integration_testing/bazel_integration_test.bzl",
         "bazel_integration_test.bzl");
-    copyFromRunfiles("build_bazel_integration_test/tools/bazel_hash_dict.bzl",
+    copyFromRunfiles("build_bazel_integration_testing/tools/bazel_hash_dict.bzl",
         "tools/bazel_hash_dict.bzl");
-    copyFromRunfiles("build_bazel_integration_test/tools/bazel_java_integration_test.bzl",
+    copyFromRunfiles("build_bazel_integration_testing/tools/bazel_java_integration_test.bzl",
         "tools/bazel_java_integration_test.bzl");
-    copyFromRunfiles("build_bazel_integration_test/tools/bazel_py_integration_test.bzl",
+    copyFromRunfiles("build_bazel_integration_testing/tools/bazel_py_integration_test.bzl",
         "tools/bazel_py_integration_test.bzl");
-    copyFromRunfiles("build_bazel_integration_test/tools/BUILD", "tools/BUILD");
-    copyFromRunfiles("build_bazel_integration_test/tools/common.bzl", "tools/common.bzl");
-    copyFromRunfiles("build_bazel_integration_test/tools/bazel.sh", "tools/bazel.sh");
-    copyFromRunfiles("build_bazel_integration_test/tools/repositories.bzl",
+    copyFromRunfiles("build_bazel_integration_testing/tools/BUILD", "tools/BUILD");
+    copyFromRunfiles("build_bazel_integration_testing/tools/common.bzl", "tools/common.bzl");
+    copyFromRunfiles("build_bazel_integration_testing/tools/bazel.sh", "tools/bazel.sh");
+    copyFromRunfiles("build_bazel_integration_testing/tools/repositories.bzl",
         "tools/repositories.bzl");
   }
 
@@ -208,7 +208,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
   private void addExternalRepositoryFor(final String repoName, final String repoJarName)
       throws IOException {
-    copyFromRunfiles("build_bazel_integration_test/external/" + repoName + "/jar/" + repoJarName,
+    copyFromRunfiles("build_bazel_integration_testing/external/" + repoName + "/jar/" + repoJarName,
         "external/" + repoName + "/jar/" + repoJarName);
     scratchFile("external/" + repoName + "/WORKSPACE", "");
     scratchFile("external/" + repoName + "/jar/BUILD.bazel", "java_import(",
