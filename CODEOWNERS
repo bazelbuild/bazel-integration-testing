@@ -1,0 +1,12 @@
+# Default owner
+*                         @damienmg
+
+# Java owners
+java/*                    @damienmg @ittaiz
+javatests/*               @damienmg @ittaiz
+
+# Python owners
+# bazel_integration_test/*  @damienmg
+
+# Go owners
+go/*                      @jayconrod, @achew22
