@@ -1,19 +1,16 @@
 # Copied from https://github.com/tensorflow/tensorflow/blob/dfa7d2d2953c3d33d2e8deb898240be008de5be6/tensorflow/workspace.bzl
 
 # Parse the bazel version string from `native.bazel_version`.
+# e.g.
+# "0.10.0rc1 abc123d" => (0, 10, 0)
+# "0.3.0" => (0, 3, 0)
 def _parse_bazel_version(bazel_version):
-  # Remove commit from version.
-  version = bazel_version.split(" ", 1)[0]
-
-  # Split into (release, date) parts and only return the release
-  # as a tuple of integers.
-  parts = version.split('-', 1)
-
-  # Turn "release" into a tuple of strings
-  version_tuple = ()
-  for number in parts[0].split('.'):
-    version_tuple += (str(number),)
-  return version_tuple
+  for i in range(len(bazel_version)):
+      c = bazel_version[i]
+      if not (c.isdigit() or c == "."):
+        bazel_version = bazel_version[:i]
+        break
+  return tuple([int(n) for n in bazel_version.split(".")])
 
 def check_bazel_version(minimum_bazel_version, maximum_bazel_version=None):
   """Check that a specific bazel version is being used.
