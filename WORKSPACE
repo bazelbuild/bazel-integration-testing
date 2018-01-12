@@ -2,9 +2,14 @@ workspace(name = "build_bazel_integration_testing")
 
 ## Sanity checks
 
-load("//:bazel_version.bzl", "check_bazel_version")
+git_repository(
+    name = "bazel_skylib",
+    remote = "https://github.com/bazelbuild/bazel-skylib",
+    commit = "34d62c4490826f7642843e0617d7fa614994ef79",
+)
 
-check_bazel_version("0.5.0")
+load("@bazel_skylib//:lib.bzl", "versions")
+versions.check("0.5.0")
 
 #### Fetch remote resources
 
