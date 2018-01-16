@@ -105,8 +105,8 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private List<String> contents(final Path workspacePath) {
-    try {
-      return Files.walk(workspacePath).map(Path::toString).collect(Collectors.toList());
+    try (Stream<Path> workspaceContents = Files.walk(workspacePath)) {
+      return workspaceContents.map(Path::toString).collect(Collectors.toList());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
