@@ -5,7 +5,7 @@ workspace(name = "build_bazel_integration_testing")
 git_repository(
     name = "bazel_skylib",
     remote = "https://github.com/bazelbuild/bazel-skylib",
-    commit = "2169ae1c374aab4a09aa90e65efe1a3aad4e279b",
+    commit = "ff23a62c57d2912c3073a69c12f42c3d6e58a957",
 )
 
 load("@bazel_skylib//:lib.bzl", "versions")
