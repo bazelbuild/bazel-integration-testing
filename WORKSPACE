@@ -9,7 +9,7 @@ git_repository(
 )
 
 load("@bazel_skylib//:lib.bzl", "versions")
-versions.check("0.5.0")
+versions.check("0.6.0")
 
 #### Fetch remote resources
 

@@ -28,7 +28,7 @@ gflags.DEFINE_string("map_name", "BAZEL_HASH_DICT",
 gflags.DEFINE_multistring("platforms", ["darwin-x86_64", "linux-x86_64"],
                           "List of platforms to download SHA-256.")
 
-gflags.DEFINE_string("minimum_version", "0.5.0",
+gflags.DEFINE_string("minimum_version", "0.6.0",
                      "The lowest version of Bazel supported")
 
 FLAGS = gflags.FLAGS
