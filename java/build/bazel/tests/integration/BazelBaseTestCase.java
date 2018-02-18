@@ -172,11 +172,25 @@ public abstract class BazelBaseTestCase {
   }
 
   protected void scratchFile(String path, Iterable<String> content) throws IOException {
+    writeToFile(path, content);
+  }
+
+  protected void scratchExecutableFile(String path, String... content) throws IOException {
+    scratchExecutableFile(path, Arrays.asList(content));
+  }
+
+  protected void scratchExecutableFile(String path, Iterable<String> content) throws IOException {
+    File dest = writeToFile(path, content);
+    dest.setExecutable(true, false);
+  }
+
+  private File writeToFile(String path, Iterable<String> content) throws IOException {
     File dest = new File(workspace, path);
     if (!dest.getParentFile().exists()) {
       dest.getParentFile().mkdirs();
     }
     Files.write(dest.toPath(), LINE_JOINER.join(content).getBytes(StandardCharsets.UTF_8));
+    return dest;
   }
 
   private static Command prepareCommand(File folder, Iterable<String> command) throws IOException {
