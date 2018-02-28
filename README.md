@@ -2,7 +2,6 @@
 
 # Integration test framework for end to end test of Bazel utilities
 
-
 This repository provides frameworks in various language to write integration
 tests that call Bazel and analyze its output. 
 
