@@ -18,28 +18,5 @@ if [ ! -d "${INSTALL_BASE}" ]; then
   done
 fi
 
-export BAZEL_REAL="${BASEDIR}/bin/bazel-real"
-
-
-WORKSPACE_DIR="${PWD}"
-while [[ "${WORKSPACE_DIR}" != / ]]; do
-    if [[ -e "${WORKSPACE_DIR}/WORKSPACE" ]]; then
-      break;
-    fi
-    WORKSPACE_DIR="$(dirname "${WORKSPACE_DIR}")"
-done
-readonly WORKSPACE_DIR
-
-
-
-if [[ -e "${WORKSPACE_DIR}/WORKSPACE" ]]; then
-  readonly WRAPPER="${WORKSPACE_DIR}/tools/bazel"
-
-  if [[ -x "${WRAPPER}" ]]; then
-  	export INSTALL_BASE="${INSTALL_BASE}"
-    "${WRAPPER}" "$@"
-  else
-  	"${BASEDIR}/bin/bazel-real" --install_base="${INSTALL_BASE}" "$@"
-  fi
-
-fi
+# Finally run Bazel with the new intall base
+"${BASEDIR}/bin/bazel-real" --install_base="${INSTALL_BASE}" "$@"
