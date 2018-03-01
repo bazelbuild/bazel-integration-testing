@@ -31,7 +31,6 @@ done
 readonly WORKSPACE_DIR
 
 
-
 if [[ -e "${WORKSPACE_DIR}/WORKSPACE" ]]; then
   readonly WRAPPER="${WORKSPACE_DIR}/tools/bazel"
 
