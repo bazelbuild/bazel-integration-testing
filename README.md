@@ -1,4 +1,4 @@
-[![Build status](https://badge.buildkite.com/b0041826d71f5484c22145f44b3eac12357f51feb6ba6abb57.svg)](https://buildkite.com/bazel/bazel-integration-testing-postsubmit)
+[![Build status](https://badge.buildkite.com/b0041826d71f5484c22145f44b3eac12357f51feb6ba6abb57.svg?branch=master)](https://buildkite.com/bazel/bazel-integration-testing-postsubmit)
 
 # Integration test framework for end to end test of Bazel utilities
 
