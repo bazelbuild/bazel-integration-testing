@@ -22,8 +22,8 @@ export BAZEL_REAL="${BASEDIR}/bin/bazel-real"
 
 
 WORKSPACE_DIR="${PWD}"
-while [[ "${WORKSPACE_DIR}" != / ]]; do
-    if [[ -e "${WORKSPACE_DIR}/WORKSPACE" ]]; then
+while [ "${WORKSPACE_DIR}" != / ]; do
+    if [ -e "${WORKSPACE_DIR}/WORKSPACE" ]; then
       break;
     fi
     WORKSPACE_DIR="$(dirname "${WORKSPACE_DIR}")"
@@ -32,10 +32,10 @@ readonly WORKSPACE_DIR
 
 
 
-if [[ -e "${WORKSPACE_DIR}/WORKSPACE" ]]; then
+if [ -e "${WORKSPACE_DIR}/WORKSPACE" ]; then
   readonly WRAPPER="${WORKSPACE_DIR}/tools/bazel"
 
-  if [[ -x "${WRAPPER}" ]]; then
+  if [ -x "${WRAPPER}" ]; then
        export INSTALL_BASE="${INSTALL_BASE}"
     "${WRAPPER}" "$@"
   else
