@@ -14,8 +14,6 @@
 
 package build.bazel.tests.integration;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -23,12 +21,12 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class WorkspaceDriver {
-
-  protected final static Joiner PATH_JOINER = Joiner.on(File.separator);
-  protected final static Joiner LINE_JOINER = Joiner.on("\n");
 
   private static File tmp;
   private static Map<String, File> bazelVersions;
@@ -67,7 +65,8 @@ public class WorkspaceDriver {
    * Return a file in the runfiles whose path segments are given by the arguments.
    */
   protected static File getRunfile(String... segments) {
-    return new File(PATH_JOINER.join(runfileDirectory, PATH_JOINER.join(segments)));
+    String segmentsJoined = String.join(File.separator, segments);
+    return new File(String.join(File.separator, runfileDirectory.toString(), segmentsJoined));
   }
 
   private static void unpackBazel(String version)
@@ -80,12 +79,20 @@ public class WorkspaceDriver {
             "Bazel version " + version + " not found");
       }
       bazelVersions.put(version, bazelFile);
+
       // Unzip Bazel
-      prepareCommand(tmp,
-          ImmutableList.of(bazelVersions.get(version).getCanonicalPath(),
-              "--output_user_root=" + tmp, "--nomaster_bazelrc",
-              "--max_idle_secs=30", "--bazelrc=/dev/null", "help")).run();
+      prepareUnpackBazelCommand(version).run();
     }
+  }
+
+  private static Command prepareUnpackBazelCommand(String version)
+    throws  IOException {
+    List<String> command = new ArrayList<String>(Arrays.asList(
+        bazelVersions.get(version).getCanonicalPath(),
+        "--output_user_root=" + tmp, "--nomaster_bazelrc",
+        "--max_idle_secs=30", "--bazelrc=/dev/null", 
+        "help"));
+    return prepareCommand(tmp, Collections.unmodifiableList(command));
   }
 
   /**
@@ -117,7 +124,7 @@ public class WorkspaceDriver {
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
   protected Command bazel(String... args) throws BazelWorkspaceDriverException, IOException {
-    return bazel(ImmutableList.copyOf(args));
+    return bazel(new ArrayList<>(Arrays.asList(args)));
   }
 
   /**
@@ -129,11 +136,17 @@ public class WorkspaceDriver {
           + "please call bazelVersion(version) before calling bazel(...).");
     }
 
-    return prepareCommand(workspace,
-        ImmutableList.<String>builder()
-            .add(currentBazel.getCanonicalPath(), "--output_user_root=" + tmp, "--nomaster_bazelrc",
-                "--max_idle_secs=10", "--bazelrc=/dev/null")
-            .addAll(args).build());
+    List<String> command = new ArrayList<String>(Arrays.asList(
+      currentBazel.getCanonicalPath(), 
+      "--output_user_root=" + tmp, 
+      "--nomaster_bazelrc",
+      "--max_idle_secs=10", 
+      "--bazelrc=/dev/null"));
+    for (String arg: args) {
+      command.add(arg);
+    }
+
+    return prepareCommand(workspace,Collections.unmodifiableList(command));
   }
 
   /**
@@ -183,7 +196,7 @@ public class WorkspaceDriver {
     if (!dest.getParentFile().exists()) {
       dest.getParentFile().mkdirs();
     }
-    Files.write(dest.toPath(), LINE_JOINER.join(content).getBytes(StandardCharsets.UTF_8));
+    Files.write(dest.toPath(), String.join("\n", content).getBytes(StandardCharsets.UTF_8));
     return dest;
   }
 

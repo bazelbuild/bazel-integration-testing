@@ -5,9 +5,6 @@ java_library(
     srcs = ["WorkspaceDriver.java",
             "Command.java",
             "LineListOutputStream.java",],
-    deps = [
-        "@com_google_guava//jar",
-    ],
     visibility = ["//visibility:public"]
 )
 
