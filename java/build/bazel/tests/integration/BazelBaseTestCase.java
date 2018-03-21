@@ -23,6 +23,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -112,5 +113,9 @@ public abstract class BazelBaseTestCase {
 
   protected void scratchExecutableFile(String path, Iterable<String> content) throws IOException {
     driver.scratchExecutableFile(path, content);
+  }
+
+  protected List<String> workspaceContents() {
+    return driver.contents();
   }
 }

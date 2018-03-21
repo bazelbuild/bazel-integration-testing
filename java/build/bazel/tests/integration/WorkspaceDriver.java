@@ -24,7 +24,9 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
-
+import java.util.stream.Stream;
+import java.nio.file.Path;
+import java.util.stream.Collectors;
 
 public class WorkspaceDriver {
 
@@ -37,16 +39,7 @@ public class WorkspaceDriver {
   /**
    * The current workspace.
    */
-  protected File workspace = null;
-
-  public static class BazelWorkspaceDriverException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
-    private BazelWorkspaceDriverException(String message) {
-      super(message);
-    }
-  }
+  private File workspace = null;
 
   public static void setUpClass() throws IOException {
     // Get tempdir
@@ -202,5 +195,24 @@ public class WorkspaceDriver {
 
   private static Command prepareCommand(File folder, Iterable<String> command) throws IOException {
     return Command.builder().setDirectory(folder).addArguments(command).build();
+  }
+
+  protected List<String> contents() {
+    try {
+      try (Stream<Path> files = Files.walk(workspace.toPath())) {
+        return files.map(Path::toString).collect(Collectors.toList());
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static class BazelWorkspaceDriverException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    private BazelWorkspaceDriverException(String message) {
+      super(message);
+    }
   }
 }

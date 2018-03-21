@@ -66,8 +66,8 @@ final class LineListOutputStream extends OutputStream {
   /**
    * Returns the list of selected lines.
    */
-  
- List<String> getLines() {
+
+  List<String> getLines() {
     return Collections.unmodifiableList(lines);
   }
 }

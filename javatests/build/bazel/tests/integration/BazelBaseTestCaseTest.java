@@ -58,11 +58,11 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     Command cmd = bazel("test", "//:IntegrationTestSuiteTest");
     final int exitCode = cmd.run();
 
-    org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd, driver.workspace)));
+    org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));
   }
 
   private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(
-      final Command cmd, final File workspace) {
+      final Command cmd) {
     return new TypeSafeDiagnosingMatcher<Integer>() {
       @Override
       protected boolean matchesSafely(
@@ -73,7 +73,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
               .appendValue(exitCode)
               .appendText("\n")
               .appendText("Workspace contents: \n")
-              .appendValueList("", "\n", "\n", contents(workspace.toPath()))
+              .appendValueList("", "\n", "\n", workspaceContents())
               .appendDescriptionOf(commandDescription(cmd));
           return false;
         }
@@ -102,16 +102,6 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
             .appendValueList(newLine, newLine, newLine, logContents);
       }
     };
-  }
-
-  private List<String> contents(final Path workspacePath) {
-    try {
-      try (Stream<Path> files = Files.walk(workspacePath)) {
-        return files.map(Path::toString).collect(Collectors.toList());
-      }
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 
   private Stream<String> logsOfInternalTests(final List<String> errorLines) {
