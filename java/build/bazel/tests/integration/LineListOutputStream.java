@@ -22,9 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.Collections;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 /**
  * A wrapper output stream to return the output as a list of string.
@@ -43,7 +42,7 @@ final class LineListOutputStream extends OutputStream {
 
   @Override
   public void write(int b) throws IOException {
-    Preconditions.checkState(!closed, "Attempted to write on a closed stream");
+    assert closed == false : "Attempted to write on a closed stream";
     byte b0 = (byte) b;
     if (b0 == '\n') {
       lines.add(stream.toString(StandardCharsets.UTF_8.name()));
@@ -55,7 +54,7 @@ final class LineListOutputStream extends OutputStream {
 
   @Override
   public void close() throws IOException {
-    Preconditions.checkState(!closed);
+    assert closed == false;
     super.close();
     if (stream.size() > 0) {
       lines.add(stream.toString(StandardCharsets.UTF_8.name()));
@@ -67,7 +66,8 @@ final class LineListOutputStream extends OutputStream {
   /**
    * Returns the list of selected lines.
    */
-  ImmutableList<String> getLines() {
-    return ImmutableList.copyOf(lines);
+
+  List<String> getLines() {
+    return Collections.unmodifiableList(lines);
   }
 }

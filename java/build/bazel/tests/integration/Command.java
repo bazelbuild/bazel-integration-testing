@@ -19,9 +19,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.function.Function;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Objects;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 
 /**
  * A utility class to spawn a command and get its output.
@@ -32,12 +35,12 @@ import com.google.common.collect.ImmutableList;
 final public class Command {
 
   private final File directory;
-  private final ImmutableList<String> args;
+  private final List<String> args;
   private final LineListOutputStream stderr = new LineListOutputStream();
   private final LineListOutputStream stdout = new LineListOutputStream();
   private boolean executed = false;
 
-  private Command(File directory, ImmutableList<String> args) throws IOException {
+  private Command(File directory, List<String> args) throws IOException {
     this.directory = directory;
     this.args = args;
   }
@@ -47,7 +50,7 @@ final public class Command {
    * This method should not be called twice on the same object.
    */
   public int run() throws IOException, InterruptedException {
-    Preconditions.checkState(!executed);
+    assert executed == false;
     executed = true;
     ProcessBuilder builder = new ProcessBuilder(args);
     builder.directory(directory);
@@ -111,14 +114,14 @@ final public class Command {
   /**
    * Returns the list of lines of the standard error stream.
    */
-  public ImmutableList<String> getErrorLines() {
+  public List<String> getErrorLines() {
     return stderr.getLines();
   }
 
   /**
    * Returns the list of lines of the standard output stream.
    */
-  public ImmutableList<String> getOutputLines() {
+  public List<String> getOutputLines() {
     return stdout.getLines();
   }
 
@@ -128,7 +131,7 @@ final public class Command {
   static class Builder {
 
     private File directory;
-    private ImmutableList.Builder<String> args = ImmutableList.builder();
+    private List<String> args = new ArrayList<String>();
 
     private Builder() {
       // Default to the current working directory
@@ -149,7 +152,7 @@ final public class Command {
      * program name.
      */
     public Builder addArguments(String... args) {
-      this.args.add(args);
+      this.args.addAll(Arrays.asList(args));
       return this;
     }
 
@@ -158,7 +161,9 @@ final public class Command {
      * the program name.
      */
     public Builder addArguments(Iterable<String> args) {
-      this.args.addAll(args);
+      for (String arg : args) {
+        this.args.add(arg);
+      }
       return this;
     }
 
@@ -166,8 +171,8 @@ final public class Command {
      * Build a Command object.
      */
     public Command build() throws IOException {
-      Preconditions.checkNotNull(directory);
-      ImmutableList<String> args = this.args.build();
+      Objects.requireNonNull(directory);
+      List<String> args = Collections.unmodifiableList(this.args);
       return new Command(directory, args);
     }
   }
