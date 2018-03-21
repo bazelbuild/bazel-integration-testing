@@ -31,115 +31,51 @@ import org.junit.BeforeClass;
  */
 public abstract class BazelBaseTestCase {
 
-  protected final static Joiner PATH_JOINER = Joiner.on(File.separator);
-  protected final static Joiner LINE_JOINER = Joiner.on("\n");
-
-  private static File tmp;
-  private static Map<String, File> bazelVersions;
-  private static File runfileDirectory = new File(System.getenv("TEST_SRCDIR"));
-
-  private File currentBazel = null;
-
-  /**
-   * The current workspace.
-   */
-  protected File workspace = null;
-
-  public static class BazelTestCaseException extends Exception {
-
-    private static final long serialVersionUID = 1L;
-
-    private BazelTestCaseException(String message) {
-      super(message);
-    }
-  }
+  protected WorkspaceDriver driver = new WorkspaceDriver();
 
   @BeforeClass
   public static void setUpClass() throws IOException {
-    // Get tempdir
-    String _tmp = System.getenv("TEST_TMPDIR");
-    if (_tmp == null) {
-      File p = Files.createTempDirectory("e4b-tests").toFile();
-      p.deleteOnExit();
-      tmp = p;
-    } else {
-      tmp = new File(_tmp);
-    }
-    bazelVersions = new HashMap<>();
+    WorkspaceDriver.setUpClass();
   }
 
   /**
    * Return a file in the runfiles whose path segments are given by the arguments.
    */
   protected static File getRunfile(String... segments) {
-    return new File(PATH_JOINER.join(runfileDirectory, PATH_JOINER.join(segments)));
-  }
-
-  private static void unpackBazel(String version)
-      throws BazelTestCaseException, IOException, InterruptedException {
-    if (!bazelVersions.containsKey(version)) {
-      // Get bazel location
-      File bazelFile = getRunfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
-      if (!bazelFile.exists()) {
-        throw new BazelTestCaseException(
-            "Bazel version " + version + " not found");
-      }
-      bazelVersions.put(version, bazelFile);
-      // Unzip Bazel
-      prepareCommand(tmp,
-          ImmutableList.of(bazelVersions.get(version).getCanonicalPath(),
-              "--output_user_root=" + tmp, "--nomaster_bazelrc",
-              "--max_idle_secs=30", "--bazelrc=/dev/null", "help")).run();
-    }
+    return WorkspaceDriver.getRunfile(segments);
   }
 
   /**
    * Specify with bazel version to use, required before calling bazel.
    */
-  protected void bazelVersion(String version)
-      throws BazelTestCaseException, IOException, InterruptedException {
-    unpackBazel(version);
-    currentBazel = bazelVersions.get(version);
+  protected void bazelVersion(String version) throws WorkspaceDriver.BazelWorkspaceDriverException, IOException, InterruptedException {
+    driver.bazelVersion(version);
   }
 
   /**
    * Create a new workspace, previous one can still be used.
    */
   protected void newWorkspace() throws IOException {
-    this.workspace = java.nio.file.Files.createTempDirectory(tmp.toPath(), "workspace").toFile();
-    this.scratchFile("WORKSPACE");
+    driver.newWorkspace();
   }
 
   @Before
   public void setUp() throws Exception {
-    this.currentBazel = null;
-    if (System.getProperty("bazel.version") != null) {
-      bazelVersion(System.getProperty("bazel.version"));
-    }
-    newWorkspace();
+    driver.setUp();
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(String... args) throws BazelTestCaseException, IOException {
-    return bazel(ImmutableList.copyOf(args));
+  protected Command bazel(String... args) throws WorkspaceDriver.BazelWorkspaceDriverException, IOException {
+    return driver.bazel(args);
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(Iterable<String> args) throws BazelTestCaseException, IOException {
-    if (currentBazel == null) {
-      throw new BazelTestCaseException("Cannot use bazel because no version was specified, "
-          + "please call bazelVersion(version) before calling bazel(...).");
-    }
-
-    return prepareCommand(workspace,
-        ImmutableList.<String>builder()
-            .add(currentBazel.getCanonicalPath(), "--output_user_root=" + tmp, "--nomaster_bazelrc",
-                "--max_idle_secs=10", "--bazelrc=/dev/null")
-            .addAll(args).build());
+  protected Command bazel(Iterable<String> args) throws WorkspaceDriver.BazelWorkspaceDriverException, IOException {
+    return driver.bazel(args);
   }
 
   /**
@@ -147,12 +83,7 @@ public abstract class BazelBaseTestCase {
    * workspace.
    */
   protected void copyFromRunfiles(String path, String destpath) throws IOException {
-    File origin = getRunfile(path);
-    File dest = new File(workspace, destpath);
-    if (!dest.getParentFile().exists()) {
-      dest.getParentFile().mkdirs();
-    }
-    Files.copy(origin.toPath(), dest.toPath());
+    driver.copyFromRunfiles(path, destpath);
   }
 
   /**
@@ -160,7 +91,7 @@ public abstract class BazelBaseTestCase {
    * workspace.
    */
   protected void copyFromRunfiles(String path) throws IOException {
-    copyFromRunfiles(path, path);
+    driver.copyFromRunfiles(path);
   }
 
   /**
@@ -168,32 +99,18 @@ public abstract class BazelBaseTestCase {
    * {@code content}.
    */
   protected void scratchFile(String path, String... content) throws IOException {
-    scratchFile(path, Arrays.asList(content));
+    driver.scratchFile(path, content);
   }
 
   protected void scratchFile(String path, Iterable<String> content) throws IOException {
-    writeToFile(path, content);
+    driver.scratchFile(path, content);
   }
 
   protected void scratchExecutableFile(String path, String... content) throws IOException {
-    scratchExecutableFile(path, Arrays.asList(content));
+    driver.scratchExecutableFile(path, content);
   }
 
   protected void scratchExecutableFile(String path, Iterable<String> content) throws IOException {
-    File dest = writeToFile(path, content);
-    dest.setExecutable(true, false);
-  }
-
-  private File writeToFile(String path, Iterable<String> content) throws IOException {
-    File dest = new File(workspace, path);
-    if (!dest.getParentFile().exists()) {
-      dest.getParentFile().mkdirs();
-    }
-    Files.write(dest.toPath(), LINE_JOINER.join(content).getBytes(StandardCharsets.UTF_8));
-    return dest;
-  }
-
-  private static Command prepareCommand(File folder, Iterable<String> command) throws IOException {
-    return Command.builder().setDirectory(folder).addArguments(command).build();
+    driver.scratchExecutableFile(path, content);
   }
 }

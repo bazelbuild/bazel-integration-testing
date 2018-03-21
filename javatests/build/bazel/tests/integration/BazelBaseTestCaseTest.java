@@ -58,7 +58,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     Command cmd = bazel("test", "//:IntegrationTestSuiteTest");
     final int exitCode = cmd.run();
 
-    org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd, workspace)));
+    org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd, driver.workspace)));
   }
 
   private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(

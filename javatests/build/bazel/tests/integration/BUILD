@@ -6,7 +6,8 @@ bazel_java_integration_test(
     data = [
         "//:all_bzl",
     ],
-    deps = ["@com_google_truth//jar"],
+    deps = ["//java/build/bazel/tests/integration:workspace_driver",
+        "@com_google_truth//jar"],
 )
 
 java_library(
