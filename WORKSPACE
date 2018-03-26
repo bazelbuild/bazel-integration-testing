@@ -39,6 +39,11 @@ maven_jar(
     artifact = "com.google.truth:truth:jar:0.31",
 )
 
+maven_jar(
+    name = "com_spotify_hamcrest_optional",
+    artifact = "com.spotify:hamcrest-optional:jar:1.1.1",
+)
+
 ## golang
 
 http_archive(

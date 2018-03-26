@@ -7,7 +7,8 @@ bazel_java_integration_test(
         "//:all_bzl",
     ],
     deps = ["//java/build/bazel/tests/integration:workspace_driver",
-        "@com_google_truth//jar"],
+            "@com_google_truth//jar",
+            "@com_spotify_hamcrest_optional//jar"],
 )
 
 java_library(
