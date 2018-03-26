@@ -68,15 +68,16 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
     List<String> paths = workspaceContents();
 
-    Optional<String> fullPath = findPath(paths, path);
-    org.hamcrest.MatcherAssert.assertThat(fullPath, is(optionalWithValue()));
-
-    String contentFromFile = readFileContent(fullPath.get());
-    org.hamcrest.MatcherAssert.assertThat(contentFromFile, equalTo(content));
+    Optional<String> actualScratchFileContent = findPath(paths, path).map(this::readFileContent);
+    org.hamcrest.MatcherAssert.assertThat(actualScratchFileContent, is(optionalWithValue(equalTo(content))));
   }
 
-  private String readFileContent(String path) throws IOException {
-    return new String(Files.readAllBytes(Paths.get(path)));
+  private String readFileContent(String path) {
+      try {
+          return new String(Files.readAllBytes(Paths.get(path)));
+      } catch (IOException e) {
+          throw new RuntimeException(e);
+      }
   }
 
   private Optional<String> findPath(List<String> paths, String path) {
