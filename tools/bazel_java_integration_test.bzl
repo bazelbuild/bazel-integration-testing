@@ -74,9 +74,7 @@ def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[],
   if not test_class:
     test_class = "%s.%s" % (_java_package(), name)
   add_deps = [
-    str(Label("//java/build/bazel/tests/integration")),
-    "@org_hamcrest_core//jar",
-    "@org_junit//jar",
+    str(Label("//java/build/bazel/tests/integration:workspace_driver")),
   ]
   if srcs:
     deps = (deps or []) + add_deps

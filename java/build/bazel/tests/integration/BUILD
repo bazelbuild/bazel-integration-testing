@@ -5,6 +5,11 @@ java_library(
     srcs = ["WorkspaceDriver.java",
             "Command.java",
             "LineListOutputStream.java",],
+    data = [
+        "@build_bazel_bazel_%s//:bazel" % v.replace(".", "_")
+        for v in BAZEL_VERSIONS
+    ],
+    testonly = True,
     visibility = ["//visibility:public"]
 )
 
@@ -12,10 +17,6 @@ java_library(
     name = "integration",
     srcs = [
         "BazelBaseTestCase.java",
-    ],
-    data = [
-        "@build_bazel_bazel_%s//:bazel" % v.replace(".", "_")
-        for v in BAZEL_VERSIONS
     ],
     deps = [
         ":workspace_driver",

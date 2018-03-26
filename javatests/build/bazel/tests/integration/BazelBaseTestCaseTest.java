@@ -169,20 +169,18 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
     setupRuleSkylarkFiles();
     setupRuleCode();
-    addExternalRepositoryFor("org_junit", "junit-4.11.jar");
-    addExternalRepositoryFor("org_hamcrest_core", "hamcrest-core-1.3.jar");
-    writeWorkspaceFileWithRepositories("org_junit", "org_hamcrest_core");
+    scratchFile("./WORKSPACE",WORKSPACE_NAME);
   }
 
   private void setupRuleCode() throws IOException {
     copyFromRunfiles(
-        "build_bazel_integration_testing/java/build/bazel/tests/integration/libintegration.jar",
-        "java/build/bazel/tests/integration/libintegration.jar");
+        "build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
+        "java/build/bazel/tests/integration/libworkspace_driver.jar");
     scratchFile(
         "java/build/bazel/tests/integration/BUILD.bazel",
         "java_import(",
-        "    name = 'integration',",
-        "    jars = ['libintegration.jar'],",
+        "    name = 'workspace_driver',",
+        "    jars = ['libworkspace_driver.jar'],",
         "    visibility = ['//visibility:public']",
         ")");
   }
@@ -210,46 +208,6 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
             + "  pass");
     // In order to make //go a package it must have a build file (even if it's empty).
     scratchFile("go/BUILD.bazel", "");
-  }
-
-  private void writeWorkspaceFileWithRepositories(
-      final String junitRepoName, final String hamcrestRepoName) throws IOException {
-    scratchFile(
-        "./WORKSPACE",
-        aggregate(
-            WORKSPACE_NAME,
-            repositoryDeclarationFor(junitRepoName),
-            repositoryDeclarationFor(hamcrestRepoName)));
-  }
-
-  private List<String> aggregate(
-      final String workspaceName, final Stream<String> repo1, final Stream<String> repo2) {
-    return Stream.of(Stream.of(workspaceName), repo1, repo2)
-        .flatMap(s -> s)
-        .collect(Collectors.toList());
-  }
-
-  private Stream<String> repositoryDeclarationFor(final String repoName) {
-    return Stream.of(
-        "local_repository(",
-        "    name = '" + repoName + "',",
-        "    path = './external/" + repoName + "'",
-        ")");
-  }
-
-  private void addExternalRepositoryFor(final String repoName, final String repoJarName)
-      throws IOException {
-    copyFromRunfiles(
-        "build_bazel_integration_testing/external/" + repoName + "/jar/" + repoJarName,
-        "external/" + repoName + "/jar/" + repoJarName);
-    scratchFile("external/" + repoName + "/WORKSPACE", "");
-    scratchFile(
-        "external/" + repoName + "/jar/BUILD.bazel",
-        "java_import(",
-        "    name = 'jar',",
-        "    jars = ['" + repoJarName + "'],",
-        "    visibility = ['//visibility:public']",
-        ")");
   }
 
   private void writePassingTestJavaSource(final String testName) throws IOException {
