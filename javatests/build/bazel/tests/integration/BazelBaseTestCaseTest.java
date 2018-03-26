@@ -86,8 +86,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   public void getRunfileReturnTheFile() {
       File runfile = getRunfile("build_bazel_integration_testing", "tools", "BUILD");
 
-      boolean actualIsFileExists = runfile.exists();
-      assertTrue("runfile should exists", actualIsFileExists);
+      assertTrue("runfile should exists", runfile.exists());
   }
 
   private Boolean isExecutable(String path) {
