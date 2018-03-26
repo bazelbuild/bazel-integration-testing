@@ -72,6 +72,23 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     org.hamcrest.MatcherAssert.assertThat(actualScratchFileContent, is(optionalWithValue(equalTo(content))));
   }
 
+  @Test
+  public void scratchExecutableFileShouldCreateAnExecutableFile() throws IOException {
+    String content = "somecontentForExecutable";
+    String path = "someExecutablePath";
+
+    scratchExecutableFile(path, content);
+
+    List<String> paths = workspaceContents();
+
+    Optional<Boolean> isExecutable = findPath(paths, path).map(this::isExecutable);
+    org.hamcrest.MatcherAssert.assertThat(isExecutable, is(optionalWithValue(equalTo(true))));
+  }
+
+  private Boolean isExecutable(String path) {
+      return Files.isExecutable(Paths.get(path));
+  }
+
   private String readFileContent(String path) {
       try {
           return new String(Files.readAllBytes(Paths.get(path)));
