@@ -60,8 +60,10 @@ def _java_package():
   return ".".join(segments[idx+1:])
 
 
-def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[],
+def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[], data=[],
                                 jvm_flags=[], test_class=None,
+                                #flag to allow bazel_integration_testing own tests to work
+                                add_bazel_data_dependency = True,
                                 versions=BAZEL_VERSIONS, **kwargs):
   """A wrapper around java_test that create several java tests, one per version
      of Bazel.
@@ -81,10 +83,13 @@ def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[],
   else:
     runtime_deps = runtime_deps + add_deps
   for version in versions:
+    if add_bazel_data_dependency:
+      data = data + ["@build_bazel_bazel_%s//:bazel" % version.replace(".", "_")]
     native.java_test(
         name = "%s/bazel%s" % (name, version),
         jvm_flags = ["-Dbazel.version=" + version],
         srcs = srcs,
+        data = data,
         test_class = test_class,
         deps = deps,
         runtime_deps = runtime_deps,
