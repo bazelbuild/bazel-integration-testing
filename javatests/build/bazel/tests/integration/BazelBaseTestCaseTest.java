@@ -14,25 +14,23 @@
 
 package build.bazel.tests.integration;
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.hamcrest.Description;
 import org.hamcrest.SelfDescribing;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.google.common.truth.Truth.assertThat;
+import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 
 /** {@link BazelBaseTestCase}Test */
 // suppress since same parameter value is ok for tests readability, tests should encapsulate and not
@@ -60,6 +58,31 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
     org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));
   }
+
+  @Test
+  public void scratchFile_Should_CreateFile_and_workspaceContents_ContainTheFile() throws IOException {
+    String content = "somecontent";
+    String path = "somePath";
+
+    scratchFile(path, content);
+
+    List<String> paths = workspaceContents();
+
+    Optional<String> fullPath = findPath(paths, path);
+    org.hamcrest.MatcherAssert.assertThat(fullPath, is(optionalWithValue()));
+
+    String contentFromFile = readFileContent(fullPath.get());
+    org.hamcrest.MatcherAssert.assertThat(contentFromFile, equalTo(content));
+  }
+
+  private String readFileContent(String path) throws IOException {
+    return new String(Files.readAllBytes(Paths.get(path)));
+  }
+
+  private Optional<String> findPath(List<String> paths, String path) {
+    return paths.stream().filter(x -> x.endsWith(path)).findFirst();
+  }
+
 
   private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(
       final Command cmd) {
