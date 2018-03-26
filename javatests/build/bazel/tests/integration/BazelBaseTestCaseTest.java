@@ -19,6 +19,7 @@ import org.hamcrest.SelfDescribing;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,6 +32,7 @@ import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /** {@link BazelBaseTestCase}Test */
 // suppress since same parameter value is ok for tests readability, tests should encapsulate and not
@@ -80,8 +82,16 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     org.hamcrest.MatcherAssert.assertThat(isExecutable, is(optionalWithValue(equalTo(true))));
   }
 
+  @Test
+  public void getRunfileReturnTheFile() {
+      File runfile = getRunfile("build_bazel_integration_testing", "tools", "BUILD");
+
+      boolean actualIsFileExists = runfile.exists();
+      assertTrue("runfile should exists", actualIsFileExists);
+  }
+
   private Boolean isExecutable(String path) {
-      return Files.isExecutable(Paths.get(path));
+    return Files.isExecutable(Paths.get(path));
   }
 
   private String readFileContent(String path) {
