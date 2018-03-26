@@ -60,7 +60,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   @Test
-  public void scratchFile_Should_CreateFile_and_workspaceContents_ContainTheFile() throws IOException {
+  public void scratchFileShouldCreateFileAndWorkspaceContentsContainThatFile() throws IOException {
     String content = "somecontent";
     String path = "somePath";
 
