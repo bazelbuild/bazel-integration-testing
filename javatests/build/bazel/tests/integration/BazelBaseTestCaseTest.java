@@ -91,7 +91,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   @Test
-  public void newWorkspaceCreatesANewWorkspace() throws IOException {
+  public void newWorkspaceCreatesANewCleanWorkspace() throws IOException {
       String path = "somePathForNewWorkspace";
       scratchFile(path, "somecontent");
 
