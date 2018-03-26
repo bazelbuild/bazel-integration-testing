@@ -40,7 +40,7 @@ maven_jar(
 )
 
 maven_jar(
-    name = "com_spotify",
+    name = "com_spotify_hamcrest_optional",
     artifact = "com.spotify:hamcrest-optional:jar:1.1.1",
 )
 
