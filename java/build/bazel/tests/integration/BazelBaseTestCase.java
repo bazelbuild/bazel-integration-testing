@@ -14,18 +14,12 @@
 
 package build.bazel.tests.integration;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableList;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
 import org.junit.Before;
 import org.junit.BeforeClass;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * A base class to do integration test that call Bazel
@@ -93,6 +87,13 @@ public abstract class BazelBaseTestCase {
    */
   protected void copyFromRunfiles(String path) throws IOException {
     driver.copyFromRunfiles(path);
+  }
+
+  /**
+   * Copy the whole directory from the runfiles under {@code rootDirectoryPath} to the current workspace.
+   */
+  protected void copyFromRunfilesDirectory(String rootDirectoryPath) throws IOException {
+    driver.copyFromRunfilesDirectory(rootDirectoryPath);
   }
 
   /**

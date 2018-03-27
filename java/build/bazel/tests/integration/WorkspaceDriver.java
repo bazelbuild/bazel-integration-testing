@@ -18,15 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.stream.Stream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WorkspaceDriver {
 
@@ -153,6 +149,27 @@ public class WorkspaceDriver {
       dest.getParentFile().mkdirs();
     }
     Files.copy(origin.toPath(), dest.toPath());
+  }
+
+  /**
+   * Copy the whole directory from the runfiles under {@code rootDirectoryPath} to the current workspace.
+   */
+  protected void copyFromRunfilesDirectory(final String rootDirectoryPath) throws IOException {
+    File root = getRunfile(rootDirectoryPath);
+    try (Stream<Path> paths = Files.walk(Paths.get(root.toURI()))) {
+      paths.filter(path -> new File(path.toUri()).isFile())
+              .forEach(file -> {
+                String relativeToRunfiles = file.toAbsolutePath().toString().substring(runfileDirectory.getPath().length());
+                Path relativeToRunfilesPath = Paths.get(relativeToRunfiles);
+                String destination = relativeToRunfilesPath.subpath(1, relativeToRunfilesPath.getNameCount()).toString();
+
+                try {
+                  copyFromRunfiles(relativeToRunfiles, destination);
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              });
+    }
   }
 
   /**

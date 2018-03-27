@@ -32,6 +32,8 @@ import static com.spotify.hamcrest.optional.OptionalMatchers.emptyOptional;
 import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.StringEndsWith.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -101,6 +103,17 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
       org.hamcrest.MatcherAssert.assertThat(fullPath, is(emptyOptional()));
   }
 
+  @Test
+  public void copyFromRunfilesDirectoryShouldCopyTheWholeDirectory() throws IOException {
+    String knownDirectoryInRunfiles = "build_bazel_integration_testing";
+    String knownFileInDirectory = "/tools/BUILD";
+
+    copyFromRunfilesDirectory(knownDirectoryInRunfiles);
+
+    Optional<String> actualFilePath = findPath(workspaceContents(), knownFileInDirectory);
+    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue(is(endsWith(knownFileInDirectory)))));
+    org.hamcrest.MatcherAssert.assertThat("the root path from the runfiles should be stripped", actualFilePath, is(optionalWithValue(not(endsWith(knownDirectoryInRunfiles + knownFileInDirectory)))));
+  }
 
   private Boolean isExecutable(String path) {
     return Files.isExecutable(Paths.get(path));
