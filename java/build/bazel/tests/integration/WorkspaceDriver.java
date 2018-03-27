@@ -161,7 +161,7 @@ public class WorkspaceDriver {
               .forEach(file -> {
                 String relativeToRunfiles = file.toAbsolutePath().toString().substring(runfileDirectory.getPath().length());
                 Path relativeToRunfilesPath = Paths.get(relativeToRunfiles);
-                String destination = relativeToRunfilesPath.subpath(1, relativeToRunfilesPath.getNameCount()).toString();
+                String destination = stripTopLevelDirectory(relativeToRunfilesPath).toString();
 
                 try {
                   copyFromRunfiles(relativeToRunfiles, destination);
@@ -170,6 +170,10 @@ public class WorkspaceDriver {
                 }
               });
     }
+  }
+
+  private Path stripTopLevelDirectory(final Path relativeToRunfilesPath) {
+    return relativeToRunfilesPath.subpath(1, relativeToRunfilesPath.getNameCount());
   }
 
   /**
