@@ -157,7 +157,7 @@ public class WorkspaceDriver {
   protected void copyDirectoryFromRunfiles(final String rootDirectoryPath) throws IOException {
     File root = getRunfile(rootDirectoryPath);
     try (Stream<Path> paths = Files.walk(Paths.get(root.toURI()))) {
-      paths.filter(path -> new File(path.toUri()).isFile())
+      paths.filter(path -> Files.isRegularFile(path))
               .forEach(file -> {
                 String relativeToRunfiles = file.toAbsolutePath().toString().substring(runfileDirectory.getPath().length());
                 Path relativeToRunfilesPath = Paths.get(relativeToRunfiles);
