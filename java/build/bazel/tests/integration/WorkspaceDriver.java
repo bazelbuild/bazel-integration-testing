@@ -156,19 +156,17 @@ public class WorkspaceDriver {
    */
   protected void copyDirectoryFromRunfiles(final String directoryToCopy) throws IOException {
     File startingDirectory = getRunfile(directoryToCopy);
-    try (Stream<Path> paths = Files.walk(Paths.get(startingDirectory.toURI()))) {
+    try (Stream<Path> paths = Files.walk(startingDirectory.toPath())) {
       paths.filter(path -> Files.isRegularFile(path))
-              .forEach(file -> {
-                String relativeToRunfiles = file.toAbsolutePath().toString().substring(runfileDirectory.getPath().length());
-                Path relativeToRunfilesPath = Paths.get(relativeToRunfiles);
-                String destination = stripTopLevelDirectory(relativeToRunfilesPath).toString();
-
-                try {
-                  copyFromRunfiles(relativeToRunfiles, destination);
-                } catch (IOException e) {
-                  throw new RuntimeException(e);
-                }
-              });
+            .forEach(file -> {
+              Path relativeToRunfilesPath = runfileDirectory.toPath().relativize(file);
+              Path destinationPath = stripTopLevelDirectory(relativeToRunfilesPath);
+              try {
+                copyFromRunfiles(relativeToRunfilesPath.toString(), destinationPath.toString());
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            });
     }
   }
 
