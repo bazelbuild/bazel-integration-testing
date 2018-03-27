@@ -223,8 +223,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private void setupRuleCode() throws IOException {
-    copyFromRunfiles(
-        "build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
+    copyFromRunfiles("build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
         "java/build/bazel/tests/integration/libworkspace_driver.jar");
     scratchFile(
         "java/build/bazel/tests/integration/BUILD.bazel",
@@ -238,19 +237,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void setupRuleSkylarkFiles() throws IOException {
     copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/bazel_hash_dict.bzl", "tools/bazel_hash_dict.bzl");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/bazel_java_integration_test.bzl",
-        "tools/bazel_java_integration_test.bzl");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/bazel_py_integration_test.bzl",
-        "tools/bazel_py_integration_test.bzl");
-    copyFromRunfiles("build_bazel_integration_testing/tools/BUILD", "tools/BUILD");
-    copyFromRunfiles("build_bazel_integration_testing/tools/common.bzl", "tools/common.bzl");
-    copyFromRunfiles("build_bazel_integration_testing/tools/bazel.sh", "tools/bazel.sh");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/repositories.bzl", "tools/repositories.bzl");
+    copyFromRunfilesDirectory("build_bazel_integration_testing/tools");
     scratchFile(
         "go/bazel_integration_test.bzl",
         "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"
