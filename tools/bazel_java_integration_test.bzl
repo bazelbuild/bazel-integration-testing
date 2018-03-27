@@ -62,7 +62,7 @@ def _java_package():
 
 def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[], data=[],
                                 jvm_flags=[], test_class=None,
-                                #flag to allow bazel_integration_testing own tests to work
+                                # flag to allow bazel_integration_testing own tests to work
                                 add_bazel_data_dependency = True,
                                 versions=BAZEL_VERSIONS, **kwargs):
   """A wrapper around java_test that create several java tests, one per version
