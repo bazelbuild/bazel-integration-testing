@@ -163,8 +163,8 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
         "    name = '" + testName + "',",
         "    test_class = '" + testName + "',",
         "    srcs = ['" + testName + ".java'],",
-        //inside the sandbox we don't have access to full bazel
-        //and we don't need it since it's prepared in advance for us
+        // inside the sandbox we don't have access to full bazel
+        // and we don't need it since it's prepared in advance for us
         "    add_bazel_data_dependency = False,",
         ")");
   }
