@@ -152,11 +152,11 @@ public class WorkspaceDriver {
   }
 
   /**
-   * Copy the whole directory from the runfiles under {@code rootDirectoryPath} to the current workspace.
+   * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
    */
-  protected void copyDirectoryFromRunfiles(final String rootDirectoryPath) throws IOException {
-    File root = getRunfile(rootDirectoryPath);
-    try (Stream<Path> paths = Files.walk(Paths.get(root.toURI()))) {
+  protected void copyDirectoryFromRunfiles(final String directoryToCopy) throws IOException {
+    File startingDirectory = getRunfile(directoryToCopy);
+    try (Stream<Path> paths = Files.walk(Paths.get(startingDirectory.toURI()))) {
       paths.filter(path -> Files.isRegularFile(path))
               .forEach(file -> {
                 String relativeToRunfiles = file.toAbsolutePath().toString().substring(runfileDirectory.getPath().length());
