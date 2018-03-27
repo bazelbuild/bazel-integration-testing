@@ -104,11 +104,11 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   @Test
-  public void copyFromRunfilesDirectoryShouldCopyTheWholeDirectory() throws IOException {
+  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectory() throws IOException {
     String knownDirectoryInRunfiles = "build_bazel_integration_testing";
     String knownFileInDirectory = "/tools/BUILD";
 
-    copyFromRunfilesDirectory(knownDirectoryInRunfiles);
+    copyDirectoryFromRunfiles(knownDirectoryInRunfiles);
 
     Optional<String> actualFilePath = findPath(workspaceContents(), knownFileInDirectory);
     org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue(is(endsWith(knownFileInDirectory)))));
@@ -237,7 +237,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void setupRuleSkylarkFiles() throws IOException {
     copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-    copyFromRunfilesDirectory("build_bazel_integration_testing/tools");
+    copyDirectoryFromRunfiles("build_bazel_integration_testing/tools");
     scratchFile(
         "go/bazel_integration_test.bzl",
         "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"

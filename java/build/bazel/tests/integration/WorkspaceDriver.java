@@ -154,7 +154,7 @@ public class WorkspaceDriver {
   /**
    * Copy the whole directory from the runfiles under {@code rootDirectoryPath} to the current workspace.
    */
-  protected void copyFromRunfilesDirectory(final String rootDirectoryPath) throws IOException {
+  protected void copyDirectoryFromRunfiles(final String rootDirectoryPath) throws IOException {
     File root = getRunfile(rootDirectoryPath);
     try (Stream<Path> paths = Files.walk(Paths.get(root.toURI()))) {
       paths.filter(path -> new File(path.toUri()).isFile())
