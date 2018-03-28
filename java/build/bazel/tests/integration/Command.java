@@ -77,8 +77,8 @@ final public class Command {
   }
 
   private static class CopyStreamRunnable implements Runnable {
-    private InputStream inputStream;
-    private OutputStream outputStream;
+    private final InputStream inputStream;
+    private final OutputStream outputStream;
 
     CopyStreamRunnable(InputStream inputStream, OutputStream outputStream) {
       this.inputStream = inputStream;
