@@ -39,7 +39,7 @@ final public class Command {
   private final LineListOutputStream stdout = new LineListOutputStream();
   private boolean executed = false;
 
-  private Command(File directory, List<String> args) throws IOException {
+  private Command(File directory, List<String> args) {
     this.directory = directory;
     this.args = args;
   }
@@ -164,7 +164,7 @@ final public class Command {
     /**
      * Build a Command object.
      */
-    public Command build() throws IOException {
+    public Command build() {
       Objects.requireNonNull(directory);
       List<String> args = Collections.unmodifiableList(this.args);
       return new Command(directory, args);
