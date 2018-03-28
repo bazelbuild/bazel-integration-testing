@@ -108,7 +108,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   @Test
-  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectory() throws IOException {
+  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectory() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
     String knownDirectoryInRunfiles = "build_bazel_integration_testing";
     String knownFileInDirectory = "/tools/BUILD";
 
@@ -220,7 +220,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
         ")");
   }
 
-  private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
+  private void loadIntegrationTestRuleIntoWorkspace() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
     setupRuleSkylarkFiles();
     setupRuleCode();
     scratchFile("./WORKSPACE",WORKSPACE_NAME);
@@ -238,7 +238,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
         ")");
   }
 
-  private void setupRuleSkylarkFiles() throws IOException {
+  private void setupRuleSkylarkFiles() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
     copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
     copyDirectoryFromRunfiles("build_bazel_integration_testing/tools");

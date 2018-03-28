@@ -92,7 +92,7 @@ public abstract class BazelBaseTestCase {
   /**
    * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
    */
-  protected void copyDirectoryFromRunfiles(String directoryToCopy) throws IOException {
+  protected void copyDirectoryFromRunfiles(String directoryToCopy) throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
     driver.copyDirectoryFromRunfiles(directoryToCopy);
   }
 

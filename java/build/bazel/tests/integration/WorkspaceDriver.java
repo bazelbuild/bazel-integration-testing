@@ -158,8 +158,12 @@ public class WorkspaceDriver {
   /**
    * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
    */
-  protected void copyDirectoryFromRunfiles(final String directoryToCopy) throws IOException {
+  protected void copyDirectoryFromRunfiles(final String directoryToCopy) throws IOException, BazelWorkspaceDriverException {
     File startingDirectory = getRunfile(directoryToCopy);
+
+    if (!startingDirectory.isDirectory())
+      throw new BazelWorkspaceDriverException("directoryToCopy MUST be a directory");
+
     Path runfileDirectoryPath = runfileDirectory.toPath();
     try (Stream<Path> paths = Files.walk(startingDirectory.toPath())) {
       paths.filter(path -> Files.isRegularFile(path))
