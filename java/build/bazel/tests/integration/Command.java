@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * A utility class to spawn a command and get its output.
- *
+ * <p>
  * <p>
  * This class can only be initialized using a builder created with the {@link #builder()} method.
  */
@@ -67,12 +67,9 @@ final public class Command {
     if (out != null) {
       out.join();
     }
-    synchronized (stderr) {
-      stderr.close();
-    }
-    synchronized (stdout) {
-      stdout.close();
-    }
+    stderr.close();
+    stdout.close();
+
     return exitCode;
   }
 
@@ -91,9 +88,7 @@ final public class Command {
       int read;
       try {
         while ((read = inputStream.read(buffer)) > 0) {
-          synchronized (outputStream) {
-            outputStream.write(buffer, 0, read);
-          }
+          outputStream.write(buffer, 0, read);
         }
       } catch (IOException ex) {
         throw new RuntimeException(ex);
