@@ -96,7 +96,7 @@ final public class Command {
           }
         }
       } catch (IOException ex) {
-        // we simply terminate the thread on exceptions
+        throw new RuntimeException(ex);
       }
     }
   }
