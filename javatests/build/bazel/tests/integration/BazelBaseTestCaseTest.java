@@ -19,7 +19,6 @@ import org.hamcrest.SelfDescribing;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,19 +26,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.spotify.hamcrest.optional.OptionalMatchers.emptyOptional;
-import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
 import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.StringEndsWith.endsWith;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /** {@link BazelBaseTestCase}Test */
 // suppress since same parameter value is ok for tests readability, tests should encapsulate and not
@@ -67,62 +59,6 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
     org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));
   }
-
-  @Test
-  public void scratchFileShouldCreateFileAndWorkspaceContentsContainThatFile() throws IOException {
-    String content = "somecontent";
-    String path = "somePath";
-
-    scratchFile(path, content);
-
-    Optional<String> actualScratchFileContent = findPath(workspaceContents(), path).map(this::readFileContent);
-    org.hamcrest.MatcherAssert.assertThat(actualScratchFileContent, is(optionalWithValue(equalTo(content))));
-  }
-
-  @Test
-  public void scratchExecutableFileShouldCreateAnExecutableFile() throws IOException {
-    String path = "someExecutablePath";
-
-    scratchExecutableFile(path);
-
-    Optional<Boolean> isExecutable = findPath(workspaceContents(), path).map(this::isExecutable);
-    org.hamcrest.MatcherAssert.assertThat(isExecutable, is(optionalWithValue(equalTo(true))));
-  }
-
-  @Test
-  public void getRunfileReturnTheFile() {
-      File runfile = getRunfile("build_bazel_integration_testing", "tools", "BUILD");
-
-      assertTrue("runfile should exists", runfile.exists());
-  }
-
-  @Test
-  public void newWorkspaceCreatesANewCleanWorkspace() throws IOException {
-      String path = "somePathForNewWorkspace";
-      scratchFile(path);
-
-      newWorkspace();
-
-      Optional<String> fullPath = findPath(workspaceContents(), path);
-      org.hamcrest.MatcherAssert.assertThat(fullPath, is(emptyOptional()));
-  }
-
-  private Boolean isExecutable(String path) {
-    return Files.isExecutable(Paths.get(path));
-  }
-
-  private String readFileContent(String path) {
-      try {
-          return new String(Files.readAllBytes(Paths.get(path)));
-      } catch (IOException e) {
-          throw new RuntimeException(e);
-      }
-  }
-
-  private Optional<String> findPath(List<String> paths, String path) {
-    return paths.stream().filter(x -> x.endsWith(path)).findFirst();
-  }
-
 
   private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(
       final Command cmd) {
