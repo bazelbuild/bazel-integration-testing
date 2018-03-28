@@ -17,13 +17,8 @@ package build.bazel.tests.integration;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
-/**
- * A base class to do integration test that call Bazel
- */
 public abstract class BazelBaseTestCase {
 
   protected WorkspaceDriver driver = new WorkspaceDriver();
@@ -33,90 +28,8 @@ public abstract class BazelBaseTestCase {
     WorkspaceDriver.setUpClass();
   }
 
-  /**
-   * Return a file in the runfiles whose path segments are given by the arguments.
-   */
-  protected static File getRunfile(String... segments) {
-    return WorkspaceDriver.getRunfile(segments);
-  }
-
-  /**
-   * Specify with bazel version to use, required before calling bazel.
-   */
-  protected void bazelVersion(String version) throws IOException, InterruptedException {
-    driver.bazelVersion(version);
-  }
-
-  /**
-   * Create a new workspace, previous one can still be used.
-   */
-  protected void newWorkspace() throws IOException {
-    driver.newWorkspace();
-  }
-
   @Before
   public void setUp() throws Exception {
     driver.setUp();
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   */
-  protected Command bazel(String... args) throws IOException {
-    return driver.bazel(args);
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   */
-  protected Command bazel(Iterable<String> args) throws IOException {
-    return driver.bazel(args);
-  }
-
-  /**
-   * Copy a file from the runfiles under {@code path} into {@code destpath} under the current
-   * workspace.
-   */
-  protected void copyFromRunfiles(String path, String destpath) throws IOException {
-    driver.copyFromRunfiles(path, destpath);
-  }
-
-  /**
-   * Copy a file from the runfiles under {@code path} into {@code path} under the current
-   * workspace.
-   */
-  protected void copyFromRunfiles(String path) throws IOException {
-    driver.copyFromRunfiles(path);
-  }
-
-  /**
-   * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
-   */
-  protected void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException {
-    driver.copyDirectoryFromRunfiles(directoryToCopy, stripPrefix);
-  }
-
-  /**
-   * Create a file under {@code path} in the current workspace, filling it with the lines given in
-   * {@code content}.
-   */
-  protected void scratchFile(String path, String... content) throws IOException {
-    driver.scratchFile(path, content);
-  }
-
-  protected void scratchFile(String path, Iterable<String> content) throws IOException {
-    driver.scratchFile(path, content);
-  }
-
-  protected void scratchExecutableFile(String path, String... content) throws IOException {
-    driver.scratchExecutableFile(path, content);
-  }
-
-  protected void scratchExecutableFile(String path, Iterable<String> content) throws IOException {
-    driver.scratchExecutableFile(path, content);
-  }
-
-  protected List<String> workspaceContents() {
-    return driver.contents();
   }
 }
