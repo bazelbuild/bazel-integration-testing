@@ -85,22 +85,22 @@ final public class Command {
    * Returns the list of lines of the standard error stream.
    */
   public List<String> getErrorLines() {
-    List<String> result;
     synchronized (stderr) {
-      result = Collections.unmodifiableList(new LinkedList<>(stderr));
+      return copyToUnmodifiableList(stderr);
     }
-    return result;
   }
 
   /**
    * Returns the list of lines of the standard output stream.
    */
   public List<String> getOutputLines() {
-    List<String> result;
     synchronized (stdout) {
-      result = Collections.unmodifiableList(new LinkedList<>(stdout));
+      return copyToUnmodifiableList(stdout);
     }
-    return result;
+  }
+
+  private static <T> List<T> copyToUnmodifiableList(final List<T> source) {
+    return Collections.unmodifiableList(new LinkedList<>(source));
   }
 
   /**
