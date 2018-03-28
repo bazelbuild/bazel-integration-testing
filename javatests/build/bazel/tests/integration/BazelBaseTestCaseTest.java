@@ -23,7 +23,11 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,6 +36,8 @@ import static com.spotify.hamcrest.optional.OptionalMatchers.emptyOptional;
 import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.StringEndsWith.endsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -100,7 +106,6 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
       Optional<String> fullPath = findPath(workspaceContents(), path);
       org.hamcrest.MatcherAssert.assertThat(fullPath, is(emptyOptional()));
   }
-
 
   private Boolean isExecutable(String path) {
     return Files.isExecutable(Paths.get(path));
@@ -210,8 +215,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private void setupRuleCode() throws IOException {
-    copyFromRunfiles(
-        "build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
+    copyFromRunfiles("build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
         "java/build/bazel/tests/integration/libworkspace_driver.jar");
     scratchFile(
         "java/build/bazel/tests/integration/BUILD.bazel",
@@ -225,19 +229,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void setupRuleSkylarkFiles() throws IOException {
     copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/bazel_hash_dict.bzl", "tools/bazel_hash_dict.bzl");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/bazel_java_integration_test.bzl",
-        "tools/bazel_java_integration_test.bzl");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/bazel_py_integration_test.bzl",
-        "tools/bazel_py_integration_test.bzl");
-    copyFromRunfiles("build_bazel_integration_testing/tools/BUILD", "tools/BUILD");
-    copyFromRunfiles("build_bazel_integration_testing/tools/common.bzl", "tools/common.bzl");
-    copyFromRunfiles("build_bazel_integration_testing/tools/bazel.sh", "tools/bazel.sh");
-    copyFromRunfiles(
-        "build_bazel_integration_testing/tools/repositories.bzl", "tools/repositories.bzl");
+    copyDirectoryFromRunfiles("build_bazel_integration_testing/tools", "build_bazel_integration_testing");
     scratchFile(
         "go/bazel_integration_test.bzl",
         "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"

@@ -18,15 +18,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.stream.Stream;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class WorkspaceDriver {
 
@@ -63,7 +64,7 @@ public class WorkspaceDriver {
   }
 
   private static void unpackBazel(String version)
-      throws BazelWorkspaceDriverException, IOException, InterruptedException {
+      throws IOException, InterruptedException {
     if (!bazelVersions.containsKey(version)) {
       // Get bazel location
       File bazelFile = getRunfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
@@ -83,7 +84,7 @@ public class WorkspaceDriver {
     List<String> command = new ArrayList<String>(Arrays.asList(
         bazelVersions.get(version).getCanonicalPath(),
         "--output_user_root=" + tmp, "--nomaster_bazelrc",
-        "--max_idle_secs=30", "--bazelrc=/dev/null", 
+        "--max_idle_secs=30", "--bazelrc=/dev/null",
         "help"));
     return prepareCommand(tmp, Collections.unmodifiableList(command));
   }
@@ -92,7 +93,7 @@ public class WorkspaceDriver {
    * Specify with bazel version to use, required before calling bazel.
    */
   protected void bazelVersion(String version)
-      throws BazelWorkspaceDriverException, IOException, InterruptedException {
+      throws IOException, InterruptedException {
     unpackBazel(version);
     currentBazel = bazelVersions.get(version);
   }
@@ -116,24 +117,24 @@ public class WorkspaceDriver {
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(String... args) throws BazelWorkspaceDriverException, IOException {
+  protected Command bazel(String... args) throws IOException {
     return bazel(new ArrayList<>(Arrays.asList(args)));
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(Iterable<String> args) throws BazelWorkspaceDriverException, IOException {
+  protected Command bazel(Iterable<String> args) throws IOException {
     if (currentBazel == null) {
       throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
           + "please call bazelVersion(version) before calling bazel(...).");
     }
 
     List<String> command = new ArrayList<String>(Arrays.asList(
-      currentBazel.getCanonicalPath(), 
-      "--output_user_root=" + tmp, 
+      currentBazel.getCanonicalPath(),
+      "--output_user_root=" + tmp,
       "--nomaster_bazelrc",
-      "--max_idle_secs=10", 
+      "--max_idle_secs=10",
       "--bazelrc=/dev/null"));
     for (String arg: args) {
       command.add(arg);
@@ -153,6 +154,34 @@ public class WorkspaceDriver {
       dest.getParentFile().mkdirs();
     }
     Files.copy(origin.toPath(), dest.toPath());
+  }
+
+  /**
+   * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
+   */
+  protected void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException {
+    File startingDirectory = getRunfile(directoryToCopy);
+
+    if (!startingDirectory.isDirectory())
+      throw new BazelWorkspaceDriverException("directoryToCopy MUST be a directory");
+
+    if (!directoryToCopy.startsWith(stripPrefix))
+      throw new BazelWorkspaceDriverException("The `stripPrefix` MUST be a prefix of `directoryToCopy`");
+
+    Path stripPrefixPath = Paths.get(stripPrefix);
+    Path runfileDirectoryPath = runfileDirectory.toPath();
+    try (Stream<Path> paths = Files.walk(startingDirectory.toPath())) {
+      paths.filter(path -> Files.isRegularFile(path))
+              .forEach(file -> {
+                Path relativeToRunfilesPath = runfileDirectoryPath.relativize(file);
+                Path destinationPath = stripPrefixPath.relativize(relativeToRunfilesPath);
+                try {
+                  copyFromRunfiles(relativeToRunfilesPath.toString(), destinationPath.toString());
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
+              });
+    }
   }
 
   /**
@@ -207,7 +236,7 @@ public class WorkspaceDriver {
     }
   }
 
-  public static class BazelWorkspaceDriverException extends Exception {
+  public static class BazelWorkspaceDriverException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
