@@ -27,7 +27,7 @@ public class WorkspaceDriverTest {
   }
 
   @Test
-  public void copyDirectoryFromRunfilesWithoutPrefixShouldCopyTheWholeDirectory() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
+  public void copyDirectoryFromRunfilesWithoutPrefixShouldCopyTheWholeDirectory() throws IOException {
     String knownFile = "bazel_tools/tools/jdk/TestRunner_deploy.jar";
 
     driver.copyDirectoryFromRunfiles("bazel_tools/tools", "");
@@ -37,7 +37,7 @@ public class WorkspaceDriverTest {
   }
 
   @Test
-  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectoryAndStripPrefix() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
+  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectoryAndStripPrefix() throws IOException {
     String sourceDirectoryThatWillBeStripped = "bazel_tools/tools";
     String theFileToCopy = "/jdk/TestRunner_deploy.jar";
     String knownFile = sourceDirectoryThatWillBeStripped + theFileToCopy;
@@ -50,14 +50,14 @@ public class WorkspaceDriverTest {
   }
 
   @Test(expected = WorkspaceDriver.BazelWorkspaceDriverException.class)
-  public void copyDirectoryFromRunfilesShouldThrowIfNotDirectory() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
+  public void copyDirectoryFromRunfilesShouldThrowIfNotDirectory() throws IOException {
     String knownFile = "bazel_tools/tools/jdk/TestRunner_deploy.jar";
 
     driver.copyDirectoryFromRunfiles(knownFile, "");
   }
 
   @Test(expected = WorkspaceDriver.BazelWorkspaceDriverException.class)
-  public void copyDirectoryFromRunfilesShouldThrowIfTheStripPrefixIsntAPrefix() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
+  public void copyDirectoryFromRunfilesShouldThrowIfTheStripPrefixIsntAPrefix() throws IOException {
     String knownFile = "bazel_tools/tools/jdk/TestRunner_deploy.jar";
 
     driver.copyDirectoryFromRunfiles(knownFile, "blabla");

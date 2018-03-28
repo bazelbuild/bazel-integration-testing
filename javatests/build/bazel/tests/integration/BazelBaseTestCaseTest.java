@@ -208,7 +208,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
         ")");
   }
 
-  private void loadIntegrationTestRuleIntoWorkspace() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
+  private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
     setupRuleSkylarkFiles();
     setupRuleCode();
     scratchFile("./WORKSPACE",WORKSPACE_NAME);
@@ -226,7 +226,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
         ")");
   }
 
-  private void setupRuleSkylarkFiles() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
+  private void setupRuleSkylarkFiles() throws IOException {
     copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
     copyDirectoryFromRunfiles("build_bazel_integration_testing/tools", "build_bazel_integration_testing");

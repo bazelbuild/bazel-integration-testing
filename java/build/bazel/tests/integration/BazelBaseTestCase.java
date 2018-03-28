@@ -43,7 +43,7 @@ public abstract class BazelBaseTestCase {
   /**
    * Specify with bazel version to use, required before calling bazel.
    */
-  protected void bazelVersion(String version) throws WorkspaceDriver.BazelWorkspaceDriverException, IOException, InterruptedException {
+  protected void bazelVersion(String version) throws IOException, InterruptedException {
     driver.bazelVersion(version);
   }
 
@@ -62,14 +62,14 @@ public abstract class BazelBaseTestCase {
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(String... args) throws WorkspaceDriver.BazelWorkspaceDriverException, IOException {
+  protected Command bazel(String... args) throws IOException {
     return driver.bazel(args);
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(Iterable<String> args) throws WorkspaceDriver.BazelWorkspaceDriverException, IOException {
+  protected Command bazel(Iterable<String> args) throws IOException {
     return driver.bazel(args);
   }
 
@@ -92,7 +92,7 @@ public abstract class BazelBaseTestCase {
   /**
    * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
    */
-  protected void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
+  protected void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException {
     driver.copyDirectoryFromRunfiles(directoryToCopy, stripPrefix);
   }
 

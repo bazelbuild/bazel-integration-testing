@@ -64,7 +64,7 @@ public class WorkspaceDriver {
   }
 
   private static void unpackBazel(String version)
-      throws BazelWorkspaceDriverException, IOException, InterruptedException {
+      throws IOException, InterruptedException {
     if (!bazelVersions.containsKey(version)) {
       // Get bazel location
       File bazelFile = getRunfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
@@ -93,7 +93,7 @@ public class WorkspaceDriver {
    * Specify with bazel version to use, required before calling bazel.
    */
   protected void bazelVersion(String version)
-      throws BazelWorkspaceDriverException, IOException, InterruptedException {
+      throws IOException, InterruptedException {
     unpackBazel(version);
     currentBazel = bazelVersions.get(version);
   }
@@ -117,14 +117,14 @@ public class WorkspaceDriver {
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(String... args) throws BazelWorkspaceDriverException, IOException {
+  protected Command bazel(String... args) throws IOException {
     return bazel(new ArrayList<>(Arrays.asList(args)));
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(Iterable<String> args) throws BazelWorkspaceDriverException, IOException {
+  protected Command bazel(Iterable<String> args) throws IOException {
     if (currentBazel == null) {
       throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
           + "please call bazelVersion(version) before calling bazel(...).");
@@ -159,7 +159,7 @@ public class WorkspaceDriver {
   /**
    * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
    */
-  protected void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException, BazelWorkspaceDriverException {
+  protected void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException {
     File startingDirectory = getRunfile(directoryToCopy);
 
     if (!startingDirectory.isDirectory())
@@ -236,7 +236,7 @@ public class WorkspaceDriver {
     }
   }
 
-  public static class BazelWorkspaceDriverException extends Exception {
+  public static class BazelWorkspaceDriverException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
