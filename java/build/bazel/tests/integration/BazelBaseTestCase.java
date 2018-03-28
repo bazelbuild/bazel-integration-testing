@@ -29,7 +29,7 @@ public abstract class BazelBaseTestCase {
   }
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() throws IOException, InterruptedException {
     driver.setUp();
   }
 }
