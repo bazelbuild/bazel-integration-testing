@@ -50,7 +50,7 @@ final public class Command {
    * This method should not be called twice on the same object.
    */
   public int run() throws IOException, InterruptedException {
-    assert executed == false;
+    assert !executed;
     executed = true;
     ProcessBuilder builder = new ProcessBuilder(args);
     builder.directory(directory);
