@@ -60,7 +60,7 @@ final public class Command {
     Thread err = copyStream(process.getErrorStream(), stderr);
     // seriously? That's stdout, why is it called getInputStream???
     Thread out = copyStream(process.getInputStream(), stdout);
-    int r = process.waitFor();
+    int exitCode = process.waitFor();
     if (err != null) {
       err.join();
     }
@@ -73,7 +73,7 @@ final public class Command {
     synchronized (stdout) {
       stdout.close();
     }
-    return r;
+    return exitCode;
   }
 
   private static class CopyStreamRunnable implements Runnable {
