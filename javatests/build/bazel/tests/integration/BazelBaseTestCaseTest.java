@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.spotify.hamcrest.optional.OptionalMatchers.emptyOptional;
 import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -88,6 +89,18 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
       assertTrue("runfile should exists", runfile.exists());
   }
+
+  @Test
+  public void newWorkspaceCreatesANewCleanWorkspace() throws IOException {
+      String path = "somePathForNewWorkspace";
+      scratchFile(path);
+
+      newWorkspace();
+
+      Optional<String> fullPath = findPath(workspaceContents(), path);
+      org.hamcrest.MatcherAssert.assertThat(fullPath, is(emptyOptional()));
+  }
+
 
   private Boolean isExecutable(String path) {
     return Files.isExecutable(Paths.get(path));
