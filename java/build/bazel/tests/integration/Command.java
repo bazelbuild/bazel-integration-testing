@@ -14,13 +14,16 @@
 
 package build.bazel.tests.integration;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,8 +38,8 @@ final public class Command {
 
   private final File directory;
   private final List<String> args;
-  private final LineListOutputStream stderr = new LineListOutputStream();
-  private final LineListOutputStream stdout = new LineListOutputStream();
+  private final List<String> stderr = Collections.synchronizedList(new LinkedList<>());
+  private final List<String> stdout = Collections.synchronizedList(new LinkedList<>());
   private boolean executed = false;
 
   private Command(File directory, List<String> args) {
@@ -56,9 +59,9 @@ final public class Command {
     builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
     builder.redirectError(ProcessBuilder.Redirect.PIPE);
     Process process = builder.start();
-    Thread err = copyStream(process.getErrorStream(), stderr);
+    Thread err = streamToLinesThread(process.getErrorStream(), stderr);
     // seriously? That's stdout, why is it called getInputStream???
-    Thread out = copyStream(process.getInputStream(), stdout);
+    Thread out = streamToLinesThread(process.getInputStream(), stdout);
     int exitCode = process.waitFor();
     if (err != null) {
       err.join();
@@ -66,57 +69,38 @@ final public class Command {
     if (out != null) {
       out.join();
     }
-    stderr.close();
-    stdout.close();
 
     return exitCode;
   }
 
-  private static class CopyStreamRunnable implements Runnable {
-    private final InputStream inputStream;
-    private final OutputStream outputStream;
-
-    CopyStreamRunnable(InputStream inputStream, OutputStream outputStream) {
-      this.inputStream = inputStream;
-      this.outputStream = outputStream;
-    }
-
-    @Override
-    public void run() {
-      byte[] buffer = new byte[4096];
-      int read;
-      try {
-        while ((read = inputStream.read(buffer)) > 0) {
-          outputStream.write(buffer, 0, read);
-        }
-      } catch (IOException ex) {
-        throw new RuntimeException(ex);
-      }
-    }
-  }
-
-  // Launch a thread to copy all data from inputStream to outputStream
-  private static Thread copyStream(InputStream inputStream, OutputStream outputStream) {
-    if (outputStream != null) {
-      Thread t = new Thread(new CopyStreamRunnable(inputStream, outputStream), "CopyStream");
-      t.start();
-      return t;
-    }
-    return null;
+  private static Thread streamToLinesThread(final InputStream inputStream, final List<String> lines) {
+    Thread thread = new Thread(() -> {
+      new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().forEach(lines::add);
+    });
+    thread.start();
+    return thread;
   }
 
   /**
    * Returns the list of lines of the standard error stream.
    */
   public List<String> getErrorLines() {
-    return stderr.getLines();
+    List<String> result;
+    synchronized (stderr) {
+      result = Collections.unmodifiableList(new LinkedList<>(stderr));
+    }
+    return result;
   }
 
   /**
    * Returns the list of lines of the standard output stream.
    */
   public List<String> getOutputLines() {
-    return stdout.getLines();
+    List<String> result;
+    synchronized (stdout) {
+      result = Collections.unmodifiableList(new LinkedList<>(stdout));
+    }
+    return result;
   }
 
   /**
