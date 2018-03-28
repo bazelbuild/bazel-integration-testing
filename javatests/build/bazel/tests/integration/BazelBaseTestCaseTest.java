@@ -107,18 +107,6 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
       org.hamcrest.MatcherAssert.assertThat(fullPath, is(emptyOptional()));
   }
 
-  @Test
-  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectory() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
-    String knownDirectoryInRunfiles = "build_bazel_integration_testing";
-    String knownFileInDirectory = "/tools/BUILD";
-
-    copyDirectoryFromRunfiles(knownDirectoryInRunfiles);
-
-    Optional<String> actualFilePath = findPath(workspaceContents(), knownFileInDirectory);
-    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue(is(endsWith(knownFileInDirectory)))));
-    org.hamcrest.MatcherAssert.assertThat("the root path from the runfiles should be stripped", actualFilePath, is(optionalWithValue(not(endsWith(knownDirectoryInRunfiles + knownFileInDirectory)))));
-  }
-
   private Boolean isExecutable(String path) {
     return Files.isExecutable(Paths.get(path));
   }
@@ -241,7 +229,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void setupRuleSkylarkFiles() throws IOException, WorkspaceDriver.BazelWorkspaceDriverException {
     copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-    copyDirectoryFromRunfiles("build_bazel_integration_testing/tools");
+    copyDirectoryFromRunfiles("build_bazel_integration_testing/tools", "build_bazel_integration_testing");
     scratchFile(
         "go/bazel_integration_test.bzl",
         "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"

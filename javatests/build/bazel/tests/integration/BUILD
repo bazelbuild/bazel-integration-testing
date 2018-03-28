@@ -14,6 +14,7 @@ bazel_java_integration_test(
 bazel_java_integration_test(
     name = "WorkspaceDriverTest",
     srcs = ["WorkspaceDriverTest.java"],
+    deps = ["@com_spotify_hamcrest_optional//jar"],
 )
 
 java_library(
