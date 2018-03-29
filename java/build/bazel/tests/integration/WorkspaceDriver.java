@@ -14,7 +14,6 @@
 
 package build.bazel.tests.integration;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -218,14 +217,14 @@ public class WorkspaceDriver {
   }
 
   public void scratchExecutableFile(String path, Iterable<String> content) throws IOException {
-    File dest = writeToFile(path, content);
-    dest.setExecutable(true, false);
+    Path dest = writeToFile(path, content);
+    dest.toFile().setExecutable(true, false);
   }
 
-  private File writeToFile(String path, Iterable<String> content) throws IOException {
+  private Path writeToFile(String path, Iterable<String> content) throws IOException {
     Path dest = createParentDirectoryIfNotExists(path);
     Files.write(dest, String.join("\n", content).getBytes(StandardCharsets.UTF_8));
-    return dest.toFile();
+    return dest;
   }
 
   private static Command prepareCommand(Path folder, Iterable<String> command) {
