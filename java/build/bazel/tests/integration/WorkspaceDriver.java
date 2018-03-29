@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 public class WorkspaceDriver {
 
-  private static File tmp;
+  private static Path tmp;
   private static Map<String, File> bazelVersions;
   private static File runfileDirectory = new File(System.getenv("TEST_SRCDIR"));
 
@@ -43,14 +43,13 @@ public class WorkspaceDriver {
   private File workspace = null;
 
   public static void setUpClass() throws IOException {
-    // Get tempdir
-    String _tmp = System.getenv("TEST_TMPDIR");
-    if (_tmp == null) {
-      File p = Files.createTempDirectory("e4b-tests").toFile();
-      p.deleteOnExit();
-      tmp = p;
+    String environmentTempDirectory = System.getenv("TEST_TMPDIR");
+    if (environmentTempDirectory == null) {
+      File tempDirectory = Files.createTempDirectory("e4b-tests").toFile();
+      tempDirectory.deleteOnExit();
+      tmp = tempDirectory.toPath();
     } else {
-      tmp = new File(_tmp);
+      tmp = Paths.get(environmentTempDirectory);
     }
     bazelVersions = new HashMap<>();
   }
@@ -86,7 +85,7 @@ public class WorkspaceDriver {
         "--output_user_root=" + tmp, "--nomaster_bazelrc",
         "--max_idle_secs=30", "--bazelrc=/dev/null",
         "help"));
-    return prepareCommand(tmp, Collections.unmodifiableList(command));
+    return prepareCommand(tmp.toFile(), Collections.unmodifiableList(command));
   }
 
   /**
@@ -102,7 +101,7 @@ public class WorkspaceDriver {
    * Create a new workspace, previous one can still be used.
    */
   public void newWorkspace() throws IOException {
-    this.workspace = java.nio.file.Files.createTempDirectory(tmp.toPath(), "workspace").toFile();
+    this.workspace = java.nio.file.Files.createTempDirectory(tmp, "workspace").toFile();
     this.scratchFile("WORKSPACE");
   }
 
