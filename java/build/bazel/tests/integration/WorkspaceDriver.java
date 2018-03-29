@@ -58,7 +58,7 @@ public class WorkspaceDriver {
   /**
    * Return a file in the runfiles whose path segments are given by the arguments.
    */
-  protected static File getRunfile(String... segments) {
+  public static File getRunfile(String... segments) {
     String segmentsJoined = String.join(File.separator, segments);
     return new File(String.join(File.separator, runfileDirectory.toString(), segmentsJoined));
   }
@@ -92,7 +92,7 @@ public class WorkspaceDriver {
   /**
    * Specify with bazel version to use, required before calling bazel.
    */
-  protected void bazelVersion(String version)
+  public void bazelVersion(String version)
       throws IOException, InterruptedException {
     unpackBazel(version);
     currentBazel = bazelVersions.get(version);
@@ -101,7 +101,7 @@ public class WorkspaceDriver {
   /**
    * Create a new workspace, previous one can still be used.
    */
-  protected void newWorkspace() throws IOException {
+  public void newWorkspace() throws IOException {
     this.workspace = java.nio.file.Files.createTempDirectory(tmp.toPath(), "workspace").toFile();
     this.scratchFile("WORKSPACE");
   }
@@ -117,14 +117,14 @@ public class WorkspaceDriver {
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(String... args) throws IOException {
+  public Command bazel(String... args) throws IOException {
     return bazel(new ArrayList<>(Arrays.asList(args)));
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  protected Command bazel(Iterable<String> args) throws IOException {
+  public Command bazel(Iterable<String> args) throws IOException {
     if (currentBazel == null) {
       throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
           + "please call bazelVersion(version) before calling bazel(...).");
@@ -147,7 +147,7 @@ public class WorkspaceDriver {
    * Copy a file from the runfiles under {@code path} into {@code destpath} under the current
    * workspace.
    */
-  protected void copyFromRunfiles(String path, String destpath) throws IOException {
+  public void copyFromRunfiles(String path, String destpath) throws IOException {
     File origin = getRunfile(path);
     File dest = new File(workspace, destpath);
     if (!dest.getParentFile().exists()) {
@@ -159,7 +159,7 @@ public class WorkspaceDriver {
   /**
    * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
    */
-  protected void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException {
+  public void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException {
     File startingDirectory = getRunfile(directoryToCopy);
 
     if (!startingDirectory.isDirectory())
@@ -188,7 +188,7 @@ public class WorkspaceDriver {
    * Copy a file from the runfiles under {@code path} into {@code path} under the current
    * workspace.
    */
-  protected void copyFromRunfiles(String path) throws IOException {
+  public void copyFromRunfiles(String path) throws IOException {
     copyFromRunfiles(path, path);
   }
 
@@ -196,19 +196,19 @@ public class WorkspaceDriver {
    * Create a file under {@code path} in the current workspace, filling it with the lines given in
    * {@code content}.
    */
-  protected void scratchFile(String path, String... content) throws IOException {
+  public void scratchFile(String path, String... content) throws IOException {
     scratchFile(path, Arrays.asList(content));
   }
 
-  protected void scratchFile(String path, Iterable<String> content) throws IOException {
+  public void scratchFile(String path, Iterable<String> content) throws IOException {
     writeToFile(path, content);
   }
 
-  protected void scratchExecutableFile(String path, String... content) throws IOException {
+  public void scratchExecutableFile(String path, String... content) throws IOException {
     scratchExecutableFile(path, Arrays.asList(content));
   }
 
-  protected void scratchExecutableFile(String path, Iterable<String> content) throws IOException {
+  public void scratchExecutableFile(String path, Iterable<String> content) throws IOException {
     File dest = writeToFile(path, content);
     dest.setExecutable(true, false);
   }
@@ -226,7 +226,7 @@ public class WorkspaceDriver {
     return Command.builder().setDirectory(folder).addArguments(command).build();
   }
 
-  protected List<String> contents() {
+  public List<String> contents() {
     try {
       try (Stream<Path> files = Files.walk(workspace.toPath())) {
         return files.map(Path::toString).collect(Collectors.toList());
