@@ -33,7 +33,7 @@ public class WorkspaceDriver {
 
   private static Path tmp;
   private static Map<String, File> bazelVersions;
-  private static File runfileDirectory = new File(System.getenv("TEST_SRCDIR"));
+  private static Path runfileDirectory = Paths.get(System.getenv("TEST_SRCDIR"));
 
   private File currentBazel = null;
 
@@ -177,7 +177,7 @@ public class WorkspaceDriver {
       throw new BazelWorkspaceDriverException("The `stripPrefix` MUST be a prefix of `directoryToCopy`");
 
     Path stripPrefixPath = Paths.get(stripPrefix);
-    Path runfileDirectoryPath = runfileDirectory.toPath();
+    Path runfileDirectoryPath = runfileDirectory;
     try (Stream<Path> paths = Files.walk(startingDirectory.toPath())) {
       paths.filter(path -> Files.isRegularFile(path))
               .forEach(file -> {
