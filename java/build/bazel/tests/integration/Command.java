@@ -23,13 +23,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 
 /**
  * A utility class to spawn a command and get its output.
+ * <p>
  * <p>
  * This class can only be initialized using a builder created with the {@link #builder()} method.
  */
@@ -37,8 +38,8 @@ final public class Command {
 
   private final File directory;
   private final List<String> args;
-  private List<String> stderr = Collections.emptyList();
-  private List<String> stdout = Collections.emptyList();
+  private final List<String> stderr = Collections.synchronizedList(new LinkedList<>());
+  private final List<String> stdout = Collections.synchronizedList(new LinkedList<>());
   private boolean executed = false;
 
   private Command(File directory, List<String> args) {
@@ -58,34 +59,48 @@ final public class Command {
     builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
     builder.redirectError(ProcessBuilder.Redirect.PIPE);
     Process process = builder.start();
-
+    Thread err = streamToLinesThread(process.getErrorStream(), stderr);
+    // seriously? That's stdout, why is it called getInputStream???
+    Thread out = streamToLinesThread(process.getInputStream(), stdout);
     int exitCode = process.waitFor();
-
-    stdout = Collections.unmodifiableList(readStreamToLines(process.getInputStream()));
-    stderr = Collections.unmodifiableList(readStreamToLines(process.getErrorStream()));
+    if (err != null) {
+      err.join();
+    }
+    if (out != null) {
+      out.join();
+    }
 
     return exitCode;
   }
 
-  private List<String> readStreamToLines(InputStream inputStream) throws IOException {
-    try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-         BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-      return bufferedReader.lines().collect(Collectors.toList());
-    }
+  private static Thread streamToLinesThread(final InputStream inputStream, final List<String> lines) {
+    Thread thread = new Thread(() -> {
+      new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().forEach(lines::add);
+    });
+    thread.start();
+    return thread;
   }
 
   /**
    * Returns the list of lines of the standard error stream.
    */
   public List<String> getErrorLines() {
-    return stderr;
+    synchronized (stderr) {
+      return copyToUnmodifiableList(stderr);
+    }
   }
 
   /**
    * Returns the list of lines of the standard output stream.
    */
   public List<String> getOutputLines() {
-    return stdout;
+    synchronized (stdout) {
+      return copyToUnmodifiableList(stdout);
+    }
+  }
+
+  private static <T> List<T> copyToUnmodifiableList(final List<T> source) {
+    return Collections.unmodifiableList(new LinkedList<>(source));
   }
 
   /**
