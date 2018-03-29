@@ -183,8 +183,8 @@ public class WorkspaceDriver {
     Path runfileDirectoryPath = runfileDirectory;
     try (Stream<Path> paths = Files.walk(startingDirectory)) {
       paths.filter(path -> Files.isRegularFile(path))
-              .forEach(file -> {
-                Path relativeToRunfilesPath = runfileDirectoryPath.relativize(file);
+              .forEach(runfilePath -> {
+                Path relativeToRunfilesPath = runfileDirectoryPath.relativize(runfilePath);
                 Path destinationPath = stripPrefixPath.relativize(relativeToRunfilesPath);
                 try {
                   copyFromRunfiles(relativeToRunfilesPath.toString(), destinationPath.toString());
