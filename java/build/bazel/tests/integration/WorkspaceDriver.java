@@ -45,9 +45,8 @@ public class WorkspaceDriver {
   public static void setUpClass() throws IOException {
     String environmentTempDirectory = System.getenv("TEST_TMPDIR");
     if (environmentTempDirectory == null) {
-      File tempDirectory = Files.createTempDirectory("e4b-tests").toFile();
-      tempDirectory.deleteOnExit();
-      tmp = tempDirectory.toPath();
+      tmp = Files.createTempDirectory("e4b-tests");
+      tmp.toFile().deleteOnExit();
     } else {
       tmp = Paths.get(environmentTempDirectory);
     }
