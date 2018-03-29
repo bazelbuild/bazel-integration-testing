@@ -30,7 +30,7 @@ import java.util.Objects;
 
 /**
  * A utility class to spawn a command and get its output.
- * <p>
+ *
  * <p>
  * This class can only be initialized using a builder created with the {@link #builder()} method.
  */
