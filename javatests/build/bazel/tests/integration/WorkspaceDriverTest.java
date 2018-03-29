@@ -93,9 +93,9 @@ public class WorkspaceDriverTest {
 
   @Test
   public void getRunfileReturnTheFile() {
-    File runfile = WorkspaceDriver.getRunfile("bazel_tools", "tools", "jdk", "TestRunner_deploy.jar");
+    Path runfile = WorkspaceDriver.getRunfile("bazel_tools", "tools", "jdk", "TestRunner_deploy.jar");
 
-    assertTrue("runfile should exists", runfile.exists());
+    assertTrue("runfile should exists", Files.exists(runfile));
   }
 
   @Test
