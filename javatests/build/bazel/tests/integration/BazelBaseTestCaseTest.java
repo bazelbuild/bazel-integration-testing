@@ -72,7 +72,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
               .appendValue(exitCode)
               .appendText("\n")
               .appendText("Workspace contents: \n")
-              .appendValueList("", "\n", "\n", driver.contents())
+              .appendValueList("", "\n", "\n", driver.workspaceDirectoryContents())
               .appendDescriptionOf(commandDescription(cmd));
           return false;
         }

@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,8 +38,8 @@ public class WorkspaceDriverTest {
 
     driver.copyDirectoryFromRunfiles("bazel_tools/tools", "");
 
-    Optional<String> actualFilePath = findPath(driver.contents(), knownFile);
-    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue(is(endsWith(knownFile)))));
+    Optional<Path> actualFilePath = findPath(driver.workspaceDirectoryContents(), knownFile);
+    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
   }
 
   @Test
@@ -50,9 +50,10 @@ public class WorkspaceDriverTest {
 
     driver.copyDirectoryFromRunfiles(sourceDirectoryThatWillBeStripped, sourceDirectoryThatWillBeStripped);
 
-    Optional<String> actualFilePath = findPath(driver.contents(), theFileToCopy);
-    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue(is(endsWith(theFileToCopy)))));
-    org.hamcrest.MatcherAssert.assertThat("the root path from the runfiles should be stripped", actualFilePath, is(optionalWithValue(not(endsWith(knownFile)))));
+    Optional<Path> actualFilePath = findPath(driver.workspaceDirectoryContents(), theFileToCopy);
+    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
+    org.hamcrest.MatcherAssert.assertThat("the root path from the runfiles should be stripped",
+            actualFilePath.map(Path::toString), is(not(optionalWithValue(endsWith(knownFile)))));
   }
 
   @Test(expected = WorkspaceDriver.BazelWorkspaceDriverException.class)
@@ -76,7 +77,7 @@ public class WorkspaceDriverTest {
 
     driver.scratchFile(path, content);
 
-    Optional<String> actualScratchFileContent = findPath(driver.contents(), path).map(this::readFileContent);
+    Optional<String> actualScratchFileContent = findPath(driver.workspaceDirectoryContents(), path).map(this::readFileContent);
     org.hamcrest.MatcherAssert.assertThat(actualScratchFileContent, is(optionalWithValue(equalTo(content))));
   }
 
@@ -86,7 +87,7 @@ public class WorkspaceDriverTest {
 
     driver.scratchExecutableFile(path);
 
-    Optional<Boolean> isExecutable = findPath(driver.contents(), path).map(this::isExecutable);
+    Optional<Boolean> isExecutable = findPath(driver.workspaceDirectoryContents(), path).map(this::isExecutable);
     org.hamcrest.MatcherAssert.assertThat("The file should be executable", isExecutable, is(optionalWithValue(equalTo(true))));
   }
 
@@ -104,23 +105,23 @@ public class WorkspaceDriverTest {
 
     driver.newWorkspace();
 
-    Optional<String> fullPath = findPath(driver.contents(), path);
+    Optional<Path> fullPath = findPath(driver.workspaceDirectoryContents(), path);
     org.hamcrest.MatcherAssert.assertThat("Workspace should be cleaned",fullPath, is(emptyOptional()));
   }
 
-  private Boolean isExecutable(String path) {
-    return Files.isExecutable(Paths.get(path));
+  private Boolean isExecutable(Path path) {
+    return Files.isExecutable(path);
   }
 
-  private String readFileContent(String path) {
+  private String readFileContent(Path path) {
     try {
-      return new String(Files.readAllBytes(Paths.get(path)));
+      return new String(Files.readAllBytes(path));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private Optional<String> findPath(List<String> paths, String path) {
-    return paths.stream().filter(x -> x.endsWith(path)).findFirst();
+  private Optional<Path> findPath(List<Path> paths, String path) {
+    return paths.stream().filter(x -> x.toString().endsWith(path)).findFirst();
   }
 }
