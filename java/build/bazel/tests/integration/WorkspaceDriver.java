@@ -40,7 +40,7 @@ public class WorkspaceDriver {
   /**
    * The current workspace.
    */
-  private File workspace = null;
+  private Path workspace = null;
 
   public static void setUpClass() throws IOException {
     String environmentTempDirectory = System.getenv("TEST_TMPDIR");
@@ -63,13 +63,13 @@ public class WorkspaceDriver {
   }
 
   private static void unpackBazel(String version)
-      throws IOException, InterruptedException {
+          throws IOException, InterruptedException {
     if (!bazelVersions.containsKey(version)) {
       // Get bazel location
       File bazelFile = getRunfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
       if (!bazelFile.exists()) {
         throw new BazelWorkspaceDriverException(
-            "Bazel version " + version + " not found");
+                "Bazel version " + version + " not found");
       }
       bazelVersions.put(version, bazelFile.toPath());
 
@@ -79,12 +79,12 @@ public class WorkspaceDriver {
   }
 
   private static Command prepareUnpackBazelCommand(String version)
-    throws  IOException {
+          throws IOException {
     List<String> command = new ArrayList<String>(Arrays.asList(
-        bazelVersions.get(version).toString(),
-        "--output_user_root=" + tmp, "--nomaster_bazelrc",
-        "--max_idle_secs=30", "--bazelrc=/dev/null",
-        "help"));
+            bazelVersions.get(version).toString(),
+            "--output_user_root=" + tmp, "--nomaster_bazelrc",
+            "--max_idle_secs=30", "--bazelrc=/dev/null",
+            "help"));
     return prepareCommand(tmp.toFile(), Collections.unmodifiableList(command));
   }
 
@@ -92,7 +92,7 @@ public class WorkspaceDriver {
    * Specify with bazel version to use, required before calling bazel.
    */
   public void bazelVersion(String version)
-      throws IOException, InterruptedException {
+          throws IOException, InterruptedException {
     unpackBazel(version);
     currentBazel = bazelVersions.get(version);
   }
@@ -101,7 +101,7 @@ public class WorkspaceDriver {
    * Create a new workspace, previous one can still be used.
    */
   public void newWorkspace() throws IOException {
-    this.workspace = java.nio.file.Files.createTempDirectory(tmp, "workspace").toFile();
+    this.workspace = Files.createTempDirectory(tmp, "workspace");
     this.scratchFile("WORKSPACE");
   }
 
@@ -134,21 +134,21 @@ public class WorkspaceDriver {
   public Command runBazelInDirectory(Path relativeToWorksapceDir, Iterable<String> args) throws IOException {
     if (currentBazel == null) {
       throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
-          + "please call bazelVersion(version) before calling bazel(...).");
+              + "please call bazelVersion(version) before calling bazel(...).");
     }
 
     List<String> command = new ArrayList<String>(Arrays.asList(
-      currentBazel.toString(),
-      "--output_user_root=" + tmp,
-      "--nomaster_bazelrc",
-      "--max_idle_secs=10",
-      "--bazelrc=/dev/null"));
-    for (String arg: args) {
+            currentBazel.toString(),
+            "--output_user_root=" + tmp,
+            "--nomaster_bazelrc",
+            "--max_idle_secs=10",
+            "--bazelrc=/dev/null"));
+    for (String arg : args) {
       command.add(arg);
     }
-    Path relativeToWorkspaceFullPath = workspace.toPath().resolve(relativeToWorksapceDir);
+    Path relativeToWorkspaceFullPath = workspace.resolve(relativeToWorksapceDir);
 
-    return prepareCommand(relativeToWorkspaceFullPath.toFile(),Collections.unmodifiableList(command));
+    return prepareCommand(relativeToWorkspaceFullPath.toFile(), Collections.unmodifiableList(command));
   }
 
   /**
@@ -157,11 +157,15 @@ public class WorkspaceDriver {
    */
   public void copyFromRunfiles(String path, String destpath) throws IOException {
     File origin = getRunfile(path);
-    File dest = new File(workspace, destpath);
-    if (!dest.getParentFile().exists()) {
-      dest.getParentFile().mkdirs();
-    }
-    Files.copy(origin.toPath(), dest.toPath());
+    Path dest = createParentDirectoryIfNotExists(destpath);
+    Files.copy(origin.toPath(), dest);
+  }
+
+  private Path createParentDirectoryIfNotExists(String destpath) throws IOException {
+    Path dest = workspace.resolve(destpath);
+    Path parent = dest.getParent();
+    Files.createDirectories(parent);
+    return dest;
   }
 
   /**
@@ -222,21 +226,18 @@ public class WorkspaceDriver {
   }
 
   private File writeToFile(String path, Iterable<String> content) throws IOException {
-    File dest = new File(workspace, path);
-    if (!dest.getParentFile().exists()) {
-      dest.getParentFile().mkdirs();
-    }
-    Files.write(dest.toPath(), String.join("\n", content).getBytes(StandardCharsets.UTF_8));
-    return dest;
+    Path dest = createParentDirectoryIfNotExists(path);
+    Files.write(dest, String.join("\n", content).getBytes(StandardCharsets.UTF_8));
+    return dest.toFile();
   }
 
   private static Command prepareCommand(File folder, Iterable<String> command) throws IOException {
     return Command.builder().setDirectory(folder).addArguments(command).build();
   }
-  
+
   public List<Path> workspaceDirectoryContents() {
     try {
-      try (Stream<Path> files = Files.walk(workspace.toPath())) {
+      try (Stream<Path> files = Files.walk(workspace)) {
         return files.collect(Collectors.toList());
       }
     } catch (IOException e) {
