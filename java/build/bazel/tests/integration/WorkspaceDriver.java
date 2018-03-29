@@ -57,21 +57,20 @@ public class WorkspaceDriver {
   /**
    * Return a file in the runfiles whose path segments are given by the arguments.
    */
-  public static File getRunfile(String... segments) {
-    String segmentsJoined = String.join(File.separator, segments);
-    return new File(String.join(File.separator, runfileDirectory.toString(), segmentsJoined));
+  public static Path getRunfile(String... segments) {
+    return Paths.get(runfileDirectory.toString(), segments);
   }
 
   private static void unpackBazel(String version)
           throws IOException, InterruptedException {
     if (!bazelVersions.containsKey(version)) {
       // Get bazel location
-      File bazelFile = getRunfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
-      if (!bazelFile.exists()) {
+      Path bazelFile = getRunfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
+      if (!Files.exists(bazelFile)) {
         throw new BazelWorkspaceDriverException(
                 "Bazel version " + version + " not found");
       }
-      bazelVersions.put(version, bazelFile.toPath());
+      bazelVersions.put(version, bazelFile);
 
       // Unzip Bazel
       prepareUnpackBazelCommand(version).run();
@@ -156,9 +155,9 @@ public class WorkspaceDriver {
    * workspace.
    */
   public void copyFromRunfiles(String path, String destpath) throws IOException {
-    File origin = getRunfile(path);
+    Path origin = getRunfile(path);
     Path dest = createParentDirectoryIfNotExists(destpath);
-    Files.copy(origin.toPath(), dest);
+    Files.copy(origin, dest);
   }
 
   private Path createParentDirectoryIfNotExists(String destpath) throws IOException {
@@ -172,9 +171,9 @@ public class WorkspaceDriver {
    * Copy the whole directory from the runfiles under {@code directoryToCopy} to the current workspace.
    */
   public void copyDirectoryFromRunfiles(final String directoryToCopy, final String stripPrefix) throws IOException {
-    File startingDirectory = getRunfile(directoryToCopy);
+    Path startingDirectory = getRunfile(directoryToCopy);
 
-    if (!startingDirectory.isDirectory())
+    if (!Files.isDirectory(startingDirectory))
       throw new BazelWorkspaceDriverException("directoryToCopy MUST be a directory");
 
     if (!directoryToCopy.startsWith(stripPrefix))
@@ -182,7 +181,7 @@ public class WorkspaceDriver {
 
     Path stripPrefixPath = Paths.get(stripPrefix);
     Path runfileDirectoryPath = runfileDirectory;
-    try (Stream<Path> paths = Files.walk(startingDirectory.toPath())) {
+    try (Stream<Path> paths = Files.walk(startingDirectory)) {
       paths.filter(path -> Files.isRegularFile(path))
               .forEach(file -> {
                 Path relativeToRunfilesPath = runfileDirectoryPath.relativize(file);
