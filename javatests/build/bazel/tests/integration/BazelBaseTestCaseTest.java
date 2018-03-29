@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -47,6 +48,17 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     Command cmd = driver.bazel("info", "release");
     assertEquals(0, cmd.run());
     assertThat(cmd.getOutputLines()).contains("release " + System.getProperty("bazel.version"));
+  }
+
+  @Test
+  public void testRunningBazelInGivenRelativeDirectory() throws Exception {
+    driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
+    driver.scratchExecutableFile("foo/bar.sh", "echo \"in bar\"");
+
+    Command cmd = driver.runBazelInDirectory(Paths.get("foo"), "run", "bar");
+
+    assertEquals(0, cmd.run());
+    assertThat(cmd.getOutputLines()).contains("in bar");
   }
 
   @Test
