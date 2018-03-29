@@ -44,7 +44,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
   @Test
   public void testVersion() throws Exception {
-    Command cmd = bazel("info", "release");
+    Command cmd = driver.bazel("info", "release");
     assertEquals(0, cmd.run());
     assertThat(cmd.getOutputLines()).contains("release " + System.getProperty("bazel.version"));
   }
@@ -54,7 +54,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     loadIntegrationTestRuleIntoWorkspace();
     setupPassingTest("IntegrationTestSuiteTest");
 
-    Command cmd = bazel("test", "//:IntegrationTestSuiteTest");
+    Command cmd = driver.bazel("test", "//:IntegrationTestSuiteTest");
     final int exitCode = cmd.run();
 
     org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));
@@ -72,7 +72,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
               .appendValue(exitCode)
               .appendText("\n")
               .appendText("Workspace contents: \n")
-              .appendValueList("", "\n", "\n", workspaceContents())
+              .appendValueList("", "\n", "\n", driver.contents())
               .appendDescriptionOf(commandDescription(cmd));
           return false;
         }
@@ -130,7 +130,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private void writeTestBuildFile(final String testName) throws IOException {
-    scratchFile(
+    driver.scratchFile(
         "BUILD",
         "load('//:bazel_integration_test.bzl', 'bazel_java_integration_test')",
         "",
@@ -147,13 +147,13 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
     setupRuleSkylarkFiles();
     setupRuleCode();
-    scratchFile("./WORKSPACE",WORKSPACE_NAME);
+    driver.scratchFile("./WORKSPACE",WORKSPACE_NAME);
   }
 
   private void setupRuleCode() throws IOException {
-    copyFromRunfiles("build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
+    driver.copyFromRunfiles("build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
         "java/build/bazel/tests/integration/libworkspace_driver.jar");
-    scratchFile(
+    driver.scratchFile(
         "java/build/bazel/tests/integration/BUILD.bazel",
         "java_import(",
         "    name = 'workspace_driver',",
@@ -163,20 +163,20 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private void setupRuleSkylarkFiles() throws IOException {
-    copyFromRunfiles(
+    driver.copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-    copyDirectoryFromRunfiles("build_bazel_integration_testing/tools", "build_bazel_integration_testing");
-    scratchFile(
+    driver.copyDirectoryFromRunfiles("build_bazel_integration_testing/tools", "build_bazel_integration_testing");
+    driver.scratchFile(
         "go/bazel_integration_test.bzl",
         "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"
             + "def bazel_go_integration_test(name, srcs, deps=[], versions=RULES_GO_COMPATIBLE_BAZEL_VERSION, **kwargs):\n"
             + "  pass");
     // In order to make //go a package it must have a build file (even if it's empty).
-    scratchFile("go/BUILD.bazel", "");
+    driver.scratchFile("go/BUILD.bazel", "");
   }
 
   private void writePassingTestJavaSource(final String testName) throws IOException {
-    scratchFile("" + testName + ".java", somePassingTestNamed(testName));
+    driver.scratchFile("" + testName + ".java", somePassingTestNamed(testName));
   }
 
   private List<String> somePassingTestNamed(final String testName) {

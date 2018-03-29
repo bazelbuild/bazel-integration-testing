@@ -106,7 +106,7 @@ public class WorkspaceDriver {
     this.scratchFile("WORKSPACE");
   }
 
-  public void setUp() throws Exception {
+  public void setUp() throws IOException, InterruptedException {
     this.currentBazel = null;
     if (System.getProperty("bazel.version") != null) {
       bazelVersion(System.getProperty("bazel.version"));
