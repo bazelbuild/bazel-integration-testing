@@ -225,11 +225,11 @@ public class WorkspaceDriver {
   private static Command prepareCommand(File folder, Iterable<String> command) throws IOException {
     return Command.builder().setDirectory(folder).addArguments(command).build();
   }
-
-  public List<String> contents() {
+  
+  public List<Path> workspaceDirectoryContents() {
     try {
       try (Stream<Path> files = Files.walk(workspace.toPath())) {
-        return files.map(Path::toString).collect(Collectors.toList());
+        return files.collect(Collectors.toList());
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
