@@ -179,11 +179,10 @@ public class WorkspaceDriver {
       throw new BazelWorkspaceDriverException("The `stripPrefix` MUST be a prefix of `directoryToCopy`");
 
     Path stripPrefixPath = Paths.get(stripPrefix);
-    Path runfileDirectoryPath = runfileDirectory;
     try (Stream<Path> paths = Files.walk(startingDirectory)) {
       paths.filter(path -> Files.isRegularFile(path))
               .forEach(runfilePath -> {
-                Path relativeToRunfilesPath = runfileDirectoryPath.relativize(runfilePath);
+                Path relativeToRunfilesPath = runfileDirectory.relativize(runfilePath);
                 Path destinationPath = stripPrefixPath.relativize(relativeToRunfilesPath);
                 try {
                   copyFromRunfiles(relativeToRunfilesPath.toString(), destinationPath.toString());
