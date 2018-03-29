@@ -32,10 +32,10 @@ import java.util.stream.Stream;
 public class WorkspaceDriver {
 
   private static Path tmp;
-  private static Map<String, File> bazelVersions;
+  private static Map<String, Path> bazelVersions;
   private static Path runfileDirectory = Paths.get(System.getenv("TEST_SRCDIR"));
 
-  private File currentBazel = null;
+  private Path currentBazel = null;
 
   /**
    * The current workspace.
@@ -71,7 +71,7 @@ public class WorkspaceDriver {
         throw new BazelWorkspaceDriverException(
             "Bazel version " + version + " not found");
       }
-      bazelVersions.put(version, bazelFile);
+      bazelVersions.put(version, bazelFile.toPath());
 
       // Unzip Bazel
       prepareUnpackBazelCommand(version).run();
@@ -81,7 +81,7 @@ public class WorkspaceDriver {
   private static Command prepareUnpackBazelCommand(String version)
     throws  IOException {
     List<String> command = new ArrayList<String>(Arrays.asList(
-        bazelVersions.get(version).getCanonicalPath(),
+        bazelVersions.get(version).toString(),
         "--output_user_root=" + tmp, "--nomaster_bazelrc",
         "--max_idle_secs=30", "--bazelrc=/dev/null",
         "help"));
@@ -138,7 +138,7 @@ public class WorkspaceDriver {
     }
 
     List<String> command = new ArrayList<String>(Arrays.asList(
-      currentBazel.getCanonicalPath(),
+      currentBazel.toString(),
       "--output_user_root=" + tmp,
       "--nomaster_bazelrc",
       "--max_idle_secs=10",
