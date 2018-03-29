@@ -84,7 +84,7 @@ public class WorkspaceDriver {
             "--output_user_root=" + tmp, "--nomaster_bazelrc",
             "--max_idle_secs=30", "--bazelrc=/dev/null",
             "help"));
-    return prepareCommand(tmp.toFile(), Collections.unmodifiableList(command));
+    return prepareCommand(tmp, Collections.unmodifiableList(command));
   }
 
   /**
@@ -147,7 +147,7 @@ public class WorkspaceDriver {
     }
     Path relativeToWorkspaceFullPath = workspace.resolve(relativeToWorksapceDir);
 
-    return prepareCommand(relativeToWorkspaceFullPath.toFile(), Collections.unmodifiableList(command));
+    return prepareCommand(relativeToWorkspaceFullPath, Collections.unmodifiableList(command));
   }
 
   /**
@@ -230,7 +230,7 @@ public class WorkspaceDriver {
     return dest.toFile();
   }
 
-  private static Command prepareCommand(File folder, Iterable<String> command) throws IOException {
+  private static Command prepareCommand(Path folder, Iterable<String> command) {
     return Command.builder().setDirectory(folder).addArguments(command).build();
   }
 

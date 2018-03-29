@@ -15,11 +15,12 @@
 package build.bazel.tests.integration;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,13 +37,13 @@ import java.util.Objects;
  */
 final public class Command {
 
-  private final File directory;
+  private final Path directory;
   private final List<String> args;
   private final List<String> stderr = Collections.synchronizedList(new LinkedList<>());
   private final List<String> stdout = Collections.synchronizedList(new LinkedList<>());
   private boolean executed = false;
 
-  private Command(File directory, List<String> args) {
+  private Command(Path directory, List<String> args) {
     this.directory = directory;
     this.args = args;
   }
@@ -55,7 +56,7 @@ final public class Command {
     assert !executed;
     executed = true;
     ProcessBuilder builder = new ProcessBuilder(args);
-    builder.directory(directory);
+    builder.directory(directory.toFile());
     builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
     builder.redirectError(ProcessBuilder.Redirect.PIPE);
     Process process = builder.start();
@@ -108,19 +109,19 @@ final public class Command {
    */
   static class Builder {
 
-    private File directory;
+    private Path directory;
     private List<String> args = new ArrayList<String>();
 
     private Builder() {
       // Default to the current working directory
-      this.directory = new File(System.getProperty("user.dir"));
+      this.directory = Paths.get(System.getProperty("user.dir"));
     }
 
     /**
      * Set the working directory for the program, it is set to the current working directory of the
      * current java process by default.
      */
-    public Builder setDirectory(File directory) {
+    public Builder setDirectory(Path directory) {
       this.directory = directory;
       return this;
     }
