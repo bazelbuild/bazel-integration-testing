@@ -3,8 +3,7 @@ load("//tools:common.bzl", "BAZEL_VERSIONS")
 java_library(
     name = "workspace_driver",
     srcs = ["WorkspaceDriver.java",
-            "Command.java",
-            "LineListOutputStream.java",],
+            "Command.java",],
     testonly = True,
     visibility = ["//visibility:public"]
 )
