@@ -124,7 +124,19 @@ public class WorkspaceDriver {
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
+<<<<<<< HEAD
   public Command bazel(Iterable<String> args) throws IOException {
+=======
+  protected Command bazel(Iterable<String> args) throws IOException {
+    return runBazelInDirectory(Paths.get(""), args);
+  }
+
+  protected Command runBazelInDirectory(Path relativeDir, String... args) throws IOException {
+    return runBazelInDirectory(relativeDir, new ArrayList<>(Arrays.asList(args)));
+  }
+
+  protected Command runBazelInDirectory(Path relativeToWorksapceDir, Iterable<String> args) throws IOException {
+>>>>>>> allow to run bazel in relative dir to workspace
     if (currentBazel == null) {
       throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
           + "please call bazelVersion(version) before calling bazel(...).");
@@ -139,8 +151,9 @@ public class WorkspaceDriver {
     for (String arg: args) {
       command.add(arg);
     }
+    Path relativeToWorkspaceFullPath = workspace.toPath().resolve(relativeToWorksapceDir);
 
-    return prepareCommand(workspace,Collections.unmodifiableList(command));
+    return prepareCommand(relativeToWorkspaceFullPath.toFile(),Collections.unmodifiableList(command));
   }
 
   /**

@@ -22,6 +22,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -47,6 +48,19 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     Command cmd = driver.bazel("info", "release");
     assertEquals(0, cmd.run());
     assertThat(cmd.getOutputLines()).contains("release " + System.getProperty("bazel.version"));
+  }
+
+  @Test
+  public void testRunningBazelInGivenRelativeDirectory() throws Exception {
+    String customScript = "#!/bin/bash\n\n" + "ls continuation/of/path\n";
+
+    driver.scratchExecutableFile("tools/bazel",customScript);
+    driver.scratchFile("start/of/path/continuation/of/path", "some-content");
+
+    Path relativeDir = Paths.get("start/of/path");
+    Command cmd = driver.runBazelInDirectory(relativeDir, "info");
+    assertEquals(0, cmd.run());
+    assertThat(cmd.getOutputLines()).contains("continuation/of/path");
   }
 
   @Test
