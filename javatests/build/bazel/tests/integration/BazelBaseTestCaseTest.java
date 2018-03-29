@@ -55,8 +55,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
     driver.scratchExecutableFile("foo/bar.sh", "echo \"in bar\"");
 
-    Path relativeDir = Paths.get("foo");
-    Command cmd = driver.runBazelInDirectory(relativeDir, "run", "bar");
+    Command cmd = driver.runBazelInDirectory(Paths.get("foo"), "run", "bar");
 
     assertEquals(0, cmd.run());
     assertThat(cmd.getOutputLines()).contains("in bar");
