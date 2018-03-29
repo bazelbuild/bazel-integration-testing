@@ -52,15 +52,14 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
   @Test
   public void testRunningBazelInGivenRelativeDirectory() throws Exception {
-    String customScript = "#!/bin/bash\n\n" + "ls continuation/of/path\n";
+    driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
+    driver.scratchExecutableFile("foo/bar.sh", "echo \"in bar\"");
 
-    driver.scratchExecutableFile("tools/bazel",customScript);
-    driver.scratchFile("start/of/path/continuation/of/path", "some-content");
+    Path relativeDir = Paths.get("foo");
+    Command cmd = driver.runBazelInDirectory(relativeDir, "run", "bar");
 
-    Path relativeDir = Paths.get("start/of/path");
-    Command cmd = driver.runBazelInDirectory(relativeDir, "info");
     assertEquals(0, cmd.run());
-    assertThat(cmd.getOutputLines()).contains("continuation/of/path");
+    assertThat(cmd.getOutputLines()).contains("in bar");
   }
 
   @Test
