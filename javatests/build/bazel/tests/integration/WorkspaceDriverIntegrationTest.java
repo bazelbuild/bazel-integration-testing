@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
@@ -24,7 +24,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         Command cmd = driver.bazel(Optional.of(Paths.get(".bazelrc")), "test", "//:TestMe");
         int returnCode = cmd.run();
 
-        assertEquals("bazel test return code", 1, returnCode);
+        assertNotEquals("bazel test return code", 0, returnCode);
         assertTrue("stderr contains InvalidOpt failure", cmd.getErrorLines().stream().anyMatch(x -> x.contains("-InvalidOpt")));
     }
 
