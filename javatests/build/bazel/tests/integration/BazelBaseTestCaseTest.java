@@ -22,10 +22,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -76,7 +73,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     setUpTestSuit("IntegrationTestSuiteTest");
     driver.scratchFile(".bazelrc", "test --javacopt=\"-InvalidFlag\"");
 
-    Command cmd = driver.bazel(Paths.get(".bazelrc"), "test", "//:IntegrationTestSuiteTest");
+    Command cmd = driver.bazel(Optional.of(Paths.get(".bazelrc")), "test", "//:IntegrationTestSuiteTest");
 
     org.hamcrest.MatcherAssert.assertThat(cmd.run(), not((successfulExitCode(cmd))));
     assertThat(cmd.getErrorLines()).contains("java.lang.IllegalArgumentException: invalid flag: -InvalidFlag");

@@ -19,12 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -114,13 +109,13 @@ public class WorkspaceDriver {
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
   public Command bazel(String... args) {
-    return bazel(null, args);
+    return bazel(Optional.empty(), args);
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  public Command bazel(Path bazelrcFile, String... args) {
+  public Command bazel(Optional<Path> bazelrcFile, String... args) {
     return bazel(bazelrcFile, new ArrayList<>(Arrays.asList(args)));
   }
 
@@ -128,13 +123,13 @@ public class WorkspaceDriver {
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
   public Command bazel(Iterable<String> args) {
-    return bazel(null, args);
+    return bazel(Optional.empty(), args);
   }
 
   /**
    * Prepare bazel for running, and return the {@link Command} object to run it.
    */
-  public Command bazel(Path bazelrcFile, Iterable<String> args) {
+  public Command bazel(Optional<Path> bazelrcFile, Iterable<String> args) {
     return runBazelInDirectory(Paths.get(""), bazelrcFile, args);
   }
 
@@ -143,16 +138,16 @@ public class WorkspaceDriver {
   }
 
   public Command runBazelInDirectory(Path relativeToWorksapceDir, Iterable<String> args) {
-    return runBazelInDirectory(relativeToWorksapceDir, null, args);
+    return runBazelInDirectory(relativeToWorksapceDir, Optional.empty(), args);
   }
 
-  public Command runBazelInDirectory(Path relativeToWorksapceDir, Path bazelrcFile, Iterable<String> args) {
+  public Command runBazelInDirectory(Path relativeToWorksapceDir, Optional<Path> bazelrcFile, Iterable<String> args) {
     if (currentBazel == null) {
       throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
               + "please call bazelVersion(version) before calling bazel(...).");
     }
 
-    String bazelRcPath = bazelrcFile == null ? "/dev/null" : workspace.resolve(bazelrcFile).toString();
+    String bazelRcPath = bazelrcFile.map(p -> workspace.resolve(p).toString()).orElse("/dev/null");
 
     List<String> command = new ArrayList<String>(Arrays.asList(
             currentBazel.toString(),
