@@ -22,7 +22,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -32,6 +31,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
 
 /** {@link BazelBaseTestCase}Test */
@@ -63,13 +63,28 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
   @Test
   public void testTestSuiteExists() throws Exception {
-    loadIntegrationTestRuleIntoWorkspace();
-    setupPassingTest("IntegrationTestSuiteTest");
+    setUpTestSuit("IntegrationTestSuiteTest");
 
     Command cmd = driver.bazel("test", "//:IntegrationTestSuiteTest");
     final int exitCode = cmd.run();
 
     org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));
+  }
+
+  @Test
+  public void testUseBazelRcFile() throws Exception {
+    setUpTestSuit("IntegrationTestSuiteTest");
+    driver.scratchFile(".bazelrc", "test --javacopt=\"-InvalidFlag\"");
+
+    Command cmd = driver.bazel(Paths.get(".bazelrc"), "test", "//:IntegrationTestSuiteTest");
+
+    org.hamcrest.MatcherAssert.assertThat(cmd.run(), not((successfulExitCode(cmd))));
+    assertThat(cmd.getErrorLines()).contains("java.lang.IllegalArgumentException: invalid flag: -InvalidFlag");
+  }
+
+  private void setUpTestSuit(String testName) throws Exception {
+    loadIntegrationTestRuleIntoWorkspace();
+    setupPassingTest(testName);
   }
 
   private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(
@@ -159,7 +174,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
     setupRuleSkylarkFiles();
     setupRuleCode();
-    driver.scratchFile("./WORKSPACE",WORKSPACE_NAME);
+    driver.scratchFile("./WORKSPACE", WORKSPACE_NAME);
   }
 
   private void setupRuleCode() throws IOException {
