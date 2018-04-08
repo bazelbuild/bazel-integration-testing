@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 
 public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     @Test
-    public void testBazelRc() throws Exception {
+    public void testWorkspaceWithBazelRcFile() throws Exception {
         String testName = "TestMe";
 
         driver.scratchFile("WORKSPACE", workspaceWithJunit());
