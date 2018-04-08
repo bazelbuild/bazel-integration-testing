@@ -29,3 +29,9 @@ bazel_java_integration_test(
     test_class = "build.bazel.tests.integration.BazelIntegrationTestNoSourcesTest",
     runtime_deps = [":BazelIntegrationTestNoSourcesSrc"],
 )
+
+bazel_java_integration_test(
+    name = "WorkspaceDriverIntegrationTest",
+    srcs = ["WorkspaceDriverIntegrationTest.java"],
+    deps = ["//java/build/bazel/tests/integration"],
+)

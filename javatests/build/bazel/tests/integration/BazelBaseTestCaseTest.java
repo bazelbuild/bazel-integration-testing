@@ -22,7 +22,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -159,7 +158,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
     setupRuleSkylarkFiles();
     setupRuleCode();
-    driver.scratchFile("./WORKSPACE",WORKSPACE_NAME);
+    driver.scratchFile("./WORKSPACE", WORKSPACE_NAME);
   }
 
   private void setupRuleCode() throws IOException {
