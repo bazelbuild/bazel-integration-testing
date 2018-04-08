@@ -2,10 +2,12 @@ package build.bazel.tests.integration;
 
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,7 +17,9 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     public void testWorkspaceWithBazelRcFile() throws Exception {
         String testName = "TestMe";
 
-        driver.scratchFile("WORKSPACE", workspaceWithJunit());
+        addExternalRepositoryFor("org_junit", "junit-4.11.jar");
+        writeWorkspaceFileWithRepositories("org_junit");
+
         driver.scratchFile("BUILD.bazel", testLabelNamed(testName));
         driver.scratchFile("TestMe.java", passingTestNamed(testName));
 
@@ -50,13 +54,30 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
                 "}");
     }
 
-    private List<String> workspaceWithJunit() {
-        return Arrays.asList(
+    private void writeWorkspaceFileWithRepositories(String... repos) throws IOException {
+        Stream<String> reposDec = Arrays.stream(repos).map(WorkspaceDriverIntegrationTest::repositoryDeclarationFor);
+
+        driver.scratchFile("./WORKSPACE",
                 "workspace(name = 'driver_integration_tests')",
-                "maven_jar(",
-                "  name = 'org_junit',",
-                "  artifact = 'junit:junit:jar:4.11',",
-                ")"
+                reposDec.reduce("", (acc, cur) -> acc + cur)
         );
+    }
+
+    private static String repositoryDeclarationFor(final String repoName) {
+        return "local_repository(\n" +
+                "    name = \"" + repoName + "\",\n" +
+                "    path = \"./external/" + repoName + "\"\n" +
+                ")\n";
+    }
+
+    private void addExternalRepositoryFor(final String repoName, final String repoJarName) throws IOException {
+        driver.copyFromRunfiles("build_bazel_integration_testing/external/" + repoName + "/jar/" + repoJarName,
+                "external/" + repoName + "/jar/" + repoJarName);
+        driver.scratchFile("external/" + repoName + "/WORKSPACE","");
+        driver.scratchFile("external/" + repoName + "/jar/BUILD.bazel","java_import(\n" +
+                "    name = 'jar',\n" +
+                "    jars = ['" + repoJarName + "'],\n" +
+                "    visibility = ['//visibility:public']\n" +
+                ")\n");
     }
 }
