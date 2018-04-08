@@ -32,28 +32,6 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         assertTrue("stderr contains InvalidOpt failure", cmd.getErrorLines().stream().anyMatch(x -> x.contains("-InvalidOpt")));
     }
 
-    private List<String> testLabelNamed(String name) {
-        return Arrays.asList(
-                "java_test(",
-                "  name = '" + name + "',",
-                "  srcs = ['"+ name +".java'],",
-                "  test_class = 'build.bazel.tests.integration." + name + "',",
-                "  deps = ['@org_junit//jar'],",
-                ")"
-        );
-    }
-
-    private List<String> passingTestNamed(String name) {
-        return Arrays.asList(
-                "package build.bazel.tests.integration;",
-                "import org.junit.Test;",
-                "public class " + name + " {",
-                "  @Test",
-                "  public void testSuccess() {",
-                "  }",
-                "}");
-    }
-
     private void writeWorkspaceFileWithRepositories(String... repos) throws IOException {
         Stream<String> reposDec = Arrays.stream(repos).map(WorkspaceDriverIntegrationTest::repositoryDeclarationFor);
 
@@ -61,13 +39,6 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
                 "workspace(name = 'driver_integration_tests')",
                 reposDec.reduce("", (acc, cur) -> acc + cur)
         );
-    }
-
-    private static String repositoryDeclarationFor(final String repoName) {
-        return "local_repository(\n" +
-                "    name = \"" + repoName + "\",\n" +
-                "    path = \"./external/" + repoName + "\"\n" +
-                ")\n";
     }
 
     private void addExternalRepositoryFor(final String repoName, final String repoJarName) throws IOException {
@@ -79,5 +50,34 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
                 "    jars = ['" + repoJarName + "'],\n" +
                 "    visibility = ['//visibility:public']\n" +
                 ")\n");
+    }
+
+    private static List<String> testLabelNamed(String name) {
+        return Arrays.asList(
+                "java_test(",
+                "  name = '" + name + "',",
+                "  srcs = ['"+ name +".java'],",
+                "  test_class = 'build.bazel.tests.integration." + name + "',",
+                "  deps = ['@org_junit//jar'],",
+                ")"
+        );
+    }
+
+    private static List<String> passingTestNamed(String name) {
+        return Arrays.asList(
+                "package build.bazel.tests.integration;",
+                "import org.junit.Test;",
+                "public class " + name + " {",
+                "  @Test",
+                "  public void testSuccess() {",
+                "  }",
+                "}");
+    }
+
+    private static String repositoryDeclarationFor(final String repoName) {
+        return "local_repository(\n" +
+                "    name = \"" + repoName + "\",\n" +
+                "    path = \"./external/" + repoName + "\"\n" +
+                ")\n";
     }
 }
