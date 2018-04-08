@@ -33,6 +33,5 @@ bazel_java_integration_test(
 bazel_java_integration_test(
     name = "WorkspaceDriverIntegrationTest",
     srcs = ["WorkspaceDriverIntegrationTest.java"],
-    test_class = "build.bazel.tests.integration.WorkspaceDriverIntegrationTest",
     deps = ["//java/build/bazel/tests/integration"],
 )
