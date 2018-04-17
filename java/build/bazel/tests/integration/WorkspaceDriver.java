@@ -149,6 +149,7 @@ public class WorkspaceDriver {
    /**
      * @deprecated use Use {@link #bazelCommand()}
      */
+  @Deprecated
   public Command runBazelInDirectory(Path relativeDir, String... args) {
     return runBazelInDirectory(relativeDir, new ArrayList<>(Arrays.asList(args)));
   }
@@ -156,6 +157,7 @@ public class WorkspaceDriver {
   /**
    * @deprecated use Use {@link #bazelCommand()}
    */
+  @Deprecated
   public Command runBazelInDirectory(Path relativeToWorksapceDir, Iterable<String> args) {
     return runBazelInDirectory(relativeToWorksapceDir, Optional.empty(), args);
   }
@@ -163,6 +165,7 @@ public class WorkspaceDriver {
     /**
      * @deprecated use Use {@link #bazelCommand()}
      */
+    @Deprecated
     public Command runBazelInDirectory(Path relativeToWorkspaceDir, Optional<Path> bazelrcFile, Iterable<String> args) {
         BazelCommand builder  = bazelCommand().withWorkingDirectory(relativeToWorkspaceDir).withArguments(args);
         return bazelrcFile.map(builder::withBazelrcFile).orElse(builder).build();
