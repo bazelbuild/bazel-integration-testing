@@ -15,9 +15,12 @@ public class CommandTest {
         String key = "MY_KEY";
         String value = "some-value";
         Map<String, String> environment = Collections.singletonMap(key, value);
-        Command command = Command.builder().addArguments("bash", "-c", "echo ${" + key + "}").build();
+        Command command = Command.builder()
+                .addArguments("bash", "-c", "echo ${" + key + "}")
+                .withEnvironment(environment)
+                .build();
 
-        command.run(environment);
+        command.run();
 
         org.hamcrest.MatcherAssert.assertThat(command.getOutputLines(), hasItem(value));
     }
