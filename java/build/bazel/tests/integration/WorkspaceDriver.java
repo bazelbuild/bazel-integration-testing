@@ -111,68 +111,6 @@ public class WorkspaceDriver {
   }
 
   /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   * @deprecated use Use {@link #bazelCommand()}
-   */
-  @Deprecated
-  public Command bazel(String... args) {
-    return bazel(Optional.empty(), args);
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   * @deprecated use Use {@link #bazelCommand()}
-   */
-  @Deprecated
-  public Command bazel(Optional<Path> bazelrcFile, String... args) {
-    return bazel(bazelrcFile, new ArrayList<>(Arrays.asList(args)));
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   * @deprecated use Use {@link #bazelCommand()}
-   */
-  @Deprecated
-  public Command bazel(Iterable<String> args) {
-    return bazel(Optional.empty(), args);
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   * @deprecated use Use {@link #bazelCommand()}
-   */
-  @Deprecated
-  public Command bazel(Optional<Path> bazelrcFile, Iterable<String> args) {
-    return runBazelInDirectory(Paths.get(""), bazelrcFile, args);
-  }
-
-   /**
-     * @deprecated use Use {@link #bazelCommand()}
-     */
-  @Deprecated
-  public Command runBazelInDirectory(Path relativeDir, String... args) {
-    return runBazelInDirectory(relativeDir, new ArrayList<>(Arrays.asList(args)));
-  }
-
-  /**
-   * @deprecated use Use {@link #bazelCommand()}
-   */
-  @Deprecated
-  public Command runBazelInDirectory(Path relativeToWorksapceDir, Iterable<String> args) {
-    return runBazelInDirectory(relativeToWorksapceDir, Optional.empty(), args);
-  }
-
-    /**
-     * @deprecated use Use {@link #bazelCommand()}
-     */
-    @Deprecated
-    public Command runBazelInDirectory(Path relativeToWorkspaceDir, Optional<Path> bazelrcFile, Iterable<String> args) {
-        BazelCommand builder  = bazelCommand().withWorkingDirectory(relativeToWorkspaceDir).withArguments(args);
-        return bazelrcFile.map(builder::withBazelrcFile).orElse(builder).build();
-    }
-
-
-  /**
    * Copy a file from the runfiles under {@code path} into {@code destpath} under the current
    * workspace.
    */
