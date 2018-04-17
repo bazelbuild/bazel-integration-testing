@@ -21,12 +21,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 
 /**
@@ -53,9 +48,18 @@ final public class Command {
    * This method should not be called twice on the same object.
    */
   public int run() throws IOException, InterruptedException {
+    return run(Collections.emptyMap());
+  }
+
+  /**
+   * Executes the command represented by this instance, and return the exit code of the command.
+   * This method should not be called twice on the same object.
+   */
+  public int run(Map<String, String> environment) throws IOException, InterruptedException {
     assert !executed;
     executed = true;
     ProcessBuilder builder = new ProcessBuilder(args);
+    builder.environment().putAll(environment);
     builder.directory(directory.toFile());
     builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
     builder.redirectError(ProcessBuilder.Redirect.PIPE);
