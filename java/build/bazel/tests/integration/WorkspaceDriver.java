@@ -272,7 +272,6 @@ public class WorkspaceDriver {
 
         /**
          * Prepare bazel for running, and return the {@link Command} object to run it.
-
          */
         public Command build() {
             String bazelRcPath = bazelrcFile.map(p -> workspace.resolve(p).toString()).orElse("/dev/null");

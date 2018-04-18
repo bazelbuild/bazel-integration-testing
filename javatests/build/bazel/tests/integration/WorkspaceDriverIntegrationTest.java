@@ -43,7 +43,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         driver.scratchFile("BUILD.bazel", shTest(testName));
         driver.scratchExecutableFile(testName+".sh", shellTestingEnvironmentVariable(key,val));
         Command cmd = driver.bazelCommand()
-                //.withEnvironmentVariable(key,val)
+                .withEnvironmentVariable(key,val)
                 .withArguments(
                         "test",
                         "--test_env="+key,
@@ -51,13 +51,14 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
         int returnCode = cmd.run();
 
-        assertEquals("bazel test environemnt variable return code", 0, returnCode);
+        assertEquals("bazel test environment variable return code", 0, returnCode);
     }
 
     private List<String> shellTestingEnvironmentVariable(String key, String val) {
         return Arrays.asList(
                 "#!/bin/bash",
-                "test \"$"+key+"\" = \""+val+"\"","");
+                "test \"$"+key+"\" = \""+val+"\"",
+                "");
     }
 
     private void writeWorkspaceFileWithRepositories(String... repos) throws IOException {
