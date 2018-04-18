@@ -25,9 +25,8 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
         driver.scratchFile(".bazelrc", "test --javacopt=\"-InvalidOpt\"");
 
-        Command cmd = driver.bazelCommand()
-                .withBazelrcFile(Paths.get(".bazelrc"))
-                .withArguments("test", "//:TestMe").build();
+        Command cmd = driver.bazelCommand("test", "//:TestMe")
+                .withBazelrcFile(Paths.get(".bazelrc")).build();
 
         int returnCode = cmd.run();
 
@@ -42,12 +41,8 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         String val = "some_value";
         driver.scratchFile("BUILD.bazel", shTest(testName));
         driver.scratchExecutableFile(testName+".sh", shellTestingEnvironmentVariable(key,val));
-        Command cmd = driver.bazelCommand()
-                .withEnvironmentVariable(key,val)
-                .withArguments(
-                        "test",
-                        "--test_env="+key,
-                        "//:"+testName).build();
+        Command cmd = driver.bazelCommand("test", "--test_env="+key, "//:"+testName)
+                .withEnvironmentVariable(key,val).build();
 
         int returnCode = cmd.run();
 
