@@ -236,8 +236,8 @@ public class WorkspaceDriver {
       /**
        * sets the working directory relative to workspace path
        */
-      public BazelCommand withWorkingDirectory(Path relativeWorkingDirectory) {
-          this.workingDirectory = relativeWorkingDirectory;
+      public BazelCommand inWorkingDirectory(Path dirRelativeToWorkspaceRoot) {
+          this.workingDirectory = dirRelativeToWorkspaceRoot;
           return this;
       }
 

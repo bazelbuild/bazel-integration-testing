@@ -35,19 +35,3 @@ bazel_java_integration_test(
     srcs = ["WorkspaceDriverIntegrationTest.java"],
     deps = ["//java/build/bazel/tests/integration"],
 )
-
-java_library(
-    name = "CommandTestSrc",
-    srcs = ["CommandTest.java"],
-    deps = [
-        "//java/build/bazel/tests/integration:workspace_driver",
-        "@org_junit//jar",
-        "@org_hamcrest_core//jar",
-        ],
-)
-
-java_test(
-    name = "CommandTest",
-
-    runtime_deps = [":CommandTestSrc"],
-)
