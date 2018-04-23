@@ -44,7 +44,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
   @Test
   public void testVersion() throws Exception {
-    Command cmd = driver.bazel("info", "release");
+    Command cmd = driver.bazelCommand("info", "release").build();
     assertEquals(0, cmd.run());
     assertThat(cmd.getOutputLines()).contains("release " + System.getProperty("bazel.version"));
   }
@@ -54,7 +54,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
     driver.scratchExecutableFile("foo/bar.sh", "echo \"in bar\"");
 
-    Command cmd = driver.runBazelInDirectory(Paths.get("foo"), "run", "bar");
+    Command cmd = driver.bazelCommand( "run", "bar").inWorkingDirectory(Paths.get("foo")).build();
 
     assertEquals(0, cmd.run());
     assertThat(cmd.getOutputLines()).contains("in bar");
@@ -65,7 +65,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     loadIntegrationTestRuleIntoWorkspace();
     setupPassingTest("IntegrationTestSuiteTest");
 
-    Command cmd = driver.bazel("test", "//:IntegrationTestSuiteTest");
+    Command cmd = driver.bazelCommand("test", "//:IntegrationTestSuiteTest").build();
     final int exitCode = cmd.run();
 
     org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));

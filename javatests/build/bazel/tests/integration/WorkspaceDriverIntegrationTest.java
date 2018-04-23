@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -25,11 +25,35 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
         driver.scratchFile(".bazelrc", "test --javacopt=\"-InvalidOpt\"");
 
-        Command cmd = driver.bazel(Optional.of(Paths.get(".bazelrc")), "test", "//:TestMe");
+        Command cmd = driver.bazelCommand("test", "//:TestMe")
+                .withBazelrcFile(Paths.get(".bazelrc")).build();
+
         int returnCode = cmd.run();
 
         assertNotEquals("bazel test return code", 0, returnCode);
         assertTrue("stderr contains InvalidOpt failure", cmd.getErrorLines().stream().anyMatch(x -> x.contains("-InvalidOpt")));
+    }
+
+    @Test
+    public void testRunningWithEnvironment() throws Exception {
+        String testName = "test_me";
+        String key = "SOME_KEY";
+        String val = "some_value";
+        driver.scratchFile("BUILD.bazel", shTest(testName));
+        driver.scratchExecutableFile(testName+".sh", shellTestingEnvironmentVariable(key,val));
+        Command cmd = driver.bazelCommand("test", "--test_env="+key, "//:"+testName)
+                .withEnvironmentVariable(key,val).build();
+
+        int returnCode = cmd.run();
+
+        assertEquals("bazel test environment variable return code", 0, returnCode);
+    }
+
+    private List<String> shellTestingEnvironmentVariable(String key, String val) {
+        return Arrays.asList(
+                "#!/bin/bash",
+                "test \"$"+key+"\" = \""+val+"\"",
+                "");
     }
 
     private void writeWorkspaceFileWithRepositories(String... repos) throws IOException {
@@ -44,8 +68,8 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     private void addExternalRepositoryFor(final String repoName, final String repoJarName) throws IOException {
         driver.copyFromRunfiles("build_bazel_integration_testing/external/" + repoName + "/jar/" + repoJarName,
                 "external/" + repoName + "/jar/" + repoJarName);
-        driver.scratchFile("external/" + repoName + "/WORKSPACE","");
-        driver.scratchFile("external/" + repoName + "/jar/BUILD.bazel","java_import(\n" +
+        driver.scratchFile("external/" + repoName + "/WORKSPACE", "");
+        driver.scratchFile("external/" + repoName + "/jar/BUILD.bazel", "java_import(\n" +
                 "    name = 'jar',\n" +
                 "    jars = ['" + repoJarName + "'],\n" +
                 "    visibility = ['//visibility:public']\n" +
@@ -56,9 +80,18 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         return Arrays.asList(
                 "java_test(",
                 "  name = '" + name + "',",
-                "  srcs = ['"+ name +".java'],",
+                "  srcs = ['" + name + ".java'],",
                 "  test_class = 'build.bazel.tests.integration." + name + "',",
                 "  deps = ['@org_junit//jar'],",
+                ")"
+        );
+    }
+
+    private static List<String> shTest(String name) {
+        return Arrays.asList(
+                "sh_test(",
+                "  name = '" + name + "',",
+                "  srcs = ['" + name + ".sh'],",
                 ")"
         );
     }

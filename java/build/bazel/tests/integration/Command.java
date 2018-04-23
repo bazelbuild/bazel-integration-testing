@@ -24,8 +24,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -41,11 +43,13 @@ final public class Command {
   private final List<String> args;
   private final List<String> stderr = Collections.synchronizedList(new LinkedList<>());
   private final List<String> stdout = Collections.synchronizedList(new LinkedList<>());
+  private final Map<String, String> environment;
   private boolean executed = false;
 
-  private Command(Path directory, List<String> args) {
+  private Command(Path directory, List<String> args, Map<String, String> environment) {
     this.directory = directory;
     this.args = args;
+    this.environment = environment;
   }
 
   /**
@@ -57,6 +61,7 @@ final public class Command {
     executed = true;
     ProcessBuilder builder = new ProcessBuilder(args);
     builder.directory(directory.toFile());
+    builder.environment().putAll(environment);
     builder.redirectOutput(ProcessBuilder.Redirect.PIPE);
     builder.redirectError(ProcessBuilder.Redirect.PIPE);
     Process process = builder.start();
@@ -110,7 +115,8 @@ final public class Command {
   static class Builder {
 
     private Path directory;
-    private List<String> args = new ArrayList<String>();
+    private List<String> args = new ArrayList<>();
+    private Map<String,String> environment = new HashMap<>();
 
     private Builder() {
       // Default to the current working directory
@@ -147,13 +153,23 @@ final public class Command {
     }
 
     /**
+     * Sets environment variable in the runtime
+     */
+    public Builder withEnvironment(Map<String, String> environment) {
+        this.environment = Collections.unmodifiableMap(environment);
+        return this;
+    }
+
+    /**
      * Build a Command object.
      */
     public Command build() {
       Objects.requireNonNull(directory);
       List<String> args = Collections.unmodifiableList(this.args);
-      return new Command(directory, args);
+      Map<String,String> env = Collections.unmodifiableMap(environment);
+      return new Command(directory, args, env);
     }
+
   }
 
   /**
