@@ -71,6 +71,11 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));
   }
 
+  @Test
+  public void testJvmFlags() {
+    org.hamcrest.MatcherAssert.assertThat(System.getProperty("foo.bar"), is("true"));
+  }
+
   private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(
       final Command cmd) {
     return new TypeSafeDiagnosingMatcher<Integer>() {

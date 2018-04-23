@@ -87,7 +87,7 @@ def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[], data=
       data = data + ["@build_bazel_bazel_%s//:bazel" % version.replace(".", "_")]
     native.java_test(
         name = "%s/bazel%s" % (name, version),
-        jvm_flags = ["-Dbazel.version=" + version],
+        jvm_flags = ["-Dbazel.version=" + version] + jvm_flags,
         srcs = srcs,
         data = data,
         test_class = test_class,

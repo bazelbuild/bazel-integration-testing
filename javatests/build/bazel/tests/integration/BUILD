@@ -8,6 +8,7 @@ bazel_java_integration_test(
     ],
     deps = ["//java/build/bazel/tests/integration",
             "@com_google_truth//jar",],
+    jvm_flags = ["-Dfoo.bar=true"],
 )
 
 bazel_java_integration_test(
