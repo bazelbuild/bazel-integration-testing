@@ -83,7 +83,7 @@ public class WorkspaceDriver {
             "--output_user_root=" + tmp, "--nomaster_bazelrc",
             "--max_idle_secs=30", "--bazelrc=/dev/null",
             "help"));
-    return prepareCommand(tmp, Collections.unmodifiableList(command));
+      return Command.builder().setDirectory(tmp).addArguments(command).build();
   }
 
   /**
@@ -109,64 +109,6 @@ public class WorkspaceDriver {
       bazelVersion(System.getProperty("bazel.version"));
     }
     newWorkspace();
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   */
-  public Command bazel(String... args) {
-    return bazel(Optional.empty(), args);
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   */
-  public Command bazel(Optional<Path> bazelrcFile, String... args) {
-    return bazel(bazelrcFile, new ArrayList<>(Arrays.asList(args)));
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   */
-  public Command bazel(Iterable<String> args) {
-    return bazel(Optional.empty(), args);
-  }
-
-  /**
-   * Prepare bazel for running, and return the {@link Command} object to run it.
-   */
-  public Command bazel(Optional<Path> bazelrcFile, Iterable<String> args) {
-    return runBazelInDirectory(Paths.get(""), bazelrcFile, args);
-  }
-
-  public Command runBazelInDirectory(Path relativeDir, String... args) {
-    return runBazelInDirectory(relativeDir, new ArrayList<>(Arrays.asList(args)));
-  }
-
-  public Command runBazelInDirectory(Path relativeToWorksapceDir, Iterable<String> args) {
-    return runBazelInDirectory(relativeToWorksapceDir, Optional.empty(), args);
-  }
-
-  public Command runBazelInDirectory(Path relativeToWorksapceDir, Optional<Path> bazelrcFile, Iterable<String> args) {
-    if (currentBazel == null) {
-      throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
-              + "please call bazelVersion(version) before calling bazel(...).");
-    }
-
-    String bazelRcPath = bazelrcFile.map(p -> workspace.resolve(p).toString()).orElse("/dev/null");
-
-    List<String> command = new ArrayList<String>(Arrays.asList(
-            currentBazel.toString(),
-            "--output_user_root=" + tmp,
-            "--nomaster_bazelrc",
-            "--max_idle_secs=10",
-            "--bazelrc=" + bazelRcPath));
-    for (String arg : args) {
-      command.add(arg);
-    }
-    Path relativeToWorkspaceFullPath = workspace.resolve(relativeToWorksapceDir);
-
-    return prepareCommand(relativeToWorkspaceFullPath, Collections.unmodifiableList(command));
   }
 
   /**
@@ -269,5 +211,81 @@ public class WorkspaceDriver {
     private BazelWorkspaceDriverException(String message) {
       super(message);
     }
+  }
+
+  /**
+   * bazel command with the given arguments. features like bazelrc file and environment can be added to result object
+   */
+  public BazelCommand bazelCommand(String arg, String... args){
+    return bazelCommand(Stream.concat(Stream.of(arg),Stream.of(args)).collect(Collectors.toList()));
+  }
+
+  public BazelCommand bazelCommand(List<String> args) {
+      if (currentBazel == null) {
+          throw new BazelWorkspaceDriverException("Cannot use bazel because no version was specified, "
+                  + "please call bazelVersion(version) before creating command(...).");
+      }
+      return new BazelCommand(args);
+  }
+
+  public class BazelCommand {
+
+      private final List<String> args;
+      private Optional<Path> bazelrcFile = Optional.empty();
+      private Map<String, String> environment = new HashMap<>();
+      private Path workingDirectory = Paths.get("");
+
+      private BazelCommand(List<String> args) {
+          this.args = Collections.unmodifiableList(args);
+      }
+
+      /**
+       * sets the working directory relative to workspace path
+       */
+      public BazelCommand inWorkingDirectory(Path dirRelativeToWorkspaceRoot) {
+          this.workingDirectory = dirRelativeToWorkspaceRoot;
+          return this;
+      }
+
+      /**
+       * sets the bazelrc file path
+       */
+      public BazelCommand withBazelrcFile(Path bazelrcFile) {
+        this.bazelrcFile = Optional.of(bazelrcFile);
+        return this;
+    }
+
+    /**
+     * adds environment variable to execution runtime
+     */
+    public BazelCommand withEnvironmentVariable(String key, String value) {
+        this.environment.put(key, value);
+        return this;
+    }
+
+    /**
+     * Prepare bazel for running, and return the {@link Command} object to run it.
+     */
+    public Command build() {
+        String bazelRcPath = bazelrcFile.map(p -> workspace.resolve(p).toString()).orElse("/dev/null");
+
+        List<String> command = Stream.concat(
+                Stream.of(
+                        currentBazel.toString(),
+                        "--output_user_root=" + tmp,
+                        "--nomaster_bazelrc",
+                        "--max_idle_secs=10",
+                        "--bazelrc=" + bazelRcPath),
+                args.stream())
+                .collect(Collectors.toList());
+
+        Path relativeToWorkspaceFullPath = workspace.resolve(workingDirectory);
+
+        return Command.builder()
+                .setDirectory(relativeToWorkspaceFullPath)
+                .addArguments(command)
+                .withEnvironment(environment).build();
+    }
+
   }
 }
