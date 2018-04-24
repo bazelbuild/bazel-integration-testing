@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,6 +40,16 @@ public class WorkspaceDriverTest {
 
     Optional<Path> actualFilePath = findPath(driver.workspaceDirectoryContents(), knownFile);
     org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
+  }
+
+  // Test that we get the actual workspace with getCurrentWorkspace()
+  @Test
+  public void fileExistsUnderWorkspacePath() throws IOException {
+    driver.scratchFile("test_workspace_file");
+    org.hamcrest.MatcherAssert.assertThat(
+        "test_workspace_file should be in the workspace",
+        new File(driver.getCurrentWorkspace().toFile(), "test_workspace_file").exists(),
+        is(true));
   }
 
   @Test
