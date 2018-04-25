@@ -1,16 +1,5 @@
 package build.bazel.tests.integration;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-
 import static com.spotify.hamcrest.optional.OptionalMatchers.emptyOptional;
 import static com.spotify.hamcrest.optional.OptionalMatchers.optionalWithValue;
 import static org.hamcrest.core.Is.is;
@@ -18,6 +7,16 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringEndsWith.endsWith;
 import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class WorkspaceDriverTest {
   private WorkspaceDriver driver = new WorkspaceDriver();
@@ -33,13 +32,15 @@ public class WorkspaceDriverTest {
   }
 
   @Test
-  public void copyDirectoryFromRunfilesWithoutPrefixShouldCopyTheWholeDirectory() throws IOException {
+  public void copyDirectoryFromRunfilesWithoutPrefixShouldCopyTheWholeDirectory()
+      throws IOException {
     String knownFile = "bazel_tools/tools/jdk/TestRunner_deploy.jar";
 
     driver.copyDirectoryFromRunfiles("bazel_tools/tools", "");
 
     Optional<Path> actualFilePath = findPath(driver.workspaceDirectoryContents(), knownFile);
-    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
+    org.hamcrest.MatcherAssert.assertThat(
+        "the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
   }
 
   // Test that we get the actual workspace with currentWorkspace()
@@ -53,17 +54,22 @@ public class WorkspaceDriverTest {
   }
 
   @Test
-  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectoryAndStripPrefix() throws IOException {
+  public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectoryAndStripPrefix()
+      throws IOException {
     String sourceDirectoryThatWillBeStripped = "bazel_tools/tools";
     String theFileToCopy = "/jdk/TestRunner_deploy.jar";
     String knownFile = sourceDirectoryThatWillBeStripped + theFileToCopy;
 
-    driver.copyDirectoryFromRunfiles(sourceDirectoryThatWillBeStripped, sourceDirectoryThatWillBeStripped);
+    driver.copyDirectoryFromRunfiles(
+        sourceDirectoryThatWillBeStripped, sourceDirectoryThatWillBeStripped);
 
     Optional<Path> actualFilePath = findPath(driver.workspaceDirectoryContents(), theFileToCopy);
-    org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
-    org.hamcrest.MatcherAssert.assertThat("the root path from the runfiles should be stripped",
-            actualFilePath.map(Path::toString), is(not(optionalWithValue(endsWith(knownFile)))));
+    org.hamcrest.MatcherAssert.assertThat(
+        "the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
+    org.hamcrest.MatcherAssert.assertThat(
+        "the root path from the runfiles should be stripped",
+        actualFilePath.map(Path::toString),
+        is(not(optionalWithValue(endsWith(knownFile)))));
   }
 
   @Test(expected = WorkspaceDriver.BazelWorkspaceDriverException.class)
@@ -87,8 +93,10 @@ public class WorkspaceDriverTest {
 
     driver.scratchFile(path, content);
 
-    Optional<String> actualScratchFileContent = findPath(driver.workspaceDirectoryContents(), path).map(this::readFileContent);
-    org.hamcrest.MatcherAssert.assertThat(actualScratchFileContent, is(optionalWithValue(equalTo(content))));
+    Optional<String> actualScratchFileContent =
+        findPath(driver.workspaceDirectoryContents(), path).map(this::readFileContent);
+    org.hamcrest.MatcherAssert.assertThat(
+        actualScratchFileContent, is(optionalWithValue(equalTo(content))));
   }
 
   @Test
@@ -97,8 +105,10 @@ public class WorkspaceDriverTest {
 
     driver.scratchExecutableFile(path);
 
-    Optional<Boolean> isExecutable = findPath(driver.workspaceDirectoryContents(), path).map(this::isExecutable);
-    org.hamcrest.MatcherAssert.assertThat("The file should be executable", isExecutable, is(optionalWithValue(equalTo(true))));
+    Optional<Boolean> isExecutable =
+        findPath(driver.workspaceDirectoryContents(), path).map(this::isExecutable);
+    org.hamcrest.MatcherAssert.assertThat(
+        "The file should be executable", isExecutable, is(optionalWithValue(equalTo(true))));
   }
 
   @Test
@@ -116,7 +126,8 @@ public class WorkspaceDriverTest {
     driver.newWorkspace();
 
     Optional<Path> fullPath = findPath(driver.workspaceDirectoryContents(), path);
-    org.hamcrest.MatcherAssert.assertThat("Workspace should be cleaned",fullPath, is(emptyOptional()));
+    org.hamcrest.MatcherAssert.assertThat(
+        "Workspace should be cleaned", fullPath, is(emptyOptional()));
   }
 
   private Boolean isExecutable(Path path) {

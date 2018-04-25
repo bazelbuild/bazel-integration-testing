@@ -13,8 +13,25 @@
 # limitations under the License.
 
 # Integration test framework for using Bazel
-load("//tools:common.bzl", "BAZEL_VERSIONS")
-load("//tools:repositories.bzl", "bazel_binary", "bazel_binaries")
-load("//tools:bazel_java_integration_test.bzl", "bazel_java_integration_test", "bazel_java_integration_test_deps")
-load("//tools:bazel_py_integration_test.bzl", "bazel_py_integration_test")
-load("//go:bazel_integration_test.bzl", "bazel_go_integration_test")
+load(
+    "//tools:common.bzl",
+    "BAZEL_VERSIONS",
+)
+load(
+    "//tools:repositories.bzl",
+    "bazel_binary",
+    "bazel_binaries",
+)
+load(
+    "//tools:bazel_java_integration_test.bzl",
+    "bazel_java_integration_test",
+    "bazel_java_integration_test_deps",
+)
+load(
+    "//tools:bazel_py_integration_test.bzl",
+    "bazel_py_integration_test",
+)
+load(
+    "//go:bazel_integration_test.bzl",
+    "bazel_go_integration_test",
+)

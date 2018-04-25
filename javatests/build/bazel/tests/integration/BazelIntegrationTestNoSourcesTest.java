@@ -5,7 +5,5 @@ import org.junit.Test;
 public class BazelIntegrationTestNoSourcesTest {
 
   @Test
-  public void passing() throws Exception {
-  }
-
+  public void passing() throws Exception {}
 }

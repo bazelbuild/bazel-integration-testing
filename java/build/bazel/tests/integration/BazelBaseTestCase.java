@@ -14,14 +14,11 @@
 
 package build.bazel.tests.integration;
 
+import java.io.IOException;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
-import java.io.IOException;
-
-/**
- * A base class to do integration test that call Bazel
- */
+/** A base class to do integration test that call Bazel */
 public abstract class BazelBaseTestCase {
 
   protected WorkspaceDriver driver = new WorkspaceDriver();

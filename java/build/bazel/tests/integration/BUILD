@@ -2,22 +2,24 @@ load("//tools:common.bzl", "BAZEL_VERSIONS")
 
 java_library(
     name = "workspace_driver",
-    srcs = ["WorkspaceDriver.java",
-            "Command.java",],
     testonly = True,
-    visibility = ["//visibility:public"]
+    srcs = [
+        "Command.java",
+        "WorkspaceDriver.java",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 java_library(
     name = "integration",
+    testonly = True,
     srcs = [
         "BazelBaseTestCase.java",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":workspace_driver",
         "@com_google_guava//jar",
         "@org_junit//jar",
     ],
-    testonly = True,
-    visibility = ["//visibility:public"]
 )

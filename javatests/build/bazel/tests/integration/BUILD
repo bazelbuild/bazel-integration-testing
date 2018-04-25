@@ -6,9 +6,11 @@ bazel_java_integration_test(
     data = [
         "//:all_bzl",
     ],
-    deps = ["//java/build/bazel/tests/integration",
-            "@com_google_truth//jar",],
     jvm_flags = ["-Dfoo.bar=true"],
+    deps = [
+        "//java/build/bazel/tests/integration",
+        "@com_google_truth//jar",
+    ],
 )
 
 bazel_java_integration_test(

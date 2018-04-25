@@ -30,14 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
 /**
  * A utility class to spawn a command and get its output.
  *
- * <p>
- * This class can only be initialized using a builder created with the {@link #builder()} method.
+ * <p>This class can only be initialized using a builder created with the {@link #builder()} method.
  */
-final public class Command {
+public final class Command {
 
   private final Path directory;
   private final List<String> args;
@@ -79,26 +77,27 @@ final public class Command {
     return exitCode;
   }
 
-  private static Thread streamToLinesThread(final InputStream inputStream, final List<String> lines) {
-    Thread thread = new Thread(() -> {
-      new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)).lines().forEach(lines::add);
-    });
+  private static Thread streamToLinesThread(
+      final InputStream inputStream, final List<String> lines) {
+    Thread thread =
+        new Thread(
+            () -> {
+              new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+                  .lines()
+                  .forEach(lines::add);
+            });
     thread.start();
     return thread;
   }
 
-  /**
-   * Returns the list of lines of the standard error stream.
-   */
+  /** Returns the list of lines of the standard error stream. */
   public List<String> getErrorLines() {
     synchronized (stderr) {
       return copyToUnmodifiableList(stderr);
     }
   }
 
-  /**
-   * Returns the list of lines of the standard output stream.
-   */
+  /** Returns the list of lines of the standard output stream. */
   public List<String> getOutputLines() {
     synchronized (stdout) {
       return copyToUnmodifiableList(stdout);
@@ -109,14 +108,12 @@ final public class Command {
     return Collections.unmodifiableList(new LinkedList<>(source));
   }
 
-  /**
-   * A builder class to generate a Command object.
-   */
+  /** A builder class to generate a Command object. */
   static class Builder {
 
     private Path directory;
     private List<String> args = new ArrayList<>();
-    private Map<String,String> environment = new HashMap<>();
+    private Map<String, String> environment = new HashMap<>();
 
     private Builder() {
       // Default to the current working directory
@@ -152,29 +149,22 @@ final public class Command {
       return this;
     }
 
-    /**
-     * Sets environment variable in the runtime
-     */
+    /** Sets environment variable in the runtime */
     public Builder withEnvironment(Map<String, String> environment) {
-        this.environment = Collections.unmodifiableMap(environment);
-        return this;
+      this.environment = Collections.unmodifiableMap(environment);
+      return this;
     }
 
-    /**
-     * Build a Command object.
-     */
+    /** Build a Command object. */
     public Command build() {
       Objects.requireNonNull(directory);
       List<String> args = Collections.unmodifiableList(this.args);
-      Map<String,String> env = Collections.unmodifiableMap(environment);
+      Map<String, String> env = Collections.unmodifiableMap(environment);
       return new Command(directory, args, env);
     }
-
   }
 
-  /**
-   * Returns a {@link Builder} object to use to create a {@link Command} object.
-   */
+  /** Returns a {@link Builder} object to use to create a {@link Command} object. */
   static Builder builder() {
     return new Builder();
   }
