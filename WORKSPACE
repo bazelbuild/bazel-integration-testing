@@ -11,6 +11,12 @@ git_repository(
 load("@bazel_skylib//:lib.bzl", "versions")
 versions.check("0.6.0")
 
+## Linting
+
+load("//private:format.bzl", "format_repositories")
+
+format_repositories()
+
 #### Fetch remote resources
 
 ## Python
