@@ -45,7 +45,7 @@ public class WorkspaceDriver {
   /**
    * Returns the current workspace path
    */
-  public Path getCurrentWorkspace() {
+  public Path currentWorkspace() {
     return workspace;
   }
 

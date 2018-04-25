@@ -42,13 +42,13 @@ public class WorkspaceDriverTest {
     org.hamcrest.MatcherAssert.assertThat("the known file should be found in the workspace", actualFilePath, is(optionalWithValue()));
   }
 
-  // Test that we get the actual workspace with getCurrentWorkspace()
+  // Test that we get the actual workspace with currentWorkspace()
   @Test
   public void fileExistsUnderWorkspacePath() throws IOException {
     driver.scratchFile("test_workspace_file");
     org.hamcrest.MatcherAssert.assertThat(
         "test_workspace_file should be in the workspace",
-        new File(driver.getCurrentWorkspace().toFile(), "test_workspace_file").exists(),
+        new File(driver.currentWorkspace().toFile(), "test_workspace_file").exists(),
         is(true));
   }
 
