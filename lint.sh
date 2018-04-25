@@ -130,7 +130,7 @@ BAZEL_OUTPUT_BASE=$(bazel info output_base)
 function build() {
   # NOTE: if and when the Skylink target becomes public, use a sh_binary instead
   # of building everything here?
-  bazel build \
+  bazel build --color=yes --show_progress_rate_limit=30 \
     @io_bazel//src/tools/skylark/java/com/google/devtools/skylark/skylint:Skylint \
     //private:java_format \
     @com_github_google_yapf//:yapf \
