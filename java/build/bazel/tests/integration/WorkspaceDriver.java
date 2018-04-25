@@ -42,6 +42,13 @@ public class WorkspaceDriver {
    */
   private Path workspace = null;
 
+  /**
+   * Returns the current workspace path
+   */
+  public Path currentWorkspace() {
+    return workspace;
+  }
+
   public static void setUpClass() throws IOException {
     String environmentTempDirectory = System.getenv("TEST_TMPDIR");
     if (environmentTempDirectory == null) {
