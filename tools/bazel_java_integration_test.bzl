@@ -22,6 +22,27 @@ load(
     "bazel_binaries",
 )
 
+def _bazel_java_integration_test_properties_impl(ctx):
+  properties = [
+      "bazel.version=" + ctx.attr.bazel_version,
+      "bazel.workspace=" + ctx.workspace_name,
+      "bazel.external.deps=" +
+      ",".join([d.short_path for d in ctx.files.external_deps]),
+  ]
+
+  ctx.actions.write(ctx.outputs.properties, "\n".join(properties))
+
+bazel_java_integration_test_properties_ = rule(
+    attrs = {
+        "bazel_version": attr.string(mandatory = True),
+        "external_deps": attr.label_list(allow_files = True),
+    },
+    implementation = _bazel_java_integration_test_properties_impl,
+    outputs = {
+        "properties": "%{name}.properties",
+    },
+)
+
 def _index(lst, el):
   return lst.index(el) if el in lst else -1
 
@@ -76,11 +97,13 @@ def bazel_java_integration_test(
     data = [],
     jvm_flags = [],
     test_class = None,
+    external_deps = [],
     # flag to allow bazel_integration_testing own tests to work
     add_bazel_data_dependency = True,
     versions = BAZEL_VERSIONS,
     **kwargs):
-  """A wrapper around java_test that create several java tests, one per version of Bazel.
+  """A wrapper around java_test that create several java tests, one per version
+     of Bazel.
 
      Args:
        versions: list of version of bazel to create a test for. Each test
@@ -97,15 +120,23 @@ def bazel_java_integration_test(
   else:
     runtime_deps = runtime_deps + add_deps
   for version in versions:
+    prop_rule = "%s/config%s" % (name, version)
+    bazel_java_integration_test_properties_(
+        name = prop_rule,
+        bazel_version = version,
+        external_deps = external_deps,
+    )
+
+    cur_data = data + external_deps + [prop_rule + ".properties"]
     if add_bazel_data_dependency:
-      data = data + [
-          "@build_bazel_bazel_%s//:bazel" % version.replace(".", "_")
-      ]
+      cur_data += ["@build_bazel_bazel_%s//:bazel" % version.replace(".", "_")]
     native.java_test(
         name = "%s/bazel%s" % (name, version),
-        jvm_flags = ["-Dbazel.version=" + version] + jvm_flags,
+        jvm_flags = [
+            "-Dbazel.configuration=$(location %s.properties)" % prop_rule
+        ] + jvm_flags,
         srcs = srcs,
-        data = data,
+        data = cur_data,
         test_class = test_class,
         deps = deps,
         runtime_deps = runtime_deps,

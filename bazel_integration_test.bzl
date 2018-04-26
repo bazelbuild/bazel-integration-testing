@@ -32,6 +32,10 @@ load(
     "bazel_py_integration_test",
 )
 load(
+    "//tools:import.bzl",
+    "bazel_external_dependency_archive",
+)
+load(
     "//go:bazel_integration_test.bzl",
     "bazel_go_integration_test",
 )

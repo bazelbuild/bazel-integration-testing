@@ -53,6 +53,64 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     assertEquals("bazel test environment variable return code", 0, returnCode);
   }
 
+  /**
+   * Test that {@code junit} can be specified as a {@code java_import_external} without any download
+   * taking place. Indeed, because the cache is frozen (see {@link RepositoryCache#freeze()}), it is
+   * not possible to add any other dependency.
+   */
+  @Test
+  public void testExternalDep() throws Exception {
+    String testName = "TestMe";
+
+    driver.scratchFile(
+        "WORKSPACE",
+        "load(\"@bazel_tools//tools/build_defs/repo:java.bzl\", \"java_import_external\")",
+        "java_import_external(",
+        "    name = \"org_junit\",",
+        "    licenses = [\"restricted\"],  # Eclipse Public License 1.0",
+        "    jar_urls = [",
+        "        \"http://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar\",",
+        "    ],",
+        "    jar_sha256 = \"90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe\",",
+        ")");
+
+    driver.scratchFile("BUILD.bazel", testLabelNamed(testName));
+    driver.scratchFile("TestMe.java", passingTestNamed(testName));
+
+    Command cmd = driver.bazelCommand("test", "//:TestMe").build();
+
+    int returnCode = cmd.run();
+    assertEquals(0, returnCode);
+  }
+
+  /** Try (unsuccessfully) to download a dependency that was not specified as an external dep. */
+  @Test
+  public void testRepositoryCacheIsFrozen() throws Exception {
+    String testName = "TestMe";
+
+    // This version of junit should not have been added as external dep.
+    driver.scratchFile(
+        "WORKSPACE",
+        "load(\"@bazel_tools//tools/build_defs/repo:java.bzl\", \"java_import_external\")",
+        "java_import_external(",
+        "    name = \"org_junit\",",
+        "    licenses = [\"restricted\"],  # Eclipse Public License 1.0",
+        "    jar_urls = [",
+        "        \"http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar\",",
+        "    ],",
+        "    jar_sha256 = \"ecdcc08183708ea3f7b0ddc96f19678a0db8af1fb397791d484aed63200558b0\",",
+        ")");
+
+    driver.scratchFile("BUILD.bazel", testLabelNamed(testName));
+    driver.scratchFile("TestMe.java", passingTestNamed(testName));
+
+    Command cmd = driver.bazelCommand("test", "//:TestMe", "--nocache_test_results").build();
+
+    int returnCode = cmd.run();
+    assertEquals(1, returnCode);
+    assertTrue(String.join("\n", cmd.getErrorLines()).contains("(Permission denied)"));
+  }
+
   private List<String> shellTestingEnvironmentVariable(String key, String val) {
     return Arrays.asList("#!/bin/bash", "test \"$" + key + "\" = \"" + val + "\"", "");
   }
