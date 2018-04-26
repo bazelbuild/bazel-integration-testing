@@ -14,10 +14,9 @@
 
 package build.bazel.tests.integration;
 
-import org.hamcrest.Description;
-import org.hamcrest.SelfDescribing;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.junit.Test;
+import static com.google.common.truth.Truth.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,10 +27,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.google.common.truth.Truth.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
+import org.hamcrest.Description;
+import org.hamcrest.SelfDescribing;
+import org.hamcrest.TypeSafeDiagnosingMatcher;
+import org.junit.Test;
 
 /** {@link BazelBaseTestCase}Test */
 // suppress since same parameter value is ok for tests readability, tests should encapsulate and not
@@ -54,7 +53,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
     driver.scratchExecutableFile("foo/bar.sh", "echo \"in bar\"");
 
-    Command cmd = driver.bazelCommand( "run", "bar").inWorkingDirectory(Paths.get("foo")).build();
+    Command cmd = driver.bazelCommand("run", "bar").inWorkingDirectory(Paths.get("foo")).build();
 
     assertEquals(0, cmd.run());
     assertThat(cmd.getOutputLines()).contains("in bar");
@@ -76,8 +75,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     org.hamcrest.MatcherAssert.assertThat(System.getProperty("foo.bar"), is("true"));
   }
 
-  private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(
-      final Command cmd) {
+  private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(final Command cmd) {
     return new TypeSafeDiagnosingMatcher<Integer>() {
       @Override
       protected boolean matchesSafely(
@@ -167,7 +165,8 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private void setupRuleCode() throws IOException {
-    driver.copyFromRunfiles("build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
+    driver.copyFromRunfiles(
+        "build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
         "java/build/bazel/tests/integration/libworkspace_driver.jar");
     driver.scratchFile(
         "java/build/bazel/tests/integration/BUILD.bazel",
@@ -181,7 +180,8 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   private void setupRuleSkylarkFiles() throws IOException {
     driver.copyFromRunfiles(
         "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-    driver.copyDirectoryFromRunfiles("build_bazel_integration_testing/tools", "build_bazel_integration_testing");
+    driver.copyDirectoryFromRunfiles(
+        "build_bazel_integration_testing/tools", "build_bazel_integration_testing");
     driver.scratchFile(
         "go/bazel_integration_test.bzl",
         "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"

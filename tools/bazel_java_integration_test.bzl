@@ -13,20 +13,25 @@
 # limitations under the License.
 
 # Java integration test framework for using Bazel
-load(":common.bzl", "BAZEL_VERSIONS")
-load(":repositories.bzl", "bazel_binaries")
+load(
+    ":common.bzl",
+    "BAZEL_VERSIONS",
+)
+load(
+    ":repositories.bzl",
+    "bazel_binaries",
+)
 
 def _index(lst, el):
   return lst.index(el) if el in lst else -1
-
 
 def _java_package():
   # Adaptation of the java class finding library from Bazel.
   path = native.package_name()
   segments = path.split("/")
-  roots = [segments.index(i)
-           for i in ["java", "javatests", "src"]
-           if i in segments]
+  roots = [
+      segments.index(i) for i in ["java", "javatests", "src"] if i in segments
+  ]
   if not len(roots):
     return ".".join(segments)
   idx = min(roots)
@@ -37,36 +42,45 @@ def _java_package():
     end_segments = segments[idx + 1:-1]
     src_segment = end_segments.index("src") if "src" in end_segments else -1
     if is_src:
-      end_segments_idx = [end_segments.index(i)
-                          for i in ["java", "javatests", "src"]
-                          if i in end_segments]
+      end_segments_idx = [
+          end_segments.index(i)
+          for i in ["java", "javatests", "src"]
+          if i in end_segments
+      ]
       if end_segments_idx:
         src_segment = min(end_segments_idx)
     if src_segment >= 0:
-        next = end_segments[src_segment+1]
-        if next in ["com", "org", "net"]:
-          # Check for common first element of java package, to avoid false
-          # positives.
-          idx += src_segment + 1
-        elif next in ["main", "test"]:
-          # Also accept maven style src/(main|test)/(java|resources).
-          check_mvn_idx = idx + src_segment + 1
+      next = end_segments[src_segment + 1]
+      if next in ["com", "org", "net"]:
+        # Check for common first element of java package, to avoid false
+        # positives.
+        idx += src_segment + 1
+      elif next in ["main", "test"]:
+        # Also accept maven style src/(main|test)/(java|resources).
+        check_mvn_idx = idx + src_segment + 1
   # Check for (main|test)/(java|resources) after /src/.
   if check_mvn_idx >= 0 and check_mvn_idx < len(segments) - 2:
-    if segments[check_mvn_idx + 1] in ["main", "test"] and segments[check_mvn_idx + 2] in ["java", "resources"]:
+    if segments[check_mvn_idx + 1] in [
+        "main", "test"
+    ] and segments[check_mvn_idx + 2] in ["java", "resources"]:
       idx = check_mvn_idx + 2
   if idx < 0:
     return ".".join(segments)
-  return ".".join(segments[idx+1:])
+  return ".".join(segments[idx + 1:])
 
-
-def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[], data=[],
-                                jvm_flags=[], test_class=None,
-                                # flag to allow bazel_integration_testing own tests to work
-                                add_bazel_data_dependency = True,
-                                versions=BAZEL_VERSIONS, **kwargs):
-  """A wrapper around java_test that create several java tests, one per version
-     of Bazel.
+def bazel_java_integration_test(
+    name,
+    srcs = [],
+    deps = None,
+    runtime_deps = [],
+    data = [],
+    jvm_flags = [],
+    test_class = None,
+    # flag to allow bazel_integration_testing own tests to work
+    add_bazel_data_dependency = True,
+    versions = BAZEL_VERSIONS,
+    **kwargs):
+  """A wrapper around java_test that create several java tests, one per version of Bazel.
 
      Args:
        versions: list of version of bazel to create a test for. Each test
@@ -76,7 +90,7 @@ def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[], data=
   if not test_class:
     test_class = "%s.%s" % (_java_package(), name)
   add_deps = [
-    str(Label("//java/build/bazel/tests/integration:workspace_driver")),
+      str(Label("//java/build/bazel/tests/integration:workspace_driver")),
   ]
   if srcs:
     deps = (deps or []) + add_deps
@@ -84,7 +98,9 @@ def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[], data=
     runtime_deps = runtime_deps + add_deps
   for version in versions:
     if add_bazel_data_dependency:
-      data = data + ["@build_bazel_bazel_%s//:bazel" % version.replace(".", "_")]
+      data = data + [
+          "@build_bazel_bazel_%s//:bazel" % version.replace(".", "_")
+      ]
     native.java_test(
         name = "%s/bazel%s" % (name, version),
         jvm_flags = ["-Dbazel.version=" + version] + jvm_flags,
@@ -95,8 +111,8 @@ def bazel_java_integration_test(name, srcs=[], deps=None, runtime_deps=[], data=
         runtime_deps = runtime_deps,
         **kwargs)
   native.test_suite(
-        name = name,
-        tests = [":%s/bazel%s" % (name, version) for version in versions])
+      name = name,
+      tests = [":%s/bazel%s" % (name, version) for version in versions])
 
 def bazel_java_integration_test_deps(versions = BAZEL_VERSIONS):
   bazel_binaries(versions)

@@ -27,7 +27,12 @@ def _make_compatible_version_list():
 
 RULES_GO_COMPATIBLE_BAZEL_VERSION = _make_compatible_version_list()
 
-def bazel_go_integration_test(name, srcs, deps=[], data=[], versions=RULES_GO_COMPATIBLE_BAZEL_VERSION, **kwargs):
+def bazel_go_integration_test(name,
+                              srcs,
+                              deps = [],
+                              data = [],
+                              versions = RULES_GO_COMPATIBLE_BAZEL_VERSION,
+                              **kwargs):
   """A wrapper around go_test that create several go tests, one per version
      of Bazel.
 

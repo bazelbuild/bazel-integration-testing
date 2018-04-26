@@ -16,7 +16,12 @@
 load(":common.bzl", "BAZEL_VERSIONS")
 load(":repositories.bzl", "bazel_binaries")
 
-def bazel_py_integration_test(name, srcs, main=None, deps=[], versions=BAZEL_VERSIONS, **kwargs):
+def bazel_py_integration_test(name,
+                              srcs,
+                              main = None,
+                              deps = [],
+                              versions = BAZEL_VERSIONS,
+                              **kwargs):
   """A wrapper around py_test that create several python tests, one per version
      of Bazel.
 
@@ -29,8 +34,8 @@ def bazel_py_integration_test(name, srcs, main=None, deps=[], versions=BAZEL_VER
     main = srcs[0]
   for version in versions:
     add_deps = [
-      str(Label("//bazel_integration_test:python")),
-      str(Label("//bazel_integration_test:python_version_" + version)),
+        str(Label("//bazel_integration_test:python")),
+        str(Label("//bazel_integration_test:python_version_" + version)),
     ]
     native.py_test(
         name = "%s/bazel%s" % (name, version),
@@ -39,5 +44,5 @@ def bazel_py_integration_test(name, srcs, main=None, deps=[], versions=BAZEL_VER
         deps = deps + add_deps,
         **kwargs)
   native.test_suite(
-        name = name,
-        tests = [":%s/bazel%s" % (name, version) for version in versions])
+      name = name,
+      tests = [":%s/bazel%s" % (name, version) for version in versions])

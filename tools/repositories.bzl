@@ -21,30 +21,27 @@ def _get_platform_name(rctx):
   # We default on linux-x86_64 because we only support 2 platforms
   return "darwin-x86_64" if os_name.startswith("mac os") else "linux-x86_64"
 
-
 def _get_installer(rctx):
   platform = _get_platform_name(rctx)
   version = rctx.attr.version
-  url = _BAZEL_BINARY_PACKAGE.format(version=version, platform=platform)
+  url = _BAZEL_BINARY_PACKAGE.format(version = version, platform = platform)
   args = {"url": url, "type": "zip", "output": "bin"}
   if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
     args["sha256"] = BAZEL_HASH_DICT[version][platform]
   rctx.download_and_extract(**args)
 
-
 def _extract_bazel(rctx):
   result = rctx.execute([
-    rctx.path("bin/bazel-real"),
-    "--install_base",
-    rctx.path("install_base"),
-    "version"])
+      rctx.path("bin/bazel-real"), "--install_base",
+      rctx.path("install_base"), "version"
+  ])
   if result.return_code != 0:
-    fail("`bazel version` returned non zero return code (%s): %s%s" % (
-      result.return_code, result.stderr, result.stdout))
+    fail("`bazel version` returned non zero return code (%s): %s%s" %
+         (result.return_code, result.stderr, result.stdout))
   ver = result.stdout.strip().split("\n")[0].split(":")[1].strip()
   if ver != rctx.attr.version:
-    fail("`bazel version` returned version %s (expected %s)" % (
-      ver, rctx.attr.version))
+    fail("`bazel version` returned version %s (expected %s)" %
+         (ver, rctx.attr.version))
 
 def _bazel_repository_impl(rctx):
   _get_installer(rctx)
@@ -67,8 +64,11 @@ sh_binary(
   visibility = ["//visibility:public"])""")
 
 bazel_binary = repository_rule(
-  implementation=_bazel_repository_impl,
-  attrs = {"version": attr.string(default = "0.5.3")})
+    attrs = {
+        "version": attr.string(default = "0.5.3"),
+    },
+    implementation = _bazel_repository_impl,
+)
 """Download a bazel binary for integration test.
 
 Args:
@@ -77,10 +77,9 @@ Args:
 Limitation: only support Linux and macOS for now.
 """
 
-
-def bazel_binaries(versions=BAZEL_VERSIONS):
+def bazel_binaries(versions = BAZEL_VERSIONS):
   """Download all bazel binaries specified in BAZEL_VERSIONS."""
   for version in versions:
     name = "build_bazel_bazel_" + version.replace(".", "_")
     if not native.existing_rule(name):
-      bazel_binary(name=name, version=version)
+      bazel_binary(name = name, version = version)

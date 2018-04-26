@@ -21,3 +21,14 @@ possibly guide you.
 Contributions made by corporations are covered by a different agreement than
 the one above, the
 [Software Grant and Corporate Contributor License Agreement](https://cla.developers.google.com/about/google-corporate).
+
+### Code reviews
+
+All submissions, including submissions by project members, require review. We
+use GitHub pull requests for this purpose. Consult [GitHub Help] for more
+information on using pull requests.
+
+[GitHub Help]: https://help.github.com/articles/about-pull-requests/
+
+We review all the submissions through our Continuous Integration systems, and
+we enforce a coding style (see [./lint.sh](./lint.sh) for the details).

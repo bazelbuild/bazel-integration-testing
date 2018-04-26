@@ -4,12 +4,19 @@ workspace(name = "build_bazel_integration_testing")
 
 git_repository(
     name = "bazel_skylib",
-    remote = "https://github.com/bazelbuild/bazel-skylib",
     commit = "ff23a62c57d2912c3073a69c12f42c3d6e58a957",
+    remote = "https://github.com/bazelbuild/bazel-skylib",
 )
 
 load("@bazel_skylib//:lib.bzl", "versions")
+
 versions.check("0.6.0")
+
+## Linting
+
+load("//private:format.bzl", "format_repositories")
+
+format_repositories()
 
 #### Fetch remote resources
 
