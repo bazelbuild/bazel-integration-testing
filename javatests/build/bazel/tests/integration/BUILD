@@ -38,6 +38,7 @@ bazel_java_integration_test(
     srcs = ["WorkspaceDriverIntegrationTest.java"],
     external_deps = [
         "@test_archive",
+        "@test_archive2",
     ],
     # Ensure that there could be no network fetch in sandboxing.  This tag is a Bazel
     # built-in, it is important to keep it.

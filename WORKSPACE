@@ -83,6 +83,16 @@ bazel_external_dependency_archive(
     },
 )
 
+bazel_external_dependency_archive(
+    name = "test_archive2",
+    srcs = {
+        "91c77044a50c481636c32d916fd89c9118a72195390452c81065080f957de7ff": [
+            "http://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
+            "http://maven.ibiblio.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
+        ],
+    },
+)
+
 ## golang
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains", "go_repository")

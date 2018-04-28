@@ -54,48 +54,25 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
   }
 
   /**
-   * Test that {@code junit} can be specified as a {@code java_import_external} without any download
-   * taking place. Indeed, because the cache is frozen (see {@link RepositoryCache#freeze()}), it is
-   * not possible to add any other dependency.
+   * Test that external dependencies specified with {@code bazel_external_dependency_archive} can be
+   * used with {@code java_import_external} without any download taking place. Indeed, because the
+   * cache is frozen (see {@link RepositoryCache#freeze()}), it is not possible to add any other
+   * dependency.
    */
   @Test
   public void testExternalDep() throws Exception {
-    String testName = "TestMe";
-
+    // The three following dependencies are arbitrary and there to show that multiple external
+    // dependencies can be used without downloading, either pertaining to the same
+    // `bazel_external_dependency_archive` or to two different `bazel_external_dependency_archive`.
     driver.scratchFile(
         "WORKSPACE",
         "load(\"@bazel_tools//tools/build_defs/repo:java.bzl\", \"java_import_external\")",
         "java_import_external(",
         "    name = \"org_junit\",",
         "    licenses = [\"restricted\"],  # Eclipse Public License 1.0",
+        "    jar_sha256 = \"90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe\",",
         "    jar_urls = [",
         "        \"http://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar\",",
-        "    ],",
-        "    jar_sha256 = \"90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe\",",
-        ")");
-
-    driver.scratchFile("BUILD.bazel", testLabelNamed(testName));
-    driver.scratchFile("TestMe.java", passingTestNamed(testName));
-
-    Command cmd = driver.bazelCommand("test", "//:TestMe").build();
-
-    int returnCode = cmd.run();
-    assertEquals(0, returnCode);
-  }
-
-  /** Try (unsuccessfully) to download a dependency that was not specified as an external dep. */
-  @Test
-  public void testRepositoryCacheIsFrozen() throws Exception {
-    // This version of junit should not have been added as external dep.
-    driver.scratchFile(
-        "WORKSPACE",
-        "load(\"@bazel_tools//tools/build_defs/repo:java.bzl\", \"java_import_external\")",
-        "java_import_external(",
-        "    name = \"org_junit\",",
-        "    licenses = [\"restricted\"],  # Eclipse Public License 1.0",
-        "    jar_sha256 = \"ecdcc08183708ea3f7b0ddc96f19678a0db8af1fb397791d484aed63200558b0\",",
-        "    jar_urls = [",
-        "        \"http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar\",",
         "        \"http://maven.ibiblio.org/maven2/junit/junit/4.11/junit-4.11.jar\",",
         "    ],",
         ")",
@@ -107,6 +84,15 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "        \"http://repo1.maven.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar\",",
         "        \"http://maven.ibiblio.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar\",",
         "    ],",
+        ")",
+        "java_import_external(",
+        "    name = \"javax_inject\",",
+        "    licenses = [\"notice\"],  # The Apache Software License, Version 2.0",
+        "    jar_sha256 = \"91c77044a50c481636c32d916fd89c9118a72195390452c81065080f957de7ff\",",
+        "    jar_urls = [",
+        "        \"http://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar\",",
+        "        \"http://maven.ibiblio.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar\",",
+        "    ],",
         ")");
 
     driver.scratchFile(
@@ -115,12 +101,15 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "    name = \"TestMe\",",
         "    srcs = [\"TestMe.java\"],",
         "    test_class = \"build.bazel.tests.integration.TestMe\",",
-        "    deps = [\"@org_junit//jar\", \"@com_beust_jcommander//jar\"],",
+        "    deps = [\"@org_junit//jar\", \"@com_beust_jcommander//jar\", \"@javax_inject//jar\"],",
         ")");
+    // We import some classes to show that the files cached with
+    // `bazel_external_dependency_archive` are jars that contain expected classes.
     driver.scratchFile(
         "TestMe.java",
         "package build.bazel.tests.integration;",
         "import com.beust.jcommander.JCommander;",
+        "import javax.inject.Singleton;",
         "import org.junit.Test;",
         "public class TestMe {",
         "  @Test",
@@ -129,6 +118,30 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "}");
 
     Command cmd = driver.bazelCommand("test", "//:TestMe").build();
+
+    int returnCode = cmd.run();
+    assertEquals(0, returnCode);
+  }
+
+  /** Try (unsuccessfully) to download a dependency that was not specified as an external dep. */
+  @Test
+  public void testRepositoryCacheIsFrozen() throws Exception {
+    // net_sf_jopt_simple has a sha256 checksum that has not been imported through
+    // bazel_external_dependency_archive and so is unavailable.
+    driver.scratchFile(
+        "WORKSPACE",
+        "load(\"@bazel_tools//tools/build_defs/repo:java.bzl\", \"java_import_external\")",
+        "java_import_external(",
+        "    name = \"net_sf_jopt_simple\",",
+        "    licenses = [\"notice\"],  # The MIT License",
+        "    jar_sha256 = \"457877c79e038f390557db5f8e92c4436fb4f4b3ba63f28bc228500fee080193\",",
+        "    jar_urls = [",
+        "        \"http://maven.ibiblio.org/maven2/net/sf/jopt-simple/jopt-simple/5.0.2/jopt-simple-5.0.2.jar\",",
+        "        \"http://repo1.maven.org/maven2/net/sf/jopt-simple/jopt-simple/5.0.2/jopt-simple-5.0.2.jar\",",
+        "    ],",
+        ")");
+
+    Command cmd = driver.bazelCommand("build", "@net_sf_jopt_simple//jar").build();
 
     int returnCode = cmd.run();
     assertEquals(1, returnCode);
