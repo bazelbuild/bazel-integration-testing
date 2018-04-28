@@ -54,22 +54,13 @@ public class WorkspaceDriver {
   }
 
   public static void setUpClass() throws IOException {
-    String configFile = System.getProperty("bazel.configuration");
-    properties = new Properties();
-    try (InputStream is = new FileInputStream(configFile)) {
-      properties.load(is);
-    }
-
-    String environmentTempDirectory = System.getenv("TEST_TMPDIR");
-    if (environmentTempDirectory == null) {
-      tmp = Files.createTempDirectory("e4b-tests");
-      tmp.toFile().deleteOnExit();
-    } else {
-      tmp = Paths.get(environmentTempDirectory);
-    }
+    loadProperties();
+    setupTmp();
     bazelVersions = new HashMap<>();
+    setupRepositoryCache();
+  }
 
-    // Create the repository cache with the external dependency archives/files
+  private static void setupRepositoryCache() throws IOException {
     String externalDeps = properties.getProperty("bazel.external.deps");
     repositoryCache = new RepositoryCache(tmp.resolve("cache"));
     if (externalDeps != null && !externalDeps.isEmpty()) {
@@ -78,6 +69,24 @@ public class WorkspaceDriver {
       }
     }
     repositoryCache.freeze();
+  }
+
+  private static void setupTmp() throws IOException {
+    String environmentTempDirectory = System.getenv("TEST_TMPDIR");
+    if (environmentTempDirectory == null) {
+      tmp = Files.createTempDirectory("e4b-tests");
+      tmp.toFile().deleteOnExit();
+    } else {
+      tmp = Paths.get(environmentTempDirectory);
+    }
+  }
+
+  private static void loadProperties() throws IOException {
+    String configFile = System.getProperty("bazel.configuration");
+    properties = new Properties();
+    try (InputStream is = new FileInputStream(configFile)) {
+      properties.load(is);
+    }
   }
 
   /** Return a file in the runfiles whose path segments are given by the arguments. */
