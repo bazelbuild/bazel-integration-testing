@@ -39,7 +39,7 @@ public class WorkspaceDriver {
   private static Path runfileDirectory = Paths.get(System.getenv("TEST_SRCDIR"));
   // TODO: Don't have them as writable package-private when we have a better way
   // to share configuration across the WorkspaceDriver instances.
-  static Properties properties;
+  @Deprecated static Properties properties;
 
   private Path currentBazel = null;
 

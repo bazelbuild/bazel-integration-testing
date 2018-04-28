@@ -74,6 +74,11 @@ bazel_external_dependency_archive(
     srcs = {
         "90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe": [
             "http://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar",
+            "http://maven.ibiblio.org/maven2/junit/junit/4.11/junit-4.11.jar",
+        ],
+        "e0de160b129b2414087e01fe845609cd55caec6820cfd4d0c90fabcc7bdb8c1e": [
+            "http://repo1.maven.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar",
+            "http://maven.ibiblio.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar",
         ],
     },
 )
