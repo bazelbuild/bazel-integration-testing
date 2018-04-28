@@ -98,12 +98,16 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "    ],",
         ")");
 
-    testLabelNamed("TestMe", "\"@com_beust_jcommander//jar\"", "\"@javax_inject//jar\"");
+    driver.scratchFile(
+        "BUILD.bazel",
+        testLabelNamed("TestMe", "@com_beust_jcommander//jar", "@javax_inject//jar"));
 
     // We import some classes to show that the files cached with
     // `bazel_external_dependency_archive` are jars that contain expected classes.
-    passingTestNamed(
-        "TestMe.java", "import com.beust.jcommander.JCommander;", "import javax.inject.Singleton;");
+    driver.scratchFile(
+        "TestMe.java",
+        passingTestNamed(
+            "TestMe", "import com.beust.jcommander.JCommander;", "import javax.inject.Singleton;"));
 
     Command cmd = driver.bazelCommand("test", "//:TestMe").build();
 
@@ -176,7 +180,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "  name = '" + name + "',",
         "  srcs = ['" + name + ".java'],",
         "  test_class = 'build.bazel.tests.integration." + name + "',",
-        "  deps = ['@org_junit//jar'," + quoteAndAddDeps(additionalDeps) + "],",
+        "  deps = ['@org_junit//jar'" + quoteAndAddDeps(additionalDeps) + "],",
         ")");
   }
 
