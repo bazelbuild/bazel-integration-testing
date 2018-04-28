@@ -53,6 +53,9 @@ public class RepositoryCache {
    * dependencies.)
    */
   public void freeze() throws IOException {
+    if (cachePath.getFileSystem().isReadOnly()) {
+      return; // on a readonly filesystem we can't freeze
+    }
     Files.walkFileTree(
         Files.createDirectories(cachePath),
         new SimpleFileVisitor<Path>() {
