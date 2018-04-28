@@ -98,15 +98,12 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "    ],",
         ")");
 
-    testLabelNamed("TestMe",
-        "\"@com_beust_jcommander//jar\"",
-        "\"@javax_inject//jar\"");
+    testLabelNamed("TestMe", "\"@com_beust_jcommander//jar\"", "\"@javax_inject//jar\"");
 
     // We import some classes to show that the files cached with
     // `bazel_external_dependency_archive` are jars that contain expected classes.
-    passingTestNamed("TestMe.java",
-        "import com.beust.jcommander.JCommander;",
-        "import javax.inject.Singleton;");
+    passingTestNamed(
+        "TestMe.java", "import com.beust.jcommander.JCommander;", "import javax.inject.Singleton;");
 
     Command cmd = driver.bazelCommand("test", "//:TestMe").build();
 
@@ -135,7 +132,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     Command cmd = driver.bazelCommand("build", "@net_sf_jopt_simple//jar").build();
 
     int returnCode = cmd.run();
-    String err = String.join(",",cmd.getErrorLines());
+    String err = String.join(",", cmd.getErrorLines());
     assertEquals(1, returnCode);
     assertTrue(
         err.contains("(Permission denied)") // The repository cache was frozen (Mac OSX)
@@ -173,7 +170,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
             + ")\n");
   }
 
-  private static List<String> testLabelNamed(String name, String ...additionalDeps) {
+  private static List<String> testLabelNamed(String name, String... additionalDeps) {
     return Arrays.asList(
         "java_test(",
         "  name = '" + name + "',",
@@ -185,8 +182,8 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
   private static String quoteAndAddDeps(String[] additionalDeps) {
     return Arrays.stream(additionalDeps)
-          .map(dep -> "'" + dep + "'")
-          .reduce("", (acc, cur) -> acc + "," + cur);
+        .map(dep -> "'" + dep + "'")
+        .reduce("", (acc, cur) -> acc + "," + cur);
   }
 
   private static List<String> shTest(String name) {
@@ -194,15 +191,17 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "sh_test(", "  name = '" + name + "',", "  srcs = ['" + name + ".sh'],", ")");
   }
 
-  private static List<String> passingTestNamed(String name, String ...additionalImports) {
+  private static List<String> passingTestNamed(String name, String... additionalImports) {
     List<String> prefix = Collections.singletonList("package build.bazel.tests.integration;");
     List<String> additionalDepsList = Arrays.asList(additionalImports);
-    List<String> suffix = Arrays.asList("import org.junit.Test;",
-        "public class " + name + " {",
-        "  @Test",
-        "  public void testSuccess() {",
-        "  }",
-        "}");
+    List<String> suffix =
+        Arrays.asList(
+            "import org.junit.Test;",
+            "public class " + name + " {",
+            "  @Test",
+            "  public void testSuccess() {",
+            "  }",
+            "}");
     return Stream.of(prefix, additionalDepsList, suffix)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
