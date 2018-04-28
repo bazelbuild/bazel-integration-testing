@@ -60,7 +60,7 @@ public class RepositoryCache {
           public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
               throws IOException {
             if (file.getFileSystem().isReadOnly()) {
-              return FileVisitResult.CONTINUE;; // on a readonly filesystem we can't freeze
+              return FileVisitResult.CONTINUE; // on a readonly filesystem we can't freeze
             }
             Set<PosixFilePermission> perms = new HashSet<>();
             perms.add(PosixFilePermission.OWNER_READ);
@@ -71,7 +71,7 @@ public class RepositoryCache {
           @Override
           public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
             if (dir.getFileSystem().isReadOnly()) {
-              return FileVisitResult.CONTINUE;; // on a readonly filesystem we can't freeze
+              return FileVisitResult.CONTINUE; // on a readonly filesystem we can't freeze
             }
             Set<PosixFilePermission> perms = new HashSet<>();
             perms.add(PosixFilePermission.OWNER_READ);
