@@ -145,7 +145,6 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
     int returnCode = cmd.run();
     assertEquals(1, returnCode);
-    String err = String.join("\n", cmd.getErrorLines());
     assertTrue(
         err.contains("(Permission denied)") // The repository cache was frozen (Mac OSX)
             || err.contains("Unknown host")); // The block-network tag works (Linux)
