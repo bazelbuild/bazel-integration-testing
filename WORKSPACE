@@ -67,6 +67,17 @@ load("//:bazel_integration_test.bzl", "bazel_java_integration_test_deps")
 
 bazel_java_integration_test_deps()
 
+load("//tools:import.bzl", "bazel_external_dependency_archive")
+
+bazel_external_dependency_archive(
+    name = "test_archive",
+    srcs = {
+        "90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe": [
+            "http://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar",
+        ],
+    },
+)
+
 ## golang
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains", "go_repository")

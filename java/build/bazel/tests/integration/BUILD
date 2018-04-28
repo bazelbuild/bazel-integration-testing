@@ -5,6 +5,7 @@ java_library(
     testonly = True,
     srcs = [
         "Command.java",
+        "RepositoryCache.java",
         "WorkspaceDriver.java",
     ],
     visibility = ["//visibility:public"],
