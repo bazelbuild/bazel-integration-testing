@@ -53,15 +53,15 @@ public class RepositoryCache {
    * dependencies.)
    */
   public void freeze() throws IOException {
-    if (cachePath.getFileSystem().isReadOnly()) {
-      return; // on a readonly filesystem we can't freeze
-    }
     Files.walkFileTree(
         Files.createDirectories(cachePath),
         new SimpleFileVisitor<Path>() {
           @Override
           public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
               throws IOException {
+            if (file.getFileSystem().isReadOnly()) {
+              return; // on a readonly filesystem we can't freeze
+            }
             Set<PosixFilePermission> perms = new HashSet<>();
             perms.add(PosixFilePermission.OWNER_READ);
             Files.setPosixFilePermissions(file, perms);
@@ -70,6 +70,9 @@ public class RepositoryCache {
 
           @Override
           public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+            if (dir.getFileSystem().isReadOnly()) {
+              return; // on a readonly filesystem we can't freeze
+            }
             Set<PosixFilePermission> perms = new HashSet<>();
             perms.add(PosixFilePermission.OWNER_READ);
             perms.add(PosixFilePermission.OWNER_EXECUTE); // For 'ls'
