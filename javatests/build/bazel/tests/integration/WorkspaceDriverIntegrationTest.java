@@ -144,6 +144,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     Command cmd = driver.bazelCommand("build", "@net_sf_jopt_simple//jar").build();
 
     int returnCode = cmd.run();
+    String err = String.join(",",cmd.getErrorLines());
     assertEquals(1, returnCode);
     assertTrue(
         err.contains("(Permission denied)") // The repository cache was frozen (Mac OSX)
