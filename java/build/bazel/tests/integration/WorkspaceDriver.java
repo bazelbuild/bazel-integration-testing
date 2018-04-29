@@ -14,7 +14,9 @@
 
 package build.bazel.tests.integration;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,11 +37,16 @@ public class WorkspaceDriver {
   private static Path tmp;
   private static Map<String, Path> bazelVersions;
   private static Path runfileDirectory = Paths.get(System.getenv("TEST_SRCDIR"));
+  // TODO: Don't have them as writable package-private when we have a better way
+  // to share configuration across the WorkspaceDriver instances.
+  @Deprecated static Properties properties;
 
   private Path currentBazel = null;
 
   /** The current workspace. */
   private Path workspace = null;
+
+  private static RepositoryCache repositoryCache;
 
   /** Returns the current workspace path */
   public Path currentWorkspace() {
@@ -46,6 +54,24 @@ public class WorkspaceDriver {
   }
 
   public static void setUpClass() throws IOException {
+    loadProperties();
+    setupTmp();
+    bazelVersions = new HashMap<>();
+    setupRepositoryCache();
+  }
+
+  private static void setupRepositoryCache() throws IOException {
+    String externalDeps = properties.getProperty("bazel.external.deps");
+    repositoryCache = new RepositoryCache(tmp.resolve("cache"));
+    if (externalDeps != null && !externalDeps.isEmpty()) {
+      for (String dep : externalDeps.split(",")) {
+        repositoryCache.put(Paths.get(dep));
+      }
+    }
+    repositoryCache.freeze();
+  }
+
+  private static void setupTmp() throws IOException {
     String environmentTempDirectory = System.getenv("TEST_TMPDIR");
     if (environmentTempDirectory == null) {
       tmp = Files.createTempDirectory("e4b-tests");
@@ -53,7 +79,14 @@ public class WorkspaceDriver {
     } else {
       tmp = Paths.get(environmentTempDirectory);
     }
-    bazelVersions = new HashMap<>();
+  }
+
+  private static void loadProperties() throws IOException {
+    String configFile = System.getProperty("bazel.configuration");
+    properties = new Properties();
+    try (InputStream is = new FileInputStream(configFile)) {
+      properties.load(is);
+    }
   }
 
   /** Return a file in the runfiles whose path segments are given by the arguments. */
@@ -102,8 +135,8 @@ public class WorkspaceDriver {
 
   public void setUp() throws IOException, InterruptedException {
     this.currentBazel = null;
-    if (System.getProperty("bazel.version") != null) {
-      bazelVersion(System.getProperty("bazel.version"));
+    if (properties.get("bazel.version") != null) {
+      bazelVersion(properties.getProperty("bazel.version"));
     }
     newWorkspace();
   }
@@ -267,15 +300,16 @@ public class WorkspaceDriver {
           bazelrcFile.map(p -> workspace.resolve(p).toString()).orElse("/dev/null");
 
       List<String> command =
-          Stream.concat(
-                  Stream.of(
-                      currentBazel.toString(),
-                      "--output_user_root=" + tmp,
-                      "--nomaster_bazelrc",
-                      "--max_idle_secs=10",
-                      "--bazelrc=" + bazelRcPath),
-                  args.stream())
-              .collect(Collectors.toList());
+          new ArrayList<>(
+              Arrays.asList(
+                  currentBazel.toString(),
+                  "--output_user_root=" + tmp,
+                  "--nomaster_bazelrc",
+                  "--max_idle_secs=10",
+                  "--bazelrc=" + bazelRcPath));
+
+      command.addAll(args);
+      command.addAll(repositoryCache.bazelOptions());
 
       Path relativeToWorkspaceFullPath = workspace.resolve(workingDirectory);
 

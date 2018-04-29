@@ -67,6 +67,32 @@ load("//:bazel_integration_test.bzl", "bazel_java_integration_test_deps")
 
 bazel_java_integration_test_deps()
 
+load("//tools:import.bzl", "bazel_external_dependency_archive")
+
+bazel_external_dependency_archive(
+    name = "test_archive",
+    srcs = {
+        "90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe": [
+            "http://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar",
+            "http://maven.ibiblio.org/maven2/junit/junit/4.11/junit-4.11.jar",
+        ],
+        "e0de160b129b2414087e01fe845609cd55caec6820cfd4d0c90fabcc7bdb8c1e": [
+            "http://repo1.maven.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar",
+            "http://maven.ibiblio.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar",
+        ],
+    },
+)
+
+bazel_external_dependency_archive(
+    name = "test_archive2",
+    srcs = {
+        "91c77044a50c481636c32d916fd89c9118a72195390452c81065080f957de7ff": [
+            "http://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
+            "http://maven.ibiblio.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
+        ],
+    },
+)
+
 ## golang
 
 load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains", "go_repository")
