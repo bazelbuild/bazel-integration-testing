@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.Test;
 
@@ -54,6 +55,16 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     int returnCode = cmd.run();
 
     assertEquals("bazel test environment variable return code", 0, returnCode);
+  }
+
+  @Test
+  public void testRunWithArguments() throws Exception {
+    driver.scratchFile("BUILD.bazel", shTest("test_me"));
+    driver.scratchExecutableFile("test_me.sh", shellTestingArguments("hello", "world"));
+    Command cmd = driver.bazelCommand("run", "//:test_me", "--", "hello", "world").build();
+
+    int returnCode = cmd.run();
+    assertEquals(0, returnCode);
   }
 
   /**
@@ -145,6 +156,14 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
   private List<String> shellTestingEnvironmentVariable(String key, String val) {
     return Arrays.asList("#!/bin/bash", "test \"$" + key + "\" = \"" + val + "\"", "");
+  }
+
+  private List<String> shellTestingArguments(String... arguments) {
+    return Stream.concat(
+            Stream.of("#!/bin/bash"),
+            IntStream.range(0, arguments.length)
+                .mapToObj(i -> "test \"$" + (i + 1) + "\" = \"" + arguments[i] + "\""))
+        .collect(Collectors.toList());
   }
 
   private void writeWorkspaceFileWithRepositories(String... repos) throws IOException {
