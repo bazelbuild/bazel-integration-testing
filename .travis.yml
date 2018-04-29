@@ -1,16 +1,22 @@
-sudo: required
-dist: trusty
+matrix:
+  include:
+    - os: linux
+      dist: trusty
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
+              key_url: 'https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg'
+          packages:
+            - bazel
+    - os: osx
+      osx_image: xcode9.3
+      install:
+        - brew install yarn bazel
 language:
   - java
-jdk:
-  - oraclejdk8  # Building Bazel requires JDK8.
-addons:
-  apt:
-    sources:
-      - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
-        key_url: 'https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg'
-    packages:
-      - bazel
-
 script:
   - FMT_SKYLINT=false ./lint.sh check
+  - bazel build //...
+  - bazel test //...
