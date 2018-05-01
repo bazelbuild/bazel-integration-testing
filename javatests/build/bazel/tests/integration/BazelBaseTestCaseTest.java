@@ -16,20 +16,11 @@ package build.bazel.tests.integration;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.hamcrest.Description;
-import org.hamcrest.SelfDescribing;
-import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.junit.Test;
 
 /** {@link BazelBaseTestCase}Test */
@@ -43,9 +34,8 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
   @Test
   public void testVersion() throws Exception {
-    Command cmd = driver.bazelCommand("info", "release").build();
-    assertEquals(0, cmd.run());
-    assertThat(cmd.getOutputLines())
+    BazelCommand cmd = driver.bazel("info", "release").mustRunSuccessfully();
+    assertThat(cmd.outputLines())
         .contains("release " + WorkspaceDriver.properties.getProperty("bazel.version"));
   }
 
@@ -54,10 +44,9 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
     driver.scratchExecutableFile("foo/bar.sh", "echo \"in bar\"");
 
-    Command cmd = driver.bazelCommand("run", "bar").inWorkingDirectory(Paths.get("foo")).build();
-
-    assertEquals(0, cmd.run());
-    assertThat(cmd.getOutputLines()).contains("in bar");
+    BazelCommand cmd =
+        driver.bazel("run", "bar").inWorkingDirectory(Paths.get("foo")).mustRunSuccessfully();
+    assertThat(cmd.outputLines()).contains("in bar");
   }
 
   @Test
@@ -65,78 +54,12 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     loadIntegrationTestRuleIntoWorkspace();
     setupPassingTest("IntegrationTestSuiteTest");
 
-    Command cmd = driver.bazelCommand("test", "//:IntegrationTestSuiteTest").build();
-    final int exitCode = cmd.run();
-
-    org.hamcrest.MatcherAssert.assertThat(exitCode, is(successfulExitCode(cmd)));
+    driver.bazel("test", "//:IntegrationTestSuiteTest").mustRunSuccessfully();
   }
 
   @Test
   public void testJvmFlags() {
     org.hamcrest.MatcherAssert.assertThat(System.getProperty("foo.bar"), is("true"));
-  }
-
-  private TypeSafeDiagnosingMatcher<Integer> successfulExitCode(final Command cmd) {
-    return new TypeSafeDiagnosingMatcher<Integer>() {
-      @Override
-      protected boolean matchesSafely(
-          final Integer exitCode, final Description mismatchDescription) {
-        if (exitCode != 0) {
-          mismatchDescription
-              .appendText(" exit code was ")
-              .appendValue(exitCode)
-              .appendText("\n")
-              .appendText("Workspace contents: \n")
-              .appendValueList("", "\n", "\n", driver.workspaceDirectoryContents())
-              .appendDescriptionOf(commandDescription(cmd));
-          return false;
-        }
-        return true;
-      }
-
-      @Override
-      public void describeTo(final Description description) {
-        description.appendText("successful exit code (0)");
-      }
-    };
-  }
-
-  private SelfDescribing commandDescription(final Command cmd) {
-    return description -> {
-      final String newLine = System.getProperty("line.separator");
-      final List<String> logContents =
-          logsOfInternalTests(cmd.getErrorLines()).collect(Collectors.toList());
-      description
-          .appendText("std-error:\n")
-          .appendValueList("", newLine, newLine, cmd.getErrorLines());
-      if (!logContents.isEmpty()) {
-        description
-            .appendText("Contents of internal test logs:\n")
-            .appendText("*******************************\n")
-            .appendValueList(newLine, newLine, newLine, logContents);
-      }
-    };
-  }
-
-  private Stream<String> logsOfInternalTests(final List<String> errorLines) {
-    return errorLines
-        .stream()
-        .filter(line -> line.contains("(see "))
-        .map(line -> line.split("see ")[1].replace(")", ""))
-        .map(Paths::get)
-        .map(
-            logPath -> {
-              try {
-                LinkedList<String> logContents = new LinkedList<>(Files.readAllLines(logPath));
-                logContents.addFirst("Log contents:");
-                logContents.addFirst(logPath.toString());
-                logContents.addFirst("Log path:");
-                return logContents;
-              } catch (IOException e) {
-                throw new RuntimeException(e);
-              }
-            })
-        .flatMap(Collection::stream);
   }
 
   private void setupPassingTest(final String testName) throws IOException {

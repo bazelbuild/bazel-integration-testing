@@ -28,15 +28,13 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
     driver.scratchFile(".bazelrc", "test --javacopt=\"-InvalidOpt\"");
 
-    Command cmd =
-        driver.bazelCommand("test", "//:TestMe").withBazelrcFile(Paths.get(".bazelrc")).build();
+    BazelCommand cmd =
+        driver.bazel("test", "//:TestMe").withBazelrcFile(Paths.get(".bazelrc")).run();
 
-    int returnCode = cmd.run();
-
-    assertNotEquals("bazel test return code", 0, returnCode);
+    assertNotEquals(0, cmd.exitCode());
     assertTrue(
         "stderr contains InvalidOpt failure",
-        cmd.getErrorLines().stream().anyMatch(x -> x.contains("-InvalidOpt")));
+        cmd.errorLines().stream().anyMatch(x -> x.contains("-InvalidOpt")));
   }
 
   @Test
@@ -46,25 +44,17 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     String val = "some_value";
     driver.scratchFile("BUILD.bazel", shTest(testName));
     driver.scratchExecutableFile(testName + ".sh", shellTestingEnvironmentVariable(key, val));
-    Command cmd =
-        driver
-            .bazelCommand("test", "--test_env=" + key, "//:" + testName)
-            .withEnvironmentVariable(key, val)
-            .build();
-
-    int returnCode = cmd.run();
-
-    assertEquals("bazel test environment variable return code", 0, returnCode);
+    driver
+        .bazel("test", "--test_env=" + key, "//:" + testName)
+        .withEnvironmentVariable(key, val)
+        .mustRunSuccessfully();
   }
 
   @Test
   public void testRunWithArguments() throws Exception {
     driver.scratchFile("BUILD.bazel", shTest("test_me"));
     driver.scratchExecutableFile("test_me.sh", shellTestingArguments("hello", "world"));
-    Command cmd = driver.bazelCommand("run", "//:test_me", "--", "hello", "world").build();
-
-    int returnCode = cmd.run();
-    assertEquals(0, returnCode);
+    driver.bazel("run", "//:test_me", "--", "hello", "world").mustRunSuccessfully();
   }
 
   /**
@@ -120,10 +110,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         passingTestNamed(
             "TestMe", "import com.beust.jcommander.JCommander;", "import javax.inject.Singleton;"));
 
-    Command cmd = driver.bazelCommand("test", "//:TestMe").build();
-
-    int returnCode = cmd.run();
-    assertEquals(0, returnCode);
+    driver.bazel("test", "//:TestMe").mustRunSuccessfully();
   }
 
   /** Try (unsuccessfully) to download a dependency that was not specified as an external dep. */
@@ -144,11 +131,10 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "    ],",
         ")");
 
-    Command cmd = driver.bazelCommand("build", "@net_sf_jopt_simple//jar").build();
+    BazelCommand cmd = driver.bazel("build", "@net_sf_jopt_simple//jar").run();
 
-    int returnCode = cmd.run();
-    String err = String.join(",", cmd.getErrorLines());
-    assertEquals(1, returnCode);
+    assertEquals(1, cmd.exitCode());
+    String err = String.join(",", cmd.errorLines());
     assertTrue(
         err.contains("(Permission denied)") // The repository cache was frozen (Mac OSX)
             || err.contains("Unknown host")); // The block-network tag works (Linux)

@@ -4,6 +4,7 @@ java_library(
     name = "workspace_driver",
     testonly = True,
     srcs = [
+        "BazelCommand.java",
         "Command.java",
         "RepositoryCache.java",
         "WorkspaceDriver.java",
