@@ -116,3 +116,44 @@ probably better to use an http_archive rule:
 # )
 # ```
 """
+
+def _collect_runfiles(targets):
+  """Aggregates data runfiles from targets."""
+  data = depset()
+  for target in targets:
+    if hasattr(target, "runfiles"):
+      data += target.runfiles.files
+      continue
+    if hasattr(target, "data_runfiles"):
+      data += target.data_runfiles.files
+    if hasattr(target, "default_runfiles"):
+      data += target.default_runfiles.files
+  return data
+
+def _bazel_executable_impl(ctx):
+  runfiles = _collect_runfiles([ctx.attr.executable])
+  ctx.actions.write(ctx.outputs.manifest, "\n".join(
+      [ctx.workspace_name + "/" + ctx.executable.executable.short_path] +
+      [ctx.workspace_name + "/" + f.short_path for f in runfiles]))
+  return struct(
+      runfiles = ctx.runfiles(
+          files = [ctx.executable.executable, ctx.outputs.manifest],
+          transitive_files = runfiles))
+
+bazel_executable = rule(
+    attrs = {
+        "executable": attr.label(
+            executable = True,
+            cfg = "target",
+            mandatory = True,
+        ),
+    },
+    implementation = _bazel_executable_impl,
+    outputs = {
+        "manifest": "%{name}.manifest.txt",
+    },
+)
+"""
+Collect all the runfiles of an executable target and expose them as runfiles,
+along with a manifest of all the runfiles.
+"""
