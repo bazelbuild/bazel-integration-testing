@@ -1,5 +1,8 @@
 workspace(name = "build_bazel_integration_testing")
 
+load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 ## Sanity checks
 
 git_repository(
@@ -22,7 +25,7 @@ format_repositories()
 
 ## Python
 
-new_http_archive(
+http_archive(
     name = "com_google_python_gflags",
     build_file_content = """
 py_library(
