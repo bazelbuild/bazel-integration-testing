@@ -17,7 +17,7 @@ import gflags
 import urllib2
 import sys
 
-_URL_FORMAT = "http://releases.bazel.build/{version}/release/bazel-{version}-without-jdk-installer-{platform}.sh.sha256"
+_URL_FORMAT = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh.sha256"
 _URL_EXISTS = "http://releases.bazel.build/{version}/release/index.html"
 
 gflags.DEFINE_string("output", "bazel_hash_dict.bzl", "The output file")
@@ -28,7 +28,7 @@ gflags.DEFINE_string("map_name", "BAZEL_HASH_DICT",
 gflags.DEFINE_multistring("platforms", ["darwin-x86_64", "linux-x86_64"],
                           "List of platforms to download SHA-256.")
 
-gflags.DEFINE_string("minimum_version", "0.6.0",
+gflags.DEFINE_string("minimum_version", "0.11.0",
                      "The lowest version of Bazel supported")
 
 FLAGS = gflags.FLAGS
