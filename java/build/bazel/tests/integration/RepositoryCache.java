@@ -77,8 +77,9 @@ public class RepositoryCache {
     // TODO: assert the sha256 key is valid, maybe even compare to content?
     Path cacheEntry = cachePath.resolve(CAS_DIR).resolve(KEY_TYPE).resolve(sha256);
     Files.createDirectories(cacheEntry);
-    Files.createSymbolicLink(
-        cacheEntry.resolve(DEFAULT_CACHE_FILENAME), sourcePath.toAbsolutePath());
+    // RepositoryCache touches on cache hit which doesn't work on linux with links
+    // https://github.com/bazelbuild/bazel/commit/e0d80356eed398691938ea3f18bb0ce14e0eefc3
+    Files.copy(sourcePath.toAbsolutePath(), cacheEntry.resolve(DEFAULT_CACHE_FILENAME));
   }
 
   /** Returns the options to pass to Bazel for it to use the repository cache. */
