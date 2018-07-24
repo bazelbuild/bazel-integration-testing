@@ -1,4 +1,5 @@
 # gazelle:exclude bazel_test.go
+# gazelle:ignore
 
 load("//:bazel_integration_test.bzl", "bazel_go_integration_test")
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
@@ -28,6 +29,6 @@ go_library(
     importpath = "github.com/bazelbuild/bazel-integration-testing/go",
     visibility = ["//visibility:public"],
     deps = [
-        "@com_github_bazelbuild_rules_go//go/tools/bazel:go_default_library",
+        "@io_bazel_rules_go//go/tools/bazel:go_default_library",  # keep
     ],
 )
