@@ -24,5 +24,7 @@ platforms:
   rbe_ubuntu1604:
     build_targets:
     - "..."
+    test_flags:
+    - "--test_output=all"
     test_targets:
     - "..."
