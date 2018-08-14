@@ -23,6 +23,6 @@ platforms:
     - "..."
   rbe_ubuntu1604:
     build_targets:
-    - "//test/..."
+    - "..."
     test_targets:
-    - "//test/..."
+    - "..."
