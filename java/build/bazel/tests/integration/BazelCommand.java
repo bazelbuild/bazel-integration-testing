@@ -81,7 +81,7 @@ public class BazelCommand {
     return description;
   }
 
-  static class Builder {
+  public static class Builder {
     private final WorkspaceDriver driver;
     private final Path outputUserRoot;
     private final RepositoryCache repositoryCache;
