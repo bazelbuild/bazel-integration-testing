@@ -14,7 +14,7 @@
 
 load(":common.bzl", "BAZEL_HASH_DICT", "BAZEL_VERSIONS")
 
-_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-without-jdk-installer-{platform}.sh"
+_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh"
 
 def _get_platform_name(rctx):
   os_name = rctx.os.name.lower()
