@@ -119,6 +119,7 @@ def bazel_java_integration_test(
     deps = (deps or []) + add_deps
   else:
     runtime_deps = runtime_deps + add_deps
+  tags = kwargs.pop("tags",[])
   for version in versions:
     prop_rule = "%s/config%s" % (name, version)
     bazel_java_integration_test_properties_(
@@ -140,9 +141,11 @@ def bazel_java_integration_test(
         test_class = test_class,
         deps = deps,
         runtime_deps = runtime_deps,
+        tags = tags,
         **kwargs)
   native.test_suite(
       name = name,
+      tags = tags,
       tests = [":%s/bazel%s" % (name, version) for version in versions])
 
 def bazel_java_integration_test_deps(versions = BAZEL_VERSIONS):
