@@ -32,8 +32,10 @@ def _get_installer(rctx):
 
 def _extract_bazel(rctx):
   result = rctx.execute([
-      rctx.path("bin/bazel-real"), "--install_base",
-      rctx.path("install_base"), "version"
+      rctx.path("bin/bazel-real"),
+      "--install_base", rctx.path("install_base"),
+      "--ignore_all_rc_files=true",
+      "version"
   ])
   if result.return_code != 0:
     fail("`bazel version` returned non zero return code (%s): %s%s" %
