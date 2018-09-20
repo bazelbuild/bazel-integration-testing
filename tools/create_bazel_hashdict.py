@@ -34,7 +34,8 @@ gflags.DEFINE_string("minimum_version", "0.15.2",
 FLAGS = gflags.FLAGS
 
 #versions bazel team decided to skip and not cut
-skipped_versions = [[0,17,0]]
+skipped_versions = [[0, 17, 0]]
+
 
 def get_hash_map(f):
   """Construct the hash map reading the release website, writing it to f."""
@@ -80,8 +81,10 @@ def get_hash_map(f):
       else:
         raise e
 
+
 def skipped_version(version):
   return version in skipped_versions
+
 
 def print_command_line(f):
   """Print the current command line."""
