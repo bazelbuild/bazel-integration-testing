@@ -28,11 +28,13 @@ gflags.DEFINE_string("map_name", "BAZEL_HASH_DICT",
 gflags.DEFINE_multistring("platforms", ["darwin-x86_64", "linux-x86_64"],
                           "List of platforms to download SHA-256.")
 
-gflags.DEFINE_string("minimum_version", "0.11.0",
+gflags.DEFINE_string("minimum_version", "0.15.2",
                      "The lowest version of Bazel supported")
 
 FLAGS = gflags.FLAGS
 
+#versions bazel team decided to skip and not cut
+skipped_versions = [[0,17,0]]
 
 def get_hash_map(f):
   """Construct the hash map reading the release website, writing it to f."""
@@ -65,7 +67,9 @@ def get_hash_map(f):
       if e.code == 404:
         print "  ==> Not a Bazel version"
         # Current version does not exists, increase the lowest non null version number
-        if version[2] == 0:
+        if skipped_version(version):
+          version[2] += 1
+        elif version[2] == 0:
           if version[1] == 0:
             return
           version[1] = 0
@@ -76,6 +80,8 @@ def get_hash_map(f):
       else:
         raise e
 
+def skipped_version(version):
+  return version in skipped_versions
 
 def print_command_line(f):
   """Print the current command line."""
