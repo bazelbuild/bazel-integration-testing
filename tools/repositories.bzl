@@ -34,7 +34,7 @@ def _extract_bazel(rctx):
   result = rctx.execute([
       rctx.path("bin/bazel-real"),
       "--install_base", rctx.path("install_base"),
-      "--nohome_rc", "--nosystem_rc","--bazelrc=/dev/null",
+      "--ignore_all_rc_files",
       "version"
   ])
   if result.return_code != 0:
