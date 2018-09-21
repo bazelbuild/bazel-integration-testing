@@ -27,6 +27,7 @@ load(
 def _com_github_google_yapf_repository_impl(rctx):
   rctx.download_and_extract(
       url = "https://github.com/google/yapf/archive/v0.21.0.tar.gz",
+      sha256 = "b930c1bc8233a9944671db7bdd6c9dc9ba2343b08b726a2dd0bff37ce1815baa",
       stripPrefix = "yapf-0.21.0")
   rctx.file("BUILD", """
 alias(
@@ -54,10 +55,10 @@ def format_repositories():
   http_archive(
       name = "io_bazel",
       urls = [
-          "https://github.com/bazelbuild/bazel/releases/download/0.11.1/bazel-0.11.1-dist.zip"
+          "https://github.com/bazelbuild/bazel/releases/download/0.17.1/bazel-0.17.1-dist.zip"
       ],
       sha256 = (
-          "e8d762bcc01566fa50952c8028e95cfbe7545a39b8ceb3a0d0d6df33b25b333f"),
+          "23e4281c3628cbd746da3f51330109bbf69780bd64461b63b386efae37203f20"),
   )
 
   java_import_external(
@@ -72,19 +73,19 @@ def format_repositories():
   http_file(
       name = "io_bazel_buildifier_linux",
       urls = [
-          "https://github.com/bazelbuild/buildtools/releases/download/0.11.1/buildifier"
+          "https://github.com/bazelbuild/buildtools/releases/download/0.15.0/buildifier"
       ],
       sha256 = (
-          "d7d41def74991a34dfd2ac8a73804ff11c514c024a901f64ab07f45a3cf0cfef"),
+          "0dea01a7a511797878f486e6ed8e549980c0710a0a116c8ee953d4e26de41515"),
       executable = True,
   )
 
   http_file(
       name = "io_bazel_buildifier_darwin",
       urls = [
-          "https://github.com/bazelbuild/buildtools/releases/download/0.11.1/buildifier.osx"
+          "https://github.com/bazelbuild/buildtools/releases/download/0.15.0/buildifier.osx"
       ],
       sha256 = (
-          "3cbd708ff77f36413cfaef89cd5790a1137da5dfc3d9b3b3ca3fac669fbc298b"),
+          "860378a2badba9517e523e20f152ef1ca16234e0ca462a1d71e5dbee7d506771"),
       executable = True,
   )
