@@ -25,7 +25,7 @@ def _get_installer(rctx):
   platform = _get_platform_name(rctx)
   version = rctx.attr.version
   url = _BAZEL_BINARY_PACKAGE.format(version = version, platform = platform)
-  args = {"url": url, "type": "zip"}
+  args = {"url": url, "type": "zip", "output": "bin"}
   if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
     args["sha256"] = BAZEL_HASH_DICT[version][platform]
   rctx.download_and_extract(**args)
@@ -37,9 +37,9 @@ def _bazel_repository_impl(rctx):
   rctx.file("BUILD", """
 sh_binary(
   name = "bazel",
-  srcs = ["bazel"],
+  srcs = ["bin/bazel"],
   data = [
-      "bazel-real",
+      "bin/bazel-real",
   ],
   visibility = ["//visibility:public"])""")
 
