@@ -25,41 +25,21 @@ def _get_installer(rctx):
   platform = _get_platform_name(rctx)
   version = rctx.attr.version
   url = _BAZEL_BINARY_PACKAGE.format(version = version, platform = platform)
-  args = {"url": url, "type": "zip", "output": "bin"}
+  args = {"url": url, "type": "zip"}
   if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
     args["sha256"] = BAZEL_HASH_DICT[version][platform]
   rctx.download_and_extract(**args)
 
-def _extract_bazel(rctx):
-  result = rctx.execute([
-      rctx.path("bin/bazel-real"), "--install_base",
-      rctx.path("install_base"), "--ignore_all_rc_files", "version"
-  ])
-  if result.return_code != 0:
-    fail("`bazel version` returned non zero return code (%s): %s%s" %
-         (result.return_code, result.stderr, result.stdout))
-  ver = result.stdout.strip().split("\n")[0].split(":")[1].strip()
-  if ver != rctx.attr.version:
-    fail("`bazel version` returned version %s (expected %s)" %
-         (ver, rctx.attr.version))
-
 def _bazel_repository_impl(rctx):
   _get_installer(rctx)
-  _extract_bazel(rctx)
   rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
   rctx.template("bazel.sh", Label("//tools:bazel.sh"))
   rctx.file("BUILD", """
-filegroup(
-  name = "bazel_install_base",
-  srcs = glob(["install_base/**"]),
-  visibility = ["//visibility:public"])
-
 sh_binary(
   name = "bazel",
-  srcs = ["bazel.sh"],
+  srcs = ["bazel"],
   data = [
-      ":bazel_install_base",
-      ":bin/bazel-real",
+      "bazel-real",
   ],
   visibility = ["//visibility:public"])""")
 
