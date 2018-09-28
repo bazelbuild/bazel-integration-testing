@@ -47,7 +47,7 @@ def bazel_go_integration_test(name,
         srcs = srcs,
         deps = deps,
         data = [
-            "@build_bazel_bazel_%s//:bazel" % version.replace(".", "_"),
+            "@build_bazel_bazel_%s//:bazel_binary" % version.replace(".", "_"),
         ] + data,
         x_defs = {
             "github.com/bazelbuild/bazel-integration-testing/go.BazelVersion": version,

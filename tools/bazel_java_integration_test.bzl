@@ -129,7 +129,7 @@ def bazel_java_integration_test(
 
     cur_data = data + external_deps + [prop_rule + ".properties"]
     if add_bazel_data_dependency:
-      cur_data += ["@build_bazel_bazel_%s//:bazel" % version.replace(".", "_")]
+      cur_data += ["@build_bazel_bazel_%s//:bazel_binary" % version.replace(".", "_")]
     native.java_test(
         name = "%s/bazel%s" % (name, version),
         jvm_flags = [

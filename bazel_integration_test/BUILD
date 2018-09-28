@@ -22,7 +22,7 @@ py_library(
     py_library(
         name = "python_version_" + v,
         srcs = [":python_generated_version_src_" + v],
-        data = ["@build_bazel_bazel_%s//:bazel" % v.replace(".", "_")],
+        data = ["@build_bazel_bazel_%s//:bazel_binary" % v.replace(".", "_")],
         imports = [v],
         visibility = ["//visibility:public"],
     )
