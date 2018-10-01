@@ -16,13 +16,13 @@ load("//tools:bazel_hash_dict.bzl", "BAZEL_HASH_DICT")
 
 BAZEL_VERSIONS = BAZEL_HASH_DICT.keys()
 
-def zfill(v, l=5):
+def _zfill(v, l=5):
   """zfill a string by padding 0s to the left of the string till it is the link
   specified by l.
   """
   return "0" * (l - len(v)) + v
 
-def unfill(v, l=5):
+def _unfill(v, l=5):
   """unfill takes a zfilled string and returns it to the original value"""
   return [
       int(v[l * i: l * (i+1)])
@@ -42,7 +42,7 @@ def GET_LATEST_BAZEL_VERSIONS(count=3):
   """
   version_tuple_list = []
   for v in BAZEL_VERSIONS:
-    version_tuple_list.append("".join([zfill(x, 5) for x in v.split(".")]))
+    version_tuple_list.append("".join([_zfill(x, 5) for x in v.split(".")]))
 
   already_handled_major_minors = []
   toReturn = []
@@ -59,7 +59,6 @@ def GET_LATEST_BAZEL_VERSIONS(count=3):
 
     already_handled_major_minors.append(major_minor)
 
-    unfilled = unfill(v)
-    toReturn.append(unfilled)
+    toReturn.append(_unfill(v))
 
   return [".".join(v) for v in toReturn]
