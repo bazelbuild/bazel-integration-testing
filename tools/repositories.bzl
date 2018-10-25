@@ -14,37 +14,73 @@
 
 load(":common.bzl", "BAZEL_HASH_DICT", "BAZEL_VERSIONS")
 
-_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh"
+_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-without-jdk-installer-{platform}.{extension}"
 
 def _get_platform_name(rctx):
   os_name = rctx.os.name.lower()
+  
+  if os_name.startswith("mac os"):
+    return "darwin-x86_64"
+  if os_name.startswith("windows"):
+    return "windows-x86_64"                
+  
   # We default on linux-x86_64 because we only support 2 platforms
-  return "darwin-x86_64" if os_name.startswith("mac os") else "linux-x86_64"
+  return "linux-x86_64"
+
 
 def _get_installer(rctx):
   platform = _get_platform_name(rctx)
   version = rctx.attr.version
-  url = _BAZEL_BINARY_PACKAGE.format(version = version, platform = platform)
-  args = {"url": url, "type": "zip"}
+  
+  if platform.startswith("windows"):
+    extension = "exe"
+  else:
+    extension = "sh"
+
+  url = _BAZEL_BINARY_PACKAGE.format(version=version, platform=platform, extension=extension)
+  args = {"url": url, "type": "zip", "output": "bin"}
   if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
     args["sha256"] = BAZEL_HASH_DICT[version][platform]
   rctx.download_and_extract(**args)
 
+
+def _extract_bazel(rctx):
+  result = rctx.execute([
+    rctx.path("bin/bazel-real"),
+    "--install_base",
+    rctx.path("install_base"),
+    "version"])
+  if result.return_code != 0:
+    fail("`bazel version` returned non zero return code (%s): %s%s" % (
+      result.return_code, result.stderr, result.stdout))
+  ver = result.stdout.strip().split("\n")[0].split(":")[1].strip()
+  if ver != rctx.attr.version:
+    fail("`bazel version` returned version %s (expected %s)" % (
+      ver, rctx.attr.version))
+
 def _bazel_repository_impl(rctx):
   _get_installer(rctx)
+  _extract_bazel(rctx)
   rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
+  rctx.template("bazel.sh", Label("//tools:bazel.sh"))
   rctx.file("BUILD", """
 filegroup(
-  name = "bazel_binary",
-  srcs = ["bazel-real","bazel"],
+  name = "bazel_install_base",
+  srcs = glob(["install_base/**"]),
+  visibility = ["//visibility:public"])
+
+sh_binary(
+  name = "bazel",
+  srcs = ["bazel.sh"],
+  data = [
+      ":bazel_install_base",
+      ":bin/bazel-real",
+  ],
   visibility = ["//visibility:public"])""")
 
 bazel_binary = repository_rule(
-    attrs = {
-        "version": attr.string(default = "0.5.3"),
-    },
-    implementation = _bazel_repository_impl,
-)
+  implementation=_bazel_repository_impl,
+  attrs = {"version": attr.string(default = "0.5.3")})
 """Download a bazel binary for integration test.
 
 Args:
@@ -53,9 +89,10 @@ Args:
 Limitation: only support Linux and macOS for now.
 """
 
-def bazel_binaries(versions = BAZEL_VERSIONS):
+
+def bazel_binaries(versions=BAZEL_VERSIONS):
   """Download all bazel binaries specified in BAZEL_VERSIONS."""
   for version in versions:
     name = "build_bazel_bazel_" + version.replace(".", "_")
     if not native.existing_rule(name):
-      bazel_binary(name = name, version = version)
+      bazel_binary(name=name, version=version)
