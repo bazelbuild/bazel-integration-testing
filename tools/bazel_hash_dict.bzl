@@ -18,8 +18,8 @@ BAZEL_HASH_DICT = {
         "linux-x86_64": "feedbe02c81142ed95ef8d380472f0a0d88e1b9a4b1fb6e21728701032b68e02",
     },
     "0.18.0": {
-        "darwin-x86_64": "4cfc35212de193d9db6bd564135ffa66a92e22d7fb11b4e529f96ee955d5579f",
-        "linux-x86_64": "2e47e92a0a41ff42163b0240d3e4d9e4af18d41b486c9436480d9e4715fb0bc5",
-        "windows-x86_64": "6eac3cb5384b24c81c38ef2fdf57f120c52543f5b1f6cace4f4642b11fbd6c6a",
+        "darwin-x86_64": "6f07346c72d9eaea0561386a1dc49ae0b8a60f39b180cbbab930e705f3d7a3c4",
+        "linux-x86_64": "48ddaa9c9fef73dbe68517f274f09b33c3c8fdf3410638808b609f82b177d397",
+        "windows-x86_64": "36d52cbc31b7cfa18a5c988a9a90f332237f84c6c9601974583a463260708ea9",
     }
 }

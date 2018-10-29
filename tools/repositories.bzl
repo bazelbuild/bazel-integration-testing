@@ -14,16 +14,16 @@
 
 load(":common.bzl", "BAZEL_HASH_DICT", "BAZEL_VERSIONS")
 
-_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-without-jdk-installer-{platform}.{extension}"
+_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}{installer}-{platform}.{extension}"
 
 def _get_platform_name(rctx):
   os_name = rctx.os.name.lower()
-  
+
   if os_name.startswith("mac os"):
     return "darwin-x86_64"
   if os_name.startswith("windows"):
-    return "windows-x86_64"                
-  
+    return "windows-x86_64"
+
   # We default on linux-x86_64 because we only support 2 platforms
   return "linux-x86_64"
 
@@ -31,13 +31,15 @@ def _get_platform_name(rctx):
 def _get_installer(rctx):
   platform = _get_platform_name(rctx)
   version = rctx.attr.version
-  
+
   if platform.startswith("windows"):
     extension = "exe"
+    installer = ""
   else:
     extension = "sh"
+    installer = "-installer"
 
-  url = _BAZEL_BINARY_PACKAGE.format(version=version, platform=platform, extension=extension)
+  url = _BAZEL_BINARY_PACKAGE.format(version=version, installer=installer, platform=platform, extension=extension)
   args = {"url": url, "type": "zip", "output": "bin"}
   if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
     args["sha256"] = BAZEL_HASH_DICT[version][platform]
