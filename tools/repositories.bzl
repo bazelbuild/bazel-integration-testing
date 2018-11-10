@@ -12,33 +12,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load(":common.bzl", "BAZEL_HASH_DICT", "BAZEL_VERSIONS")
+load(":common.bzl", "BAZEL_VERSION_DICT", "BAZEL_VERSIONS")
 
-_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh"
-
-def _get_platform_name(rctx):
-    os_name = rctx.os.name.lower()
-
-    # We default on linux-x86_64 because we only support 2 platforms
-    return "darwin-x86_64" if os_name.startswith("mac os") else "linux-x86_64"
-
-def _get_installer(rctx):
-    platform = _get_platform_name(rctx)
-    version = rctx.attr.version
-    url = _BAZEL_BINARY_PACKAGE.format(version = version, platform = platform)
-    args = {"url": url, "type": "zip"}
-    if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
-        args["sha256"] = BAZEL_HASH_DICT[version][platform]
-    rctx.download_and_extract(**args)
-
-def _bazel_repository_impl(rctx):
-    _get_installer(rctx)
-    rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
-    rctx.file("BUILD", """
+_BAZEL_BINARY_BUILD = {
+  "default": """
 filegroup(
   name = "bazel_binary",
   srcs = ["bazel-real","bazel"],
-  visibility = ["//visibility:public"])""")
+  visibility = ["//visibility:public"])""",
+  "windows-x86_64": """
+filegroup(
+  name = "bazel_binary",
+  srcs = ["bazel.exe"],
+  visibility = ["//visibility:public"])""",
+}
+
+def _get_platform_name(rctx):
+  os_name = rctx.os.name.lower()
+  if os_name.startswith("mac os"):
+    return "darwin-x86_64"
+  elif os_name.startswith("windows"):
+    return "windows-x86_64"
+  else:
+    return "linux-x86_64"
+
+def _get_installer(rctx):
+  platform = _get_platform_name(rctx)
+  version = rctx.attr.version
+  meta = BAZEL_VERSION_DICT[version][platform]
+  rctx.download_and_extract(type="zip", **meta)
+
+def _bazel_repository_impl(rctx):
+  _get_installer(rctx)
+  platform = _get_platform_name(rctx)
+  rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
+  rctx.file("BUILD", _BAZEL_BINARY_BUILD.get(platform,
+                                             _BAZEL_BINARY_BUILD["default"]))
 
 bazel_binary = repository_rule(
     attrs = {
@@ -50,8 +59,6 @@ bazel_binary = repository_rule(
 
 Args:
   version: the version of Bazel to download.
-
-Limitation: only support Linux and macOS for now.
 """
 
 def bazel_binaries(versions = BAZEL_VERSIONS):

@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"syscall"
 
@@ -66,6 +67,9 @@ func New() (*TestingBazel, error) {
 }
 
 func (b *TestingBazel) setAndUnpackBazel(bazel string) bool {
+	if runtime.GOOS == "windows" {
+		bazel += ".exe"
+	}
 	bazel, err := b.Rlocation(bazel)
 	if err != nil {
 		return false

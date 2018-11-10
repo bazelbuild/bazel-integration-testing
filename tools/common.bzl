@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//tools:bazel_hash_dict.bzl", "BAZEL_HASH_DICT")
+load("//tools:bazel_version_dict.bzl", "BAZEL_VERSION_DICT")
 
-BAZEL_VERSIONS = BAZEL_HASH_DICT.keys()
+BAZEL_VERSIONS = BAZEL_VERSION_DICT.keys()
 
 def _zfill(v, l = 5):
     """zfill a string by padding 0s to the left of the string till it is the link

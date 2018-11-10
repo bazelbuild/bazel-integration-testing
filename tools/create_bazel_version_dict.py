@@ -13,19 +13,25 @@
 # limitations under the License.
 """Generate a Skylark file containing a map of hash of bazel installers."""
 
+from __future__ import print_function
+
 import gflags
 import urllib2
 import sys
 
-_URL_FORMAT = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh.sha256"
+_URL_FORMAT = {
+  "default": "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh",
+  "windows-x86_64": "http://releases.bazel.build/{version}/release/bazel-{version}-{platform}.zip",
+}
 _URL_EXISTS = "http://releases.bazel.build/{version}/release/index.html"
 
-gflags.DEFINE_string("output", "bazel_hash_dict.bzl", "The output file")
+gflags.DEFINE_string("output", "bazel_version_dict.bzl", "The output file")
 
-gflags.DEFINE_string("map_name", "BAZEL_HASH_DICT",
+gflags.DEFINE_string("map_name", "BAZEL_VERSION_DICT",
                      "The name of the generated map in the output file")
 
-gflags.DEFINE_multistring("platforms", ["darwin-x86_64", "linux-x86_64"],
+gflags.DEFINE_multistring("platforms",
+                          ["darwin-x86_64", "linux-x86_64", "windows-x86_64"],
                           "List of platforms to download SHA-256.")
 
 gflags.DEFINE_string("minimum_version", "0.15.2",
@@ -53,20 +59,24 @@ def get_hash_map(f):
   while True:
     try:
       v = "%s.%s.%s" % (version[0], version[1], version[2])
-      print "Getting SHA-256 for version " + v
+      print("Getting SHA-256 for version " + v)
       # Force 404 before we actually add the information
       urllib2.urlopen(_URL_EXISTS.format(version = v)).read()
       f.write("    \"%s\": {\n" % v)
       for platform in FLAGS.platforms:
-        r = urllib2.urlopen(
-            _URL_FORMAT.format(version = v, platform = platform))
-        f.write("        \"%s\": \"%s\",\n" % (platform,
-                                               r.read().split(" ", 1)[0]))
+        url_format = _URL_FORMAT.get(platform, _URL_FORMAT['default'])
+        url = url_format.format(version = v, platform = platform)
+        r = urllib2.urlopen(url + ".sha256")
+        sha256sum = r.read().split(" ", 1)[0]
+        f.write("        \"%s\": {\n" % platform)
+        f.write("            \"url\": \"%s\",\n" % url)
+        f.write("            \"sha256\": \"%s\",\n" % sha256sum)
+        f.write("        },\n")
       f.write("    },\n")
       version[2] += 1
     except urllib2.HTTPError as e:
       if e.code == 404:
-        print "  ==> Not a Bazel version"
+        print("  ==> Not a Bazel version")
         # Current version does not exists, increase the lowest non null version number
         if skipped_version(version):
           version[2] += 1
@@ -88,7 +98,7 @@ def skipped_version(version):
 
 def print_command_line(f):
   """Print the current command line."""
-  f.write("create_hash_dict")
+  f.write("create_bazel_version_dict")
   for i in range(1, len(sys.argv)):
     f.write(" '%s'" % (sys.argv[i].replace("'", "'\\''")))
 
