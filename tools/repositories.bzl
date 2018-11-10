@@ -17,23 +17,24 @@ load(":common.bzl", "BAZEL_HASH_DICT", "BAZEL_VERSIONS")
 _BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh"
 
 def _get_platform_name(rctx):
-  os_name = rctx.os.name.lower()
-  # We default on linux-x86_64 because we only support 2 platforms
-  return "darwin-x86_64" if os_name.startswith("mac os") else "linux-x86_64"
+    os_name = rctx.os.name.lower()
+
+    # We default on linux-x86_64 because we only support 2 platforms
+    return "darwin-x86_64" if os_name.startswith("mac os") else "linux-x86_64"
 
 def _get_installer(rctx):
-  platform = _get_platform_name(rctx)
-  version = rctx.attr.version
-  url = _BAZEL_BINARY_PACKAGE.format(version = version, platform = platform)
-  args = {"url": url, "type": "zip"}
-  if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
-    args["sha256"] = BAZEL_HASH_DICT[version][platform]
-  rctx.download_and_extract(**args)
+    platform = _get_platform_name(rctx)
+    version = rctx.attr.version
+    url = _BAZEL_BINARY_PACKAGE.format(version = version, platform = platform)
+    args = {"url": url, "type": "zip"}
+    if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
+        args["sha256"] = BAZEL_HASH_DICT[version][platform]
+    rctx.download_and_extract(**args)
 
 def _bazel_repository_impl(rctx):
-  _get_installer(rctx)
-  rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
-  rctx.file("BUILD", """
+    _get_installer(rctx)
+    rctx.file("WORKSPACE", "workspace(name='%s')" % rctx.attr.name)
+    rctx.file("BUILD", """
 filegroup(
   name = "bazel_binary",
   srcs = ["bazel-real","bazel"],
@@ -54,8 +55,8 @@ Limitation: only support Linux and macOS for now.
 """
 
 def bazel_binaries(versions = BAZEL_VERSIONS):
-  """Download all bazel binaries specified in BAZEL_VERSIONS."""
-  for version in versions:
-    name = "build_bazel_bazel_" + version.replace(".", "_")
-    if not native.existing_rule(name):
-      bazel_binary(name = name, version = version)
+    """Download all bazel binaries specified in BAZEL_VERSIONS."""
+    for version in versions:
+        name = "build_bazel_bazel_" + version.replace(".", "_")
+        if not native.existing_rule(name):
+            bazel_binary(name = name, version = version)

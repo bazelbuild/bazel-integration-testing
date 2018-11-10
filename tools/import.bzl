@@ -18,32 +18,32 @@
 # Implementing bazel_git_dependency_archive would mean calling "git archive" directly.
 
 def _get_basename(url):
-  return url[url.rindex("/") + 1:]
+    return url[url.rindex("/") + 1:]
 
 def _bazel_external_dependency_archive_impl(repository_ctx):
-  build_lines = [
-      "filegroup(",
-      "    name = \"%s\"," % repository_ctx.name,
-      "    srcs = [",
-  ]
+    build_lines = [
+        "filegroup(",
+        "    name = \"%s\"," % repository_ctx.name,
+        "    srcs = [",
+    ]
 
-  for sha256 in repository_ctx.attr.srcs:
-    urls = repository_ctx.attr.srcs[sha256]
-    basename = sha256
-    repository_ctx.download(
-        url = urls,
-        sha256 = sha256,
-        output = basename,
-    )
-    build_lines.append("        \"%s\",  # %s" % (basename, urls[0]))
+    for sha256 in repository_ctx.attr.srcs:
+        urls = repository_ctx.attr.srcs[sha256]
+        basename = sha256
+        repository_ctx.download(
+            url = urls,
+            sha256 = sha256,
+            output = basename,
+        )
+        build_lines.append("        \"%s\",  # %s" % (basename, urls[0]))
 
-  build_lines += [
-      "    ],",
-      "    visibility = [\"//visibility:public\"],",
-      ")",
-  ]
+    build_lines += [
+        "    ],",
+        "    visibility = [\"//visibility:public\"],",
+        ")",
+    ]
 
-  repository_ctx.file("BUILD", "\n".join(build_lines))
+    repository_ctx.file("BUILD", "\n".join(build_lines))
 
 bazel_external_dependency_archive = repository_rule(
     attrs = {

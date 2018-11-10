@@ -23,14 +23,14 @@ load(
 )
 
 def _bazel_java_integration_test_properties_impl(ctx):
-  properties = [
-      "bazel.version=" + ctx.attr.bazel_version,
-      "bazel.workspace=" + ctx.workspace_name,
-      "bazel.external.deps=" +
-      ",".join([d.short_path for d in ctx.files.external_deps]),
-  ]
+    properties = [
+        "bazel.version=" + ctx.attr.bazel_version,
+        "bazel.workspace=" + ctx.workspace_name,
+        "bazel.external.deps=" +
+        ",".join([d.short_path for d in ctx.files.external_deps]),
+    ]
 
-  ctx.actions.write(ctx.outputs.properties, "\n".join(properties))
+    ctx.actions.write(ctx.outputs.properties, "\n".join(properties))
 
 bazel_java_integration_test_properties_ = rule(
     attrs = {
@@ -44,122 +44,128 @@ bazel_java_integration_test_properties_ = rule(
 )
 
 def _index(lst, el):
-  return lst.index(el) if el in lst else -1
+    return lst.index(el) if el in lst else -1
 
 def _java_package():
-  # Adaptation of the java class finding library from Bazel.
-  path = native.package_name()
-  segments = path.split("/")
-  roots = [
-      segments.index(i) for i in ["java", "javatests", "src"] if i in segments
-  ]
-  if not len(roots):
-    return ".".join(segments)
-  idx = min(roots)
-  is_src = segments[idx] == "src"
-  check_mvn_idx = idx if is_src else -1
-  if idx == 0 or is_src:
-    # Check for a nested root directory.
-    end_segments = segments[idx + 1:-1]
-    src_segment = end_segments.index("src") if "src" in end_segments else -1
-    if is_src:
-      end_segments_idx = [
-          end_segments.index(i)
-          for i in ["java", "javatests", "src"]
-          if i in end_segments
-      ]
-      if end_segments_idx:
-        src_segment = min(end_segments_idx)
-    if src_segment >= 0:
-      next = end_segments[src_segment + 1]
-      if next in ["com", "org", "net"]:
-        # Check for common first element of java package, to avoid false
-        # positives.
-        idx += src_segment + 1
-      elif next in ["main", "test"]:
-        # Also accept maven style src/(main|test)/(java|resources).
-        check_mvn_idx = idx + src_segment + 1
-  # Check for (main|test)/(java|resources) after /src/.
-  if check_mvn_idx >= 0 and check_mvn_idx < len(segments) - 2:
-    if segments[check_mvn_idx + 1] in [
-        "main", "test"
-    ] and segments[check_mvn_idx + 2] in ["java", "resources"]:
-      idx = check_mvn_idx + 2
-  if idx < 0:
-    return ".".join(segments)
-  return ".".join(segments[idx + 1:])
+    # Adaptation of the java class finding library from Bazel.
+    path = native.package_name()
+    segments = path.split("/")
+    roots = [
+        segments.index(i)
+        for i in ["java", "javatests", "src"]
+        if i in segments
+    ]
+    if not len(roots):
+        return ".".join(segments)
+    idx = min(roots)
+    is_src = segments[idx] == "src"
+    check_mvn_idx = idx if is_src else -1
+    if idx == 0 or is_src:
+        # Check for a nested root directory.
+        end_segments = segments[idx + 1:-1]
+        src_segment = end_segments.index("src") if "src" in end_segments else -1
+        if is_src:
+            end_segments_idx = [
+                end_segments.index(i)
+                for i in ["java", "javatests", "src"]
+                if i in end_segments
+            ]
+            if end_segments_idx:
+                src_segment = min(end_segments_idx)
+        if src_segment >= 0:
+            next = end_segments[src_segment + 1]
+            if next in ["com", "org", "net"]:
+                # Check for common first element of java package, to avoid false
+                # positives.
+                idx += src_segment + 1
+            elif next in ["main", "test"]:
+                # Also accept maven style src/(main|test)/(java|resources).
+                check_mvn_idx = idx + src_segment + 1
+
+    # Check for (main|test)/(java|resources) after /src/.
+    if check_mvn_idx >= 0 and check_mvn_idx < len(segments) - 2:
+        if segments[check_mvn_idx + 1] in [
+            "main",
+            "test",
+        ] and segments[check_mvn_idx + 2] in ["java", "resources"]:
+            idx = check_mvn_idx + 2
+    if idx < 0:
+        return ".".join(segments)
+    return ".".join(segments[idx + 1:])
 
 def bazel_java_integration_test(
-    name,
-    srcs = [],
-    deps = None,
-    runtime_deps = [],
-    data = [],
-    jvm_flags = [],
-    test_class = None,
-    external_deps = [],
-    # flag to allow bazel_integration_testing own tests to work
-    add_bazel_data_dependency = True,
-    versions = BAZEL_VERSIONS,
-    **kwargs):
-  """A wrapper around java_test that create several java tests, one per version
-     of Bazel.
+        name,
+        srcs = [],
+        deps = None,
+        runtime_deps = [],
+        data = [],
+        jvm_flags = [],
+        test_class = None,
+        external_deps = [],
+        # flag to allow bazel_integration_testing own tests to work
+        add_bazel_data_dependency = True,
+        versions = BAZEL_VERSIONS,
+        **kwargs):
+    """A wrapper around java_test that create several java tests, one per version
+       of Bazel.
+  
+       Args:
+         versions: list of version of bazel to create a test for. Each test
+           will be named `<name>/bazel<version>`.
+         See java_test for the other arguments.
+    """
+    if not test_class:
+        test_class = "%s.%s" % (_java_package(), name)
+    add_deps = [
+        str(Label("//java/build/bazel/tests/integration:workspace_driver")),
+    ]
+    if srcs:
+        deps = (deps or []) + add_deps
+    else:
+        runtime_deps = runtime_deps + add_deps
+    for version in versions:
+        prop_rule = "%s/config%s" % (name, version)
+        bazel_java_integration_test_properties_(
+            name = prop_rule,
+            bazel_version = version,
+            external_deps = external_deps,
+        )
 
-     Args:
-       versions: list of version of bazel to create a test for. Each test
-         will be named `<name>/bazel<version>`.
-       See java_test for the other arguments.
-  """
-  if not test_class:
-    test_class = "%s.%s" % (_java_package(), name)
-  add_deps = [
-      str(Label("//java/build/bazel/tests/integration:workspace_driver")),
-  ]
-  if srcs:
-    deps = (deps or []) + add_deps
-  else:
-    runtime_deps = runtime_deps + add_deps
-  for version in versions:
-    prop_rule = "%s/config%s" % (name, version)
-    bazel_java_integration_test_properties_(
-        name = prop_rule,
-        bazel_version = version,
-        external_deps = external_deps,
+        cur_data = data + external_deps + [prop_rule + ".properties"]
+        if add_bazel_data_dependency:
+            cur_data += ["@build_bazel_bazel_%s//:bazel_binary" % version.replace(".", "_")]
+        native.java_test(
+            name = "%s/bazel%s" % (name, version),
+            jvm_flags = [
+                "-Dbazel.configuration=$(location %s.properties)" % prop_rule,
+            ] + jvm_flags,
+            srcs = srcs,
+            data = cur_data,
+            test_class = test_class,
+            deps = deps,
+            runtime_deps = runtime_deps,
+            **kwargs
+        )
+    native.test_suite(
+        name = name,
+        tests = [":%s/bazel%s" % (name, version) for version in versions],
     )
 
-    cur_data = data + external_deps + [prop_rule + ".properties"]
-    if add_bazel_data_dependency:
-      cur_data += ["@build_bazel_bazel_%s//:bazel_binary" % version.replace(".", "_")]
-    native.java_test(
-        name = "%s/bazel%s" % (name, version),
-        jvm_flags = [
-            "-Dbazel.configuration=$(location %s.properties)" % prop_rule
-        ] + jvm_flags,
-        srcs = srcs,
-        data = cur_data,
-        test_class = test_class,
-        deps = deps,
-        runtime_deps = runtime_deps,
-        **kwargs)
-  native.test_suite(
-      name = name,
-      tests = [":%s/bazel%s" % (name, version) for version in versions])
-
 def bazel_java_integration_test_deps(versions = BAZEL_VERSIONS):
-  bazel_binaries(versions)
+    bazel_binaries(versions)
 
-  # TODO(dmarting): Use http_file and relies on a mirror instead of maven_jar
-  native.maven_jar(
-      name = "com_google_guava",
-      artifact = "com.google.guava:guava:jar:21.0",
-  )
+    # TODO(dmarting): Use http_file and relies on a mirror instead of maven_jar
+    native.maven_jar(
+        name = "com_google_guava",
+        artifact = "com.google.guava:guava:jar:21.0",
+    )
 
-  native.maven_jar(
-      name = "org_hamcrest_core",
-      artifact = "org.hamcrest:hamcrest-core:jar:1.3",
-  )
+    native.maven_jar(
+        name = "org_hamcrest_core",
+        artifact = "org.hamcrest:hamcrest-core:jar:1.3",
+    )
 
-  native.maven_jar(
-      name = "org_junit",
-      artifact = "junit:junit:jar:4.11",
-  )
+    native.maven_jar(
+        name = "org_junit",
+        artifact = "junit:junit:jar:4.11",
+    )

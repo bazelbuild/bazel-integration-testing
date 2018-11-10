@@ -19,8 +19,8 @@ load(
 )
 load(
     "//tools:repositories.bzl",
-    "bazel_binary",
     "bazel_binaries",
+    "bazel_binary",
 )
 load(
     "//tools:bazel_java_integration_test.bzl",
