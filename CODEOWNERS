@@ -1,9 +1,9 @@
 # Default owner
-*                         @ittaiz @damienmg
+*                         @ittaiz
 
 # Java owners
-java/*                    @ittaiz @damienmg
-javatests/*               @ittaiz @damienmg
+java/*                    @ittaiz
+javatests/*               @ittaiz
 
 # Python owners
 
