@@ -73,19 +73,19 @@ def format_repositories():
   http_file(
       name = "io_bazel_buildifier_linux",
       urls = [
-          "https://github.com/bazelbuild/buildtools/releases/download/0.15.0/buildifier"
+          "https://github.com/bazelbuild/buildtools/releases/download/0.17.2/buildifier"
       ],
       sha256 = (
-          "0dea01a7a511797878f486e6ed8e549980c0710a0a116c8ee953d4e26de41515"),
+          "1cf35c463944003ceb3c3716d7fc489d3d70625e34a8127dfd8b272afad7e0fd"),
       executable = True,
   )
 
   http_file(
       name = "io_bazel_buildifier_darwin",
       urls = [
-          "https://github.com/bazelbuild/buildtools/releases/download/0.15.0/buildifier.osx"
+          "https://github.com/bazelbuild/buildtools/releases/download/0.17.2/buildifier.osx"
       ],
       sha256 = (
-          "860378a2badba9517e523e20f152ef1ca16234e0ca462a1d71e5dbee7d506771"),
+          "66a569152bf59a527000941758a25f1dd03d6e26302d7982fd8aee25e552a10c"),
       executable = True,
   )
