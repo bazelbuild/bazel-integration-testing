@@ -80,8 +80,9 @@ class TestBase(unittest.TestCase):
 
   def SetBazelVersion(self, version):
     """Set the bazel version to use, e.g. 0.5.4."""
+    bin_name = "bazel.exe" if os.name == "nt" else "bazel"
     if self._SetAndUnpackBazel(
-        "build_bazel_bazel_%s/bazel" % version.replace('.', '_')):
+        "build_bazel_bazel_%s/%s" % (version.replace('.', '_'), bin_name)):
       self.bazelVersion = version
     else:
       self.fail("Cannot find bazel version " + version)
