@@ -95,7 +95,11 @@ public class WorkspaceDriver {
   private static void unpackBazel(String version) throws IOException, InterruptedException {
     if (!bazelVersions.containsKey(version)) {
       // Get bazel location
-      Path bazelFile = runfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
+      String binName = "bazel";
+      if (System.getProperty("os.name").startsWith("Windows")) {
+        binName += ".exe";
+      }
+      Path bazelFile = runfile("build_bazel_bazel_" + version.replace('.', '_') + "/" + binName);
       if (!Files.exists(bazelFile)) {
         throw new BazelWorkspaceDriverException("Bazel version " + version + " not found");
       }
