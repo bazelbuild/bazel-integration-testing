@@ -6,11 +6,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 #Remote execution infra
 http_archive(
     name = "bazel_toolchains",
-    sha256 = "c3b08805602cd1d2b67ebe96407c1e8c6ed3d4ce55236ae2efe2f1948f38168d",
-    strip_prefix = "bazel-toolchains-5124557861ebf4c0b67f98180bff1f8551e0b421",
+ #   sha256 = "c3b08805602cd1d2b67ebe96407c1e8c6ed3d4ce55236ae2efe2f1948f38168d",
+    strip_prefix = "bazel-toolchains-bd4aa9c6df827b3ea2b71657538537698f809732",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/5124557861ebf4c0b67f98180bff1f8551e0b421.tar.gz",
-        "https://github.com/bazelbuild/bazel-toolchains/archive/5124557861ebf4c0b67f98180bff1f8551e0b421.tar.gz",
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/bd4aa9c6df827b3ea2b71657538537698f809732.tar.gz",
+        "https://github.com/bazelbuild/bazel-toolchains/archive/bd4aa9c6df827b3ea2b71657538537698f809732.tar.gz",
     ],
 )
 
