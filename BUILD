@@ -1,4 +1,4 @@
-load("@io_bazel_rules_go//go:def.bzl", "gazelle")
+load("@bazel_gazelle//:def.bzl", "gazelle")
 
 package_group(
     name = "internal",
@@ -21,7 +21,5 @@ filegroup(
     visibility = ["//:internal"],
 )
 
-gazelle(
-    name = "gazelle",
-    prefix = "github.com/bazelbuild/bazel-integration-testing",
-)
+# gazelle:prefix github.com/bazelbuild/bazel-integration-testing
+gazelle(name = "gazelle")
