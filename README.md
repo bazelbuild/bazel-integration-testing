@@ -16,9 +16,9 @@ This project was inspired by Bazel's own integration tests which were in bash at
 Internally at Wix we use this to develop and test several internal rules, macros and also tools that need to run `bazel query` and `bazel`.  
 ADD OSS EXAMPLE  
 ## Target audience  
-Bazel Starlark rule developers (both open source and closed source)  
-Bazel ecosystem tool developers (both open source and closed source)   
-Bazel developers  
+* Bazel Starlark rule developers (both open source and closed source)  
+* Bazel ecosystem tool developers (both open source and closed source)   
+* Bazel developers  
 ## Alternatives
 For integration testing as of Jan'19 there is no alternative which is usable outside of Bazel.  
 For some use-cases and tests one can use bazel-skylib's [unittest](https://github.com/bazelbuild/bazel-skylib/blob/master/lib/unittest.bzl) framework.  
