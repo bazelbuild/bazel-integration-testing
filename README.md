@@ -13,8 +13,7 @@ It does so by allowing you to have **isolated reproducible tests which run Bazel
 Happy path testing are often possible inside of bazel by adding examples of your usage but failing cases are much harder.      
 Few examples for such code can be Starlark plugins (both open and closed source), tools that augment Bazel/Bazel query and actually also Bazel itself.    
 This project was inspired by Bazel's own integration tests which were in bash at the time and were coupled inside.    
-Internally at Wix we use this to develop and test several internal rules, macros and also tools that need to run `bazel query` and `bazel`.
-Bazel's Eclipse plugin uses this library to test working with Bazel aspects while bazel-watcher runs Bazel in its E2Es.
+Internally at Wix we use this to develop and test several internal rules, macros and also tools that need to run `bazel query` and `bazel` while bazel-watcher runs Bazel in its E2Es to verify its assumptions on `bazel run` amongst other things.
 All of these set up scratch workspaces isolated to the specific tests.  
 ## Target audience  
 * Bazel Starlark rule developers (both open source and closed source)  
@@ -89,5 +88,4 @@ We hope to have more capacity in the next few months to also ramp up the missing
 Here's a (non-exhaustive) list of companies and projects that use `bazel-integration-testing`. Don't see yours? [You can add it in a PR](https://github.com/bazelbuild/bazel-integration-testing/edit/master/README.md)!
 
 * [bazel-watcher](https://github.com/bazelbuild/bazel-watcher)
-* [Bazel Eclipse plugin](https://github.com/bazelbuild/eclipse)
 * [Wix](https://www.wix.com/)
