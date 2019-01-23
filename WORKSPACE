@@ -3,6 +3,20 @@ workspace(name = "build_bazel_integration_testing")
 load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
+# Remote execution infra
+# Required configuration for remote build execution
+bazel_toolchains_version="be10bee3010494721f08a0fccd7f57411a1e773e"
+bazel_toolchains_sha256="5962fe677a43226c409316fcb321d668fc4b7fa97cb1f9ef45e7dc2676097b26"
+http_archive(
+         name = "bazel_toolchains",
+         urls = [
+           "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz"%bazel_toolchains_version,
+           "https://github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz"%bazel_toolchains_version
+         ],
+         strip_prefix = "bazel-toolchains-%s"%bazel_toolchains_version,
+         sha256 = bazel_toolchains_sha256,
+)
+
 ## Sanity checks
 
 git_repository(
@@ -116,6 +130,15 @@ bazel_external_dependency_archive(
             "http://maven.ibiblio.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
         ],
     },
+)
+
+bazel_external_dependency_archive(
+   name = "bazel_toolchains_test",
+   srcs = {
+       "5962fe677a43226c409316fcb321d668fc4b7fa97cb1f9ef45e7dc2676097b26": [
+           "https://github.com/bazelbuild/bazel-toolchains/archive/be10bee3010494721f08a0fccd7f57411a1e773e.tar.gz",
+       ],
+   }
 )
 
 ## Your new language here!

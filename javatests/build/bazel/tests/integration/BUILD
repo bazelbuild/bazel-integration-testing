@@ -49,3 +49,16 @@ bazel_java_integration_test(
     tags = ["block-network"],
     deps = ["//java/build/bazel/tests/integration"],
 )
+
+bazel_java_integration_test(
+    name = "RBEExampleTest",
+    srcs = ["RBEExampleTest.java"],
+    deps = ["//java/build/bazel/tests/integration"],
+    versions = [
+        "0.22.0",
+        "0.23.2",
+    ],
+    external_deps = [
+        "@bazel_toolchains_test",
+    ],
+)
