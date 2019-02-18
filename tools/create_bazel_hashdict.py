@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Generate a Skylark file containing a map of hash of bazel installers."""
+from __future__ import print_function
 
 import gflags
 import urllib2
@@ -53,7 +54,7 @@ def get_hash_map(f):
   while True:
     try:
       v = "%s.%s.%s" % (version[0], version[1], version[2])
-      print "Getting SHA-256 for version " + v
+      print("Getting SHA-256 for version " + v)
       # Force 404 before we actually add the information
       urllib2.urlopen(_URL_EXISTS.format(version = v)).read()
       f.write("    \"%s\": {\n" % v)
@@ -66,7 +67,7 @@ def get_hash_map(f):
       version[2] += 1
     except urllib2.HTTPError as e:
       if e.code == 404:
-        print "  ==> Not a Bazel version"
+        print("  ==> Not a Bazel version")
         # Current version does not exists, increase the lowest non null version number
         if skipped_version(version):
           version[2] += 1
