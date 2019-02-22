@@ -1,5 +1,12 @@
-load("//tools:common.bzl", "BAZEL_VERSIONS")
-load("//:bazel_integration_test.bzl", "bazel_py_integration_test")
+load("@build_bazel_integration_testing//tools:common.bzl", "BAZEL_VERSIONS")
+load("@build_bazel_integration_testing//python:python.bzl", "bazel_py_integration_test")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
+bzl_library(
+    name = "bzl",
+    srcs = ["python.bzl"],
+    visibility = ["//:internal"],
+)
 
 py_library(
     name = "python",

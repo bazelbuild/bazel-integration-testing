@@ -13,8 +13,8 @@
 # limitations under the License.
 
 # Python integration test framework for using Bazel
-load("//tools:common.bzl", "BAZEL_VERSIONS")
-load("//tools:repositories.bzl", "bazel_binaries")
+load("@build_bazel_integration_testing//tools:common.bzl", "BAZEL_VERSIONS")
+load("@build_bazel_integration_testing//tools:repositories.bzl", "bazel_binaries")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 def _make_compatible_version_list():

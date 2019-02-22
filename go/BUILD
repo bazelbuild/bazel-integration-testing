@@ -1,14 +1,13 @@
 # gazelle:exclude bazel_test.go
 # gazelle:ignore
 
-load("//:bazel_integration_test.bzl", "bazel_go_integration_test")
+load("@build_bazel_integration_testing//go:go.bzl", "bazel_go_integration_test")
 load("@io_bazel_rules_go//go:def.bzl", "go_library")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-filegroup(
+bzl_library(
     name = "bzl",
-    srcs = [
-        "bazel_integration_test.bzl",
-    ],
+    srcs = ["go.bzl"],
     visibility = ["//:internal"],
 )
 

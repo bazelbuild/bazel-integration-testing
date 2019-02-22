@@ -29,8 +29,6 @@ import org.junit.Test;
 @SuppressWarnings("SameParameterValue")
 public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
 
-  private static final String WORKSPACE_NAME =
-      "workspace(name = 'build_bazel_integration_testing')";
 
   @Test
   public void testVersion() throws Exception {
@@ -49,28 +47,26 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     assertThat(cmd.outputLines()).contains("in bar");
   }
 
+  /**
+   * Write out a BUILD file that loads the `bazel_java_integration_test` rule.
+   *
+   * This is a demo of how to load a .bzl file that is included in the parent repo.
+   * The test itself doesn't invoke Bazel, it's just a wrapper.
+   */
   @Test
   public void testTestSuiteExists() throws Exception {
     loadIntegrationTestRuleIntoWorkspace();
-    setupPassingTest("IntegrationTestSuiteTest");
-
-    driver.bazel("test", "//:IntegrationTestSuiteTest").mustRunSuccessfully();
-  }
-
-  @Test
-  public void testJvmFlags() {
-    org.hamcrest.MatcherAssert.assertThat(System.getProperty("foo.bar"), is("true"));
-  }
-
-  private void setupPassingTest(final String testName) throws IOException {
-    writePassingTestJavaSource(testName);
-    writeTestBuildFile(testName);
-  }
-
-  private void writeTestBuildFile(final String testName) throws IOException {
+    final String testName = "IntegrationTestSuiteTest";
+    driver.scratchFile(testName + ".java", Arrays.asList(
+        "import org.junit.Test;",
+        "public class " + testName + " {",
+        " @Test",
+        " public void testSuccess() {",
+        "  }",
+        "}"));
     driver.scratchFile(
         "BUILD",
-        "load('//:bazel_integration_test.bzl', 'bazel_java_integration_test')",
+        "load('@build_bazel_integration_testing//java:java.bzl', 'bazel_java_integration_test')",
         "",
         "bazel_java_integration_test(",
         "    name = '" + testName + "',",
@@ -80,52 +76,56 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
         // and we don't need it since it's prepared in advance for us
         "    add_bazel_data_dependency = False,",
         ")");
+
+    driver.bazel("test", "//:IntegrationTestSuiteTest").mustRunSuccessfully();
+  }
+
+  @Test
+  public void testJvmFlags() {
+    org.hamcrest.MatcherAssert.assertThat(System.getProperty("foo.bar"), is("true"));
   }
 
   private void loadIntegrationTestRuleIntoWorkspace() throws IOException {
-    setupRuleSkylarkFiles();
-    setupRuleCode();
-    driver.scratchFile("./WORKSPACE", WORKSPACE_NAME);
-  }
+    driver.scratchFile("./WORKSPACE",
+      "workspace(name = 'integration_test')",
+      "",
+      "local_repository(",
+      "    name = 'build_bazel_integration_testing',",
+      "    path = './build_bazel_integration_testing',",
+      ")");
 
-  private void setupRuleCode() throws IOException {
-    driver.copyFromRunfiles(
-        "build_bazel_integration_testing/java/build/bazel/tests/integration/libworkspace_driver.jar",
-        "java/build/bazel/tests/integration/libworkspace_driver.jar");
+    // Now copy in the build_bazel_integration_testing, which is included from
+    // the "data" attribute. By depending on the bzl_library rule we have
+    // access to the //java and //tools sections of the bzl tree. Note that
+    // this only imports files that are EXPLICITLY listed in the "data"
+    // attribute or are a compiled dependency of this library. Anything outside
+    // of that (BUILD files, WORKSPACE files, or source files) are not
+    // included.
+    driver.copyDirectoryFromRunfiles(
+        "build_bazel_integration_testing/", "");
+
+    // When using local_repository, the local repo must have a WORKSPACE file.
+    // Make one since we don't get one for free (it isn't in the "data"
+    // attribute").
+    driver.scratchFile("build_bazel_integration_testing/WORKSPACE",
+        "workspace(name = 'build_bazel_integration_testing')");
+
+    // In order to make //java and //tools a package it must have a build file
+    // (even if it's empty).
+    // Make one since we don't get one for free (it isn't in the "data"
+    // attribute").
+    driver.scratchFile("build_bazel_integration_testing/java/BUILD", "");
+    driver.scratchFile("build_bazel_integration_testing/tools/BUILD", "");
+
+    // Create the java/build/bazel/tests/integration package with a java_import
+    // that loads the java compiled resource that the sub-test can import the
+    // workspace driver (even though it doesn't use it).
     driver.scratchFile(
-        "java/build/bazel/tests/integration/BUILD.bazel",
+        "build_bazel_integration_testing/java/build/bazel/tests/integration/BUILD.bazel",
         "java_import(",
         "    name = 'workspace_driver',",
         "    jars = ['libworkspace_driver.jar'],",
         "    visibility = ['//visibility:public']",
         ")");
-  }
-
-  private void setupRuleSkylarkFiles() throws IOException {
-    driver.copyFromRunfiles(
-        "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
-    driver.copyDirectoryFromRunfiles(
-        "build_bazel_integration_testing/tools", "build_bazel_integration_testing");
-    driver.scratchFile(
-        "go/bazel_integration_test.bzl",
-        "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"
-            + "def bazel_go_integration_test(name, srcs, deps=[], versions=RULES_GO_COMPATIBLE_BAZEL_VERSION, **kwargs):\n"
-            + "  pass");
-    // In order to make //go a package it must have a build file (even if it's empty).
-    driver.scratchFile("go/BUILD.bazel", "");
-  }
-
-  private void writePassingTestJavaSource(final String testName) throws IOException {
-    driver.scratchFile("" + testName + ".java", somePassingTestNamed(testName));
-  }
-
-  private List<String> somePassingTestNamed(final String testName) {
-    return Arrays.asList(
-        "import org.junit.Test;",
-        "public class " + testName + " {",
-        " @Test",
-        " public void testSuccess() {",
-        "  }",
-        "}");
   }
 }

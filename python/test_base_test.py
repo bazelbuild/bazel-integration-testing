@@ -14,7 +14,7 @@
 
 import os
 import unittest
-from bazel_integration_test import test_base
+from python import test_base
 
 
 class TestBaseTest(test_base.TestBase):

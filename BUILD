@@ -1,22 +1,25 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 package_group(
     name = "internal",
     packages = ["//..."],
 )
 
-filegroup(
+bzl_library(
     name = "root_bzl",
     srcs = glob(["*.bzl"]),
     visibility = ["//:internal"],
 )
 
-filegroup(
+bzl_library(
     name = "all_bzl",
     srcs = [
         ":root_bzl",
         "//go:bzl",
-        "//tools",
+        "//java:bzl",
+        "//python:bzl",
+        "//tools:bzl",
     ],
     visibility = ["//:internal"],
 )

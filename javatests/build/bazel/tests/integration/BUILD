@@ -1,10 +1,11 @@
-load("//:bazel_integration_test.bzl", "bazel_java_integration_test")
+load("@build_bazel_integration_testing//java:java.bzl", "bazel_java_integration_test")
 
 bazel_java_integration_test(
     name = "BazelBaseTestCaseTest",
     srcs = ["BazelBaseTestCaseTest.java"],
     data = [
-        "//:all_bzl",
+        "//java:bzl",
+        "//tools:bzl",
     ],
     jvm_flags = ["-Dfoo.bar=true"],
     deps = [

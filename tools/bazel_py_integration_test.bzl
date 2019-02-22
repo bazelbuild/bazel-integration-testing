@@ -12,37 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Python integration test framework for using Bazel
-load(":common.bzl", "BAZEL_VERSIONS")
-load(":repositories.bzl", "bazel_binaries")
+# TODO: This file will be deleted March 22, 2019.
+print(
+    "WARNING: tools/bazel_py_integration_test.bzl has been moved. Please " +
+    "replace your load statement with:\n\n" +
+    "load(\"@build_bazel_integration_testing//python:python.bzl\", \"bazel_py_integration_test\")",
+)
 
-def bazel_py_integration_test(name,
-                              srcs,
-                              main = None,
-                              deps = [],
-                              versions = BAZEL_VERSIONS,
-                              **kwargs):
-  """A wrapper around py_test that create several python tests, one per version
-     of Bazel.
+load(
+    "//python:python.bzl",
+    bazel_py_integration_test_ = "bazel_py_integration_test",
+)
 
-     Args:
-       versions: list of version of bazel to create a test for. Each test
-         will be named `<name>/bazel<version>`.
-       See py_test for the other arguments.
-  """
-  if not main and len(srcs) == 1:
-    main = srcs[0]
-  for version in versions:
-    add_deps = [
-        str(Label("//bazel_integration_test:python")),
-        str(Label("//bazel_integration_test:python_version_" + version)),
-    ]
-    native.py_test(
-        name = "%s/bazel%s" % (name, version),
-        srcs = srcs,
-        main = main,
-        deps = deps + add_deps,
-        **kwargs)
-  native.test_suite(
-      name = name,
-      tests = [":%s/bazel%s" % (name, version) for version in versions])
+# Reexport the python integration test macros.
+bazel_py_integration_test = bazel_py_integration_test_

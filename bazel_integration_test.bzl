@@ -36,7 +36,7 @@ load(
     bazel_external_dependency_archive_ = "bazel_external_dependency_archive",
 )
 load(
-    "//go:bazel_integration_test.bzl",
+    "//go:go.bzl",
     bazel_go_integration_test_ = "bazel_go_integration_test",
 )
 
