@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load(":common.bzl", "BAZEL_HASH_DICT", "BAZEL_VERSIONS")
+load("//tools:bazel_hash_dict.bzl", "BAZEL_HASH_DICT")
+load(":common.bzl", "BAZEL_VERSIONS")
 
 _BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh"
 
@@ -45,6 +46,7 @@ bazel_binary = repository_rule(
     },
     implementation = _bazel_repository_impl,
 )
+
 """Download a bazel binary for integration test.
 
 Args:

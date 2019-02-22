@@ -15,27 +15,49 @@
 # Integration test framework for using Bazel
 load(
     "//tools:common.bzl",
-    "BAZEL_VERSIONS",
+    BAZEL_VERSIONS_ = "BAZEL_VERSIONS",
 )
 load(
     "//tools:repositories.bzl",
-    "bazel_binary",
-    "bazel_binaries",
+    bazel_binaries_ = "bazel_binaries",
+    bazel_binary_ = "bazel_binary",
 )
 load(
     "//tools:bazel_java_integration_test.bzl",
-    "bazel_java_integration_test",
-    "bazel_java_integration_test_deps",
+    bazel_java_integration_test_ = "bazel_java_integration_test",
+    bazel_java_integration_test_deps_ = "bazel_java_integration_test_deps",
 )
 load(
     "//tools:bazel_py_integration_test.bzl",
-    "bazel_py_integration_test",
+    bazel_py_integration_test_ = "bazel_py_integration_test",
 )
 load(
     "//tools:import.bzl",
-    "bazel_external_dependency_archive",
+    bazel_external_dependency_archive_ = "bazel_external_dependency_archive",
 )
 load(
     "//go:bazel_integration_test.bzl",
-    "bazel_go_integration_test",
+    bazel_go_integration_test_ = "bazel_go_integration_test",
 )
+
+print(
+    "WARNING: bazel_integration_test.bzl is deprecated and will go away in " +
+    "the future, please directly load the bzl file(s) of the module(s) " +
+    "needed as it is more efficient.",
+)
+
+BAZEL_VERSIONS = BAZEL_VERSIONS_
+
+bazel_binary = bazel_binary_
+
+bazel_binaries = bazel_binaries_
+
+bazel_java_integration_test = bazel_java_integration_test_
+
+bazel_java_integration_test_deps = bazel_java_integration_test_deps_
+
+bazel_py_integration_test = bazel_py_integration_test_
+
+bazel_external_dependency_archive = bazel_external_dependency_archive_
+
+bazel_go_integration_test = bazel_go_integration_test_
