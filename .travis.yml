@@ -13,4 +13,3 @@ addons:
       - bazel
 
 script:
-  - FMT_SKYLINT=false ./lint.sh check
