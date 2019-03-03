@@ -34,9 +34,9 @@ public class WorkspaceDriverTest {
   @Test
   public void copyDirectoryFromRunfilesWithoutPrefixShouldCopyTheWholeDirectory()
       throws IOException {
-    String knownFile = "bazel_tools/tools/jdk/TestRunner_deploy.jar";
+    String knownFile = "build_bazel_integration_testing/javatests/build/bazel/tests/integration/WorkspaceDriverTest/" + jarNameAccordingToCurrentBazelVersion();
 
-    driver.copyDirectoryFromRunfiles("bazel_tools/tools", "");
+    driver.copyDirectoryFromRunfiles("build_bazel_integration_testing/javatests/build/bazel/tests/integration", "");
 
     Optional<Path> actualFilePath = findPath(driver.workspaceDirectoryContents(), knownFile);
     org.hamcrest.MatcherAssert.assertThat(
@@ -56,8 +56,8 @@ public class WorkspaceDriverTest {
   @Test
   public void copyDirectoryFromRunfilesShouldCopyTheWholeDirectoryAndStripPrefix()
       throws IOException {
-    String sourceDirectoryThatWillBeStripped = "bazel_tools/tools";
-    String theFileToCopy = "/jdk/TestRunner_deploy.jar";
+    String sourceDirectoryThatWillBeStripped = "build_bazel_integration_testing/javatests/build/bazel/tests/integration";
+    String theFileToCopy = "/WorkspaceDriverTest/" + jarNameAccordingToCurrentBazelVersion();
     String knownFile = sourceDirectoryThatWillBeStripped + theFileToCopy;
 
     driver.copyDirectoryFromRunfiles(
@@ -74,14 +74,14 @@ public class WorkspaceDriverTest {
 
   @Test(expected = WorkspaceDriver.BazelWorkspaceDriverException.class)
   public void copyDirectoryFromRunfilesShouldThrowIfNotDirectory() throws IOException {
-    String knownFile = "bazel_tools/tools/jdk/TestRunner_deploy.jar";
+    String knownFile = "build_bazel_integration_testing/javatests/build/bazel/tests/integration/WorkspaceDriverTest/" + jarNameAccordingToCurrentBazelVersion();
 
     driver.copyDirectoryFromRunfiles(knownFile, "");
   }
 
   @Test(expected = WorkspaceDriver.BazelWorkspaceDriverException.class)
   public void copyDirectoryFromRunfilesShouldThrowIfTheStripPrefixIsntAPrefix() throws IOException {
-    String knownFile = "bazel_tools/tools/jdk/TestRunner_deploy.jar";
+    String knownFile = "build_bazel_integration_testing/javatests/build/bazel/tests/integration/WorkspaceDriverTest/"  + jarNameAccordingToCurrentBazelVersion();
 
     driver.copyDirectoryFromRunfiles(knownFile, "blabla");
   }
@@ -113,7 +113,14 @@ public class WorkspaceDriverTest {
 
   @Test
   public void runfileReturnTheFile() {
-    Path runfile = WorkspaceDriver.runfile("bazel_tools", "tools", "jdk", "TestRunner_deploy.jar");
+    Path runfile = WorkspaceDriver.runfile("build_bazel_integration_testing",
+        "javatests",
+        "build",
+        "bazel",
+        "tests",
+        "integration",
+        "WorkspaceDriverTest",
+        jarNameAccordingToCurrentBazelVersion());
 
     assertTrue("runfile should exists", Files.exists(runfile));
   }
@@ -145,4 +152,9 @@ public class WorkspaceDriverTest {
   private Optional<Path> findPath(List<Path> paths, String path) {
     return paths.stream().filter(x -> x.toString().endsWith(path)).findFirst();
   }
+
+  private String jarNameAccordingToCurrentBazelVersion() {
+    return "bazel" + WorkspaceDriver.properties.getProperty("bazel.version") + ".jar";
+  }
+
 }
