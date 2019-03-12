@@ -3,22 +3,16 @@ platforms:
   ubuntu1404:
     build_targets:
     - "..."
-    test_flags:
-    - "--test_output=all"
     test_targets:
     - "..."
   ubuntu1604:
     build_targets:
     - "..."
-    test_flags:
-    - "--test_output=all"
     test_targets:
     - "..."
   macos:
     build_targets:
     - "..."
-    test_flags:
-    - "--test_output=all"
     test_targets:
     - "..."
   windows:
@@ -30,6 +24,5 @@ platforms:
     - "--enable_runfiles"
     - "--test_tag_filters=-no_windows"
     - "--test_env=JAVA_HOME"
-    - "--test_output=all"
     test_targets:
     - "..."
