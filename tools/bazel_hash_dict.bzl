@@ -21,9 +21,9 @@ BAZEL_HASH_DICT = {
         "linux-x86_64": "feedbe02c81142ed95ef8d380472f0a0d88e1b9a4b1fb6e21728701032b68e02",
         "windows-x86_64": "ba6ad8931f1c82095a1194976f01adfafd881ee69fc69665334104c661800b4b",
     },
-    "0.23.2": {
-        "darwin-x86_64": "53fa727fd0bcce3e1953eef2eddd6b4c6f959cb34cb453f57787fd55874b6bc3",
-        "linux-x86_64": "5e77a0c06b45b12126e51a5fab13c89dfe6a356f86e1d27299dfac8e8746a7e9",
-        "windows-x86_64": "a91c8c2b8d31709e74310e31d0a11ba237c4f4dcff7adc0e1102fbb66a489ffe",
-    },
+    # "0.23.2": {
+    #     "darwin-x86_64": "53fa727fd0bcce3e1953eef2eddd6b4c6f959cb34cb453f57787fd55874b6bc3",
+    #     "linux-x86_64": "5e77a0c06b45b12126e51a5fab13c89dfe6a356f86e1d27299dfac8e8746a7e9",
+    #     "windows-x86_64": "a91c8c2b8d31709e74310e31d0a11ba237c4f4dcff7adc0e1102fbb66a489ffe",
+    # },
 }
