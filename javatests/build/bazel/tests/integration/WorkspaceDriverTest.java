@@ -150,7 +150,8 @@ public class WorkspaceDriverTest {
   }
 
   private Optional<Path> findPath(List<Path> paths, String path) {
-    return paths.stream().filter(x -> x.toString().endsWith(path)).findFirst();
+    final String path_platform = (OS.getCurrent() == OS.WINDOWS) ? path.replace("/", "\\") : path;
+    return paths.stream().filter(x -> x.toString().endsWith(path_platform)).findFirst();
   }
 
   private String jarNameAccordingToCurrentBazelVersion() {

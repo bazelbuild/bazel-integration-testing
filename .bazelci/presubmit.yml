@@ -21,3 +21,15 @@ platforms:
     - "--test_output=all"
     test_targets:
     - "..."
+  windows:
+    build_targets:
+    - "..."
+    build_flags:
+    - "--enable_runfiles"
+    test_flags:
+    - "--enable_runfiles"
+    - "--test_tag_filters=-no_windows"
+    - "--test_env=JAVA_HOME"
+    - "--test_output=all"
+    test_targets:
+    - "..."

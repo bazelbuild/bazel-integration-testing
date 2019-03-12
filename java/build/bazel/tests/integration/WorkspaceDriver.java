@@ -95,7 +95,8 @@ public class WorkspaceDriver {
   private static void unpackBazel(String version) throws IOException, InterruptedException {
     if (!bazelVersions.containsKey(version)) {
       // Get bazel location
-      Path bazelFile = runfile("build_bazel_bazel_" + version.replace('.', '_') + "/bazel");
+      String bazelName = "bazel" + (OS.getCurrent() == OS.WINDOWS ? ".exe" : "");
+      Path bazelFile = runfile("build_bazel_bazel_" + version.replace('.', '_') + "/" + bazelName);
       if (!Files.exists(bazelFile)) {
         throw new BazelWorkspaceDriverException("Bazel version " + version + " not found");
       }
@@ -178,14 +179,17 @@ public class WorkspaceDriver {
       throw new BazelWorkspaceDriverException(
           "The `stripPrefix` MUST be a prefix of `directoryToCopy`");
 
-    Path stripPrefixPath = Paths.get(stripPrefix);
+    // Paths.get("").relativize(Paths.get("foo/bar")) returns ..\foo\bar on Windows,
+    // but it returns foo/bar on Linux.
+    // Adding ./ as a prefix to all path to make sure relativize returns correct result.
+    Path stripPrefixPath = Paths.get("./" + stripPrefix);
     try (Stream<Path> paths = Files.walk(startingDirectory)) {
       paths
           .filter(path -> Files.isRegularFile(path))
           .forEach(
               runfilePath -> {
                 Path relativeToRunfilesPath = runfileDirectory.relativize(runfilePath);
-                Path destinationPath = stripPrefixPath.relativize(relativeToRunfilesPath);
+                Path destinationPath = stripPrefixPath.relativize(Paths.get("./").resolve(relativeToRunfilesPath));
                 try {
                   copyFromRunfiles(relativeToRunfilesPath.toString(), destinationPath.toString());
                 } catch (IOException e) {
