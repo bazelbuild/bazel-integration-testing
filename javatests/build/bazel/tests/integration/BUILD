@@ -45,6 +45,9 @@ bazel_java_integration_test(
     ],
     # Ensure that there could be no network fetch in sandboxing.  This tag is a Bazel
     # built-in, it is important to keep it.
-    tags = ["block-network"],
+    tags = [
+        "block-network",
+        "exclusive",
+    ],
     deps = ["//java/build/bazel/tests/integration"],
 )
