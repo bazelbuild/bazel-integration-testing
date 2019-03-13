@@ -24,5 +24,6 @@ platforms:
     - "--enable_runfiles"
     - "--test_tag_filters=-no_windows"
     - "--test_env=JAVA_HOME"
+    - "--test_env=BAZEL_SH"
     test_targets:
     - "..."
