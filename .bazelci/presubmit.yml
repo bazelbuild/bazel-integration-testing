@@ -23,7 +23,7 @@ platforms:
     test_flags:
     - "--enable_runfiles"
     - "--test_tag_filters=-no_windows"
-    - "--test_env=JAVA_HOME"
-    - "--test_env=BAZEL_SH"
+    - "--test_env=JAVA_HOME" # For building Java binary inside test
+    - "--test_env=BAZEL_SH"  # Make sure Bazel binary inside test can find the correct Bash (MSYS2 instead of Git)
     test_targets:
     - "..."
