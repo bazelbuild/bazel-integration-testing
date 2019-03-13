@@ -260,45 +260,21 @@ class TestBase(unittest.TestCase):
   def _EnvMap(self, env_remove = None, env_add = None):
     """Returns the environment variable map to run Bazel or other programs."""
     if TestBase.IsWindows():
-      result = []
-      if sys.version_info.major == 3:
-        # Python 3.2 has os.listdir
-        result = [
-            n for n in os.listdir('c:\\program files\\java')
-            if n.startswith('jdk')
-        ]
-      else:
-        # Python 2.7 has os.path.walk
-        def _Visit(result, _, names):
-          result.extend(n for n in names if n.startswith('jdk'))
-          while names:
-            names.pop()
-
-        os.path.walk('c:\\program files\\java\\', _Visit, result)
-
       env = {
-          'SYSTEMROOT': TestBase.GetEnv('SYSTEMROOT'),
-          # TODO(laszlocsomor): Let Bazel pass BAZEL_SH and JAVA_HOME to tests
-          # and use those here instead of hardcoding paths.
-          'JAVA_HOME': 'c:\\program files\\java\\' + sorted(result)[-1],
-          'BAZEL_SH': 'c:\\tools\\msys64\\usr\\bin\\bash.exe',
-          # TODO(pcloudy): Remove this after no longer need to debug
-          # https://github.com/bazelbuild/bazel/issues/3273
-          'CC_CONFIGURE_DEBUG': '1'
+          'SYSTEMROOT':
+              TestBase.GetEnv('SYSTEMROOT'),
+          # TODO(laszlocsomor): Let Bazel pass BAZEL_SH to tests and use that
+          # here instead of hardcoding paths.
+          #
+          # You can override this with
+          # --action_env=BAZEL_SH=C:\path\to\my\bash.exe.
+          'BAZEL_SH':
+              TestBase.GetEnv('BAZEL_SH',
+                              'c:\\tools\\msys64\\usr\\bin\\bash.exe'),
       }
-
-      # TODO(pcloudy): Remove these hardcoded paths after resolving
-      # https://github.com/bazelbuild/bazel/issues/3273
-      env['BAZEL_VC'] = 'visual-studio-not-found'
-      for p in [
-          (r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional'
-           r'\VC'),
-          r'C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC',
-          r'C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC'
-      ]:
-        if os.path.exists(p):
-          env['BAZEL_VC'] = p
-          break
+      java_home = TestBase.GetEnv('JAVA_HOME', '')
+      if java_home:
+        env['JAVA_HOME'] = java_home
     else:
       env = {'HOME': os.path.join(self._temp, 'home')}
 
@@ -310,7 +286,8 @@ class TestBase(unittest.TestCase):
     env['TMP'] = self._temp
     if env_remove:
       for e in env_remove:
-        del env[e]
+        if e in env:
+          del env[e]
     if env_add:
       for e in env_add:
         env[e] = env_add[e]
