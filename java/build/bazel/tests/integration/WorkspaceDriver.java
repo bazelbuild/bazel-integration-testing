@@ -66,7 +66,7 @@ public class WorkspaceDriver {
         repositoryCache.put(Paths.get(dep));
       }
     }
-    repositoryCache.freeze();
+    // repositoryCache.freeze();
   }
 
   private static void setupTmp() throws IOException {
