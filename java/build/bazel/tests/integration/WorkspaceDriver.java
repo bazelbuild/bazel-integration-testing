@@ -70,7 +70,10 @@ public class WorkspaceDriver {
   }
 
   private static void setupTmp() throws IOException {
-    String environmentTempDirectory = System.getenv("TEST_TMPDIR");
+    // We have to use a shorted output user root on Windows, otherwise we get
+    // a "current working directory is too long" error, so use TMP instead of "TEST_TMPDIR"
+    String environmentTempDirectory =
+      OS.getCurrent() == OS.WINDOWS ? System.getenv("TMP") : System.getenv("TEST_TMPDIR");
     if (environmentTempDirectory == null) {
       tmp = Files.createTempDirectory("e4b-tests");
       tmp.toFile().deleteOnExit();

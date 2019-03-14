@@ -11,9 +11,6 @@ bazel_java_integration_test(
         "//java/build/bazel/tests/integration",
         "@com_google_truth//jar",
     ],
-    # We had to disable this test on Windows because it will fail due to running Bazel
-    # from a path longer than 256 charactors.
-    tags = ["no_windows"],
 )
 
 bazel_java_integration_test(
