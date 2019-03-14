@@ -76,7 +76,8 @@ public class WorkspaceDriver {
     String environmentTempDirectory =
       OS.getCurrent() == OS.WINDOWS ? null : System.getenv("TEST_TMPDIR");
     if (environmentTempDirectory == null) {
-      tmp = Files.createTempDirectory("e4b-tests");
+      Path tmpPath = Paths.get(System.getenv("TMP"));
+      tmp = Files.createTempDirectory(tmpPath, "e4b-tests");
       tmp.toFile().deleteOnExit();
     } else {
       tmp = Paths.get(environmentTempDirectory);
