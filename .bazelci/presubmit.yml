@@ -3,17 +3,22 @@ platforms:
   ubuntu1404:
     build_targets:
     - "..."
+    test_flags:
+    - "--test_tag_filters=-no_linux"
     test_targets:
     - "..."
   ubuntu1604:
     build_targets:
     - "..."
+    test_flags:
+    - "--test_tag_filters=-no_linux"
     test_targets:
     - "..."
   macos:
     build_targets:
     - "..."
-    test_targets:
+    test_flags:
+    - "--test_tag_filters=-no_macos"
     - "..."
   windows:
     build_targets:
