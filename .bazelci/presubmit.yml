@@ -3,21 +3,27 @@ platforms:
   ubuntu1404:
     build_targets:
     - "..."
-    test_flags:
-    - "--test_output=all"
     test_targets:
     - "..."
   ubuntu1604:
     build_targets:
     - "..."
-    test_flags:
-    - "--test_output=all"
     test_targets:
     - "..."
   macos:
     build_targets:
     - "..."
+    test_targets:
+    - "..."
+  windows:
+    build_targets:
+    - "..."
+    build_flags:
+    - "--enable_runfiles"
     test_flags:
-    - "--test_output=all"
+    - "--enable_runfiles"
+    - "--test_tag_filters=-no_windows"
+    - "--test_env=JAVA_HOME" # For building Java binary inside test
+    - "--test_env=BAZEL_SH"  # Make sure Bazel binary inside test can find the correct Bash (MSYS2 instead of Git)
     test_targets:
     - "..."

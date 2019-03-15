@@ -52,7 +52,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
   @Test
   public void testRunWithArguments() throws Exception {
-    driver.scratchFile("BUILD.bazel", shTest("test_me"));
+    driver.scratchFile("BUILD.bazel", shBinary("test_me"));
     driver.scratchExecutableFile("test_me.sh", shellTestingArguments("hello", "world"));
     driver.bazel("run", "//:test_me", "--", "hello", "world").mustRunSuccessfully();
   }
@@ -126,8 +126,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
         "    licenses = [\"notice\"],  # The MIT License",
         "    jar_sha256 = \"457877c79e038f390557db5f8e92c4436fb4f4b3ba63f28bc228500fee080193\",",
         "    jar_urls = [",
-        "        \"http://maven.ibiblio.org/maven2/net/sf/jopt-simple/jopt-simple/5.0.2/jopt-simple-5.0.2.jar\",",
-        "        \"http://repo1.maven.org/maven2/net/sf/jopt-simple/jopt-simple/5.0.2/jopt-simple-5.0.2.jar\",",
+        "        \"http://a.host.does.not.exist/jopt-simple-5.0.2.jar\",",
         "    ],",
         ")");
 
@@ -198,6 +197,11 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
   private static List<String> shTest(String name) {
     return Arrays.asList(
         "sh_test(", "  name = '" + name + "',", "  srcs = ['" + name + ".sh'],", ")");
+  }
+
+  private static List<String> shBinary(String name) {
+    return Arrays.asList(
+        "sh_binary(", "  name = '" + name + "',", "  srcs = ['" + name + ".sh'],", ")");
   }
 
   private static List<String> passingTestNamed(String name, String... additionalImports) {

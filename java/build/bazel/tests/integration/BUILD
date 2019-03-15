@@ -8,6 +8,7 @@ java_library(
         "Command.java",
         "RepositoryCache.java",
         "WorkspaceDriver.java",
+        "OS.java",
     ],
     visibility = ["//visibility:public"],
 )

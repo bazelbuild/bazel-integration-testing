@@ -23,6 +23,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 	"syscall"
 
@@ -39,6 +40,10 @@ type TestingBazel struct {
 
 	// Path to the testing temp directory.
 	tmpDir string
+}
+
+func IsWindows() bool {
+	return runtime.GOOS == "windows"
 }
 
 // New instance of a TestingBazel will be created and the program will cd into
@@ -58,7 +63,11 @@ func New() (*TestingBazel, error) {
 	b := &TestingBazel{
 		tmpDir: dir,
 	}
-	if !b.setAndUnpackBazel(fmt.Sprintf("build_bazel_bazel_%s/bazel", strings.Replace(BazelVersion, ".", "_", -1))) {
+	suffix := ""
+	if IsWindows() {
+		suffix = ".exe"
+	}
+	if !b.setAndUnpackBazel(fmt.Sprintf("build_bazel_bazel_%s/bazel%s", strings.Replace(BazelVersion, ".", "_", -1), suffix)) {
 		return nil, errors.New("Unable to find Bazel")
 	}
 

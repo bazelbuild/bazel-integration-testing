@@ -44,8 +44,9 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
     driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
     driver.scratchExecutableFile("foo/bar.sh", "echo \"in bar\"");
 
+    // --enable_runfiles has no effect on Linux and macOS, but it enables runfiles symlink tree on Windows.
     BazelCommand cmd =
-        driver.bazel("run", "bar").inWorkingDirectory(Paths.get("foo")).mustRunSuccessfully();
+        driver.bazel("run", "bar", "--enable_runfiles").inWorkingDirectory(Paths.get("foo")).mustRunSuccessfully();
     assertThat(cmd.outputLines()).contains("in bar");
   }
 
@@ -53,8 +54,8 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   public void testTestSuiteExists() throws Exception {
     loadIntegrationTestRuleIntoWorkspace();
     setupPassingTest("IntegrationTestSuiteTest");
-
-    driver.bazel("test", "//:IntegrationTestSuiteTest").mustRunSuccessfully();
+    // --enable_runfiles has no effect on Linux and macOS, but it enables runfiles symlink tree on Windows.
+    driver.bazel("test", "//:IntegrationTestSuiteTest", "--enable_runfiles").mustRunSuccessfully();
   }
 
   @Test

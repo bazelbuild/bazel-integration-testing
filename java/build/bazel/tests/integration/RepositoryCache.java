@@ -109,19 +109,23 @@ public class RepositoryCache {
             public FileVisitResult visitFile(Path file, BasicFileAttributes attrs)
                 throws IOException {
               if (file.getFileSystem().isReadOnly()) return FileVisitResult.CONTINUE;
-              Set<PosixFilePermission> perms = new HashSet<>();
-              perms.add(PosixFilePermission.OWNER_READ);
-              Files.setPosixFilePermissions(file, perms);
+              if (file.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+                Set<PosixFilePermission> perms = new HashSet<>();
+                perms.add(PosixFilePermission.OWNER_READ);
+                Files.setPosixFilePermissions(file, perms);
+              }
               return FileVisitResult.CONTINUE;
             }
 
             @Override
             public FileVisitResult postVisitDirectory(Path dir, IOException exc)
                 throws IOException {
-              Set<PosixFilePermission> perms = new HashSet<>();
-              perms.add(PosixFilePermission.OWNER_READ);
-              perms.add(PosixFilePermission.OWNER_EXECUTE); // For 'ls'
-              Files.setPosixFilePermissions(dir, perms);
+              if (dir.getFileSystem().supportedFileAttributeViews().contains("posix")) {
+                Set<PosixFilePermission> perms = new HashSet<>();
+                perms.add(PosixFilePermission.OWNER_READ);
+                perms.add(PosixFilePermission.OWNER_EXECUTE); // For 'ls'
+                Files.setPosixFilePermissions(dir, perms);
+              }
               return FileVisitResult.CONTINUE;
             }
           });
