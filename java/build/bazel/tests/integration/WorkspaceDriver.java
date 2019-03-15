@@ -66,7 +66,9 @@ public class WorkspaceDriver {
         repositoryCache.put(Paths.get(dep));
       }
     }
-    // repositoryCache.freeze();
+    //freeze doesn't work on Windows
+    if (OS.getCurrent() != OS.WINDOWS)
+      repositoryCache.freeze();
   }
 
   private static void setupTmp() throws IOException {
