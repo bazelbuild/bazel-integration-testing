@@ -300,7 +300,8 @@ public class WorkspaceDriver {
     if (build.getErrorLines().stream().anyMatch(line -> line.contains("1.8."))) {
       return "@bazel_tools//tools/jdk:toolchain_hostjdk8";
     } else {
-      return "@bazel_tools//tools/jdk:toolchain_jdk9";
+      return "@bazel_tools//tools/jdk:toolchain_hostjdk8";
+//      return "@bazel_tools//tools/jdk:toolchain_jdk9";
     }
   }
 
