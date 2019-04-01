@@ -46,6 +46,8 @@ public class WorkspaceDriver {
 
   private static RepositoryCache repositoryCache;
 
+  private static Stream<String> currentBazelJavaFlagsForSandboxedRun;
+  
   /** Returns the current workspace path */
   public Path currentWorkspace() {
     return workspace;
@@ -56,6 +58,7 @@ public class WorkspaceDriver {
     setupTmp();
     bazelVersions = new HashMap<>();
     setupRepositoryCache();
+    currentBazelJavaFlagsForSandboxedRun = bazelJavaFlagsForSandboxedRun();
   }
 
   private static void setupRepositoryCache() throws IOException {
@@ -266,7 +269,7 @@ public class WorkspaceDriver {
   /** Returns a builder for invoking bazel. */
   public BazelCommand.Builder bazel(String arg, String... args) {
     return bazel(Stream.concat(Stream.concat(Stream.of(arg), Stream.of(args)),
-        bazelJavaFlagsForSandboxedRun()).collect(Collectors.toList()));
+        currentBazelJavaFlagsForSandboxedRun).collect(Collectors.toList()));
   }
 
   /** Returns a builder for invoking bazel. */
@@ -280,13 +283,7 @@ public class WorkspaceDriver {
     final String toolchain = javaToolchainFromJavaHome(javaHome);
     return Stream.of(
         "--host_javabase=@bazel_tools//tools/jdk:jdk",
-//        "--javabase=@bazel_tools//tools/jdk:jdk",
-//        "--host_javabase=@bazel_tools//tools/jdk:absolute_javabase",
-//        "--javabase=@bazel_tools//tools/jdk:absolute_javabase",
         "--java_toolchain=" + toolchain
-//        "--host_java_toolchain="  + toolchain,
-//        "--define=ABSOLUTE_JAVABASE="+ javaHome
-
     );
   }
 
@@ -298,8 +295,7 @@ public class WorkspaceDriver {
       e.printStackTrace();
     }
     if (build.getErrorLines().stream().anyMatch(line -> line.contains("1.8."))) {
-//      return "@bazel_tools//tools/jdk:toolchain_hostjdk8";
-      return "@bazel_tools//tools/jdk:toolchain_java9";
+      return "@bazel_tools//tools/jdk:toolchain_hostjdk8";
     } else {
       return "@bazel_tools//tools/jdk:toolchain_java9";
     }
