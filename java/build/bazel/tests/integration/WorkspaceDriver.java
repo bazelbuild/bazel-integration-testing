@@ -46,8 +46,8 @@ public class WorkspaceDriver {
 
   private static RepositoryCache repositoryCache;
 
-  private static Stream<String> currentBazelJavaFlagsForSandboxedRun;
-  
+  private static String javaToolchain;
+
   /** Returns the current workspace path */
   public Path currentWorkspace() {
     return workspace;
@@ -58,7 +58,7 @@ public class WorkspaceDriver {
     setupTmp();
     bazelVersions = new HashMap<>();
     setupRepositoryCache();
-    currentBazelJavaFlagsForSandboxedRun = bazelJavaFlagsForSandboxedRun();
+    javaToolchain = javaToolchainFromProperties();
   }
 
   private static void setupRepositoryCache() throws IOException {
@@ -269,7 +269,7 @@ public class WorkspaceDriver {
   /** Returns a builder for invoking bazel. */
   public BazelCommand.Builder bazel(String arg, String... args) {
     return bazel(Stream.concat(Stream.concat(Stream.of(arg), Stream.of(args)),
-        currentBazelJavaFlagsForSandboxedRun).collect(Collectors.toList()));
+        bazelJavaFlagsForSandboxedRun()).collect(Collectors.toList()));
   }
 
   /** Returns a builder for invoking bazel. */
@@ -278,13 +278,16 @@ public class WorkspaceDriver {
   }
 
   private static Stream<String> bazelJavaFlagsForSandboxedRun() {
-    final String javaHome = Paths.get(
-        WorkspaceDriver.properties.getProperty("java_home_runfiles_path")).toAbsolutePath().toString();
-    final String toolchain = javaToolchainFromJavaHome(javaHome);
     return Stream.of(
         "--host_javabase=@bazel_tools//tools/jdk:jdk",
-        "--java_toolchain=" + toolchain
+        "--java_toolchain=" + javaToolchain
     );
+  }
+
+  private static String javaToolchainFromProperties() {
+    final String javaHome = Paths.get(
+        WorkspaceDriver.properties.getProperty("java_home_runfiles_path")).toAbsolutePath().toString();
+    return javaToolchainFromJavaHome(javaHome);
   }
 
   private static String javaToolchainFromJavaHome(String javaHome) {
