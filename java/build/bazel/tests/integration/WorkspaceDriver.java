@@ -47,6 +47,7 @@ public class WorkspaceDriver {
   private static RepositoryCache repositoryCache;
 
   private static String javaToolchain;
+  private static String javaHome;
 
   /** Returns the current workspace path */
   public Path currentWorkspace() {
@@ -58,6 +59,8 @@ public class WorkspaceDriver {
     setupTmp();
     bazelVersions = new HashMap<>();
     setupRepositoryCache();
+    javaHome = Paths.get(properties.getProperty("java_home_runfiles_path")).toAbsolutePath()
+        .toString();
     javaToolchain = javaToolchainFromProperties();
   }
 
@@ -279,14 +282,13 @@ public class WorkspaceDriver {
 
   private static Stream<String> bazelJavaFlagsForSandboxedRun() {
     return Stream.of(
-        "--host_javabase=@bazel_tools//tools/jdk:jdk",
-        "--java_toolchain=" + javaToolchain
+        "--host_javabase=@bazel_tools//tools/jdk:absolute_javabase",
+        "--java_toolchain=" + javaToolchain,
+        "--define=ABSOLUTE_JAVABASE="+ javaHome
     );
   }
 
   private static String javaToolchainFromProperties() {
-    final String javaHome = Paths.get(
-        WorkspaceDriver.properties.getProperty("java_home_runfiles_path")).toAbsolutePath().toString();
     return javaToolchainFromJavaHome(javaHome);
   }
 
