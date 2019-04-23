@@ -60,8 +60,7 @@ public class WorkspaceDriver {
     setupTmp();
     bazelVersions = new HashMap<>();
     setupRepositoryCache();
-    javaHome = Paths.get(properties.getProperty("java_home_runfiles_path")).toAbsolutePath()
-        .toString();
+    javaHome = javaHomeFromProperties();
     javaToolchain = javaToolchainFromProperties();
   }
 
@@ -318,6 +317,11 @@ public class WorkspaceDriver {
 
   private static String javaToolchainFromProperties() {
     return javaToolchainFromJavaHome(javaHome);
+  }
+
+  private static String javaHomeFromProperties() {
+    return Paths.get(properties.getProperty("java_home_runfiles_path")).toAbsolutePath()
+        .toString();
   }
 
   private static String javaToolchainFromJavaHome(String javaHome) {
