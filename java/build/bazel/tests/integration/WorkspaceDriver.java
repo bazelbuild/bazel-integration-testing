@@ -260,6 +260,7 @@ public class WorkspaceDriver {
     }
   }
 
+  @SuppressWarnings("WeakerAccess")
   public static class BazelWorkspaceDriverException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
@@ -270,10 +271,12 @@ public class WorkspaceDriver {
   }
 
   /** Returns a builder for invoking bazel. */
+  @SuppressWarnings("WeakerAccess")
   public BazelCommand.Builder bazelWithoutJavaBaseConfig(String arg, String... args) {
     return bazelWithoutJavaBaseConfig(concat(arg, args));
   }
 
+  @SuppressWarnings("WeakerAccess")
   public BazelCommand.Builder bazelWithoutJavaBaseConfig(List<String> args) {
     return bazel(args, false);
   }
@@ -286,6 +289,16 @@ public class WorkspaceDriver {
   /** Returns a builder for invoking bazel. */
   public BazelCommand.Builder bazel(List<String> args) {
     return bazel(args, true);
+  }
+
+  /** Needed for custom workspace driver implementations*/
+  @SuppressWarnings("WeakerAccess")
+  public static Stream<String> bazelJavaFlagsForSandboxedRun() {
+    return Stream.of(
+        "--host_javabase=@bazel_tools//tools/jdk:absolute_javabase",
+        "--java_toolchain=" + javaToolchain,
+        "--define=ABSOLUTE_JAVABASE="+ javaHome
+    );
   }
 
   private BazelCommand.Builder bazel(List<String> args, boolean addJavaBaseConfigFlags) {
@@ -305,14 +318,6 @@ public class WorkspaceDriver {
     return addJavaBaseConfigFlags ?
         bazelJavaFlagsForSandboxedRun().collect(Collectors.toList()) :
         Collections.emptyList();
-  }
-
-  private static Stream<String> bazelJavaFlagsForSandboxedRun() {
-    return Stream.of(
-        "--host_javabase=@bazel_tools//tools/jdk:absolute_javabase",
-        "--java_toolchain=" + javaToolchain,
-        "--define=ABSOLUTE_JAVABASE="+ javaHome
-    );
   }
 
   private static String javaToolchainFromProperties() {
