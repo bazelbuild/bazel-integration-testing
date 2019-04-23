@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -270,14 +271,41 @@ public class WorkspaceDriver {
   }
 
   /** Returns a builder for invoking bazel. */
+  public BazelCommand.Builder bazelWithoutJavaBaseConfig(String arg, String... args) {
+    return bazelWithoutJavaBaseConfig(concat(arg, args));
+  }
+
+  public BazelCommand.Builder bazelWithoutJavaBaseConfig(List<String> args) {
+    return bazel(args, false);
+  }
+
+  /** Returns a builder for invoking bazel. */
   public BazelCommand.Builder bazel(String arg, String... args) {
-    return bazel(Stream.concat(Stream.concat(Stream.of(arg), Stream.of(args)),
-        bazelJavaFlagsForSandboxedRun()).collect(Collectors.toList()));
+    return bazel(concat(arg, args));
   }
 
   /** Returns a builder for invoking bazel. */
   public BazelCommand.Builder bazel(List<String> args) {
-    return new BazelCommand.Builder(this, tmp, repositoryCache, args);
+    return bazel(args, true);
+  }
+
+  private BazelCommand.Builder bazel(List<String> args, boolean addJavaBaseConfigFlags) {
+    return new BazelCommand.Builder(this, tmp, repositoryCache,
+        concat(args, maybeJavaBaseConfigFlags(addJavaBaseConfigFlags)));
+  }
+
+  private List<String> concat(String arg, String[] args) {
+    return Stream.concat(Stream.of(arg), Stream.of(args)).collect(Collectors.toList());
+  }
+
+  private List<String> concat(List<String> a, List<String> b) {
+    return Stream.concat(a.stream(), b.stream()).collect(Collectors.toList());
+  }
+
+  private List<String> maybeJavaBaseConfigFlags(boolean addJavaBaseConfigFlags) {
+    return addJavaBaseConfigFlags ?
+        bazelJavaFlagsForSandboxedRun().collect(Collectors.toList()) :
+        Collections.emptyList();
   }
 
   private static Stream<String> bazelJavaFlagsForSandboxedRun() {

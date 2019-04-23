@@ -143,6 +143,12 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     }
   }
 
+  @Test
+  public void testRunningBazelQuery() throws Exception {
+    driver.scratchFile("BUILD.bazel", shTest("foo"));
+    driver.bazelWithoutJavaBaseConfig("query","//:foo").mustRunSuccessfully();
+  }
+
   private List<String> shellTestingEnvironmentVariable(String key, String val) {
     return Arrays.asList("#!/bin/bash", "test \"$" + key + "\" = \"" + val + "\"", "");
   }
