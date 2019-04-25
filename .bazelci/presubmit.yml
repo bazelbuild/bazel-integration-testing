@@ -2,28 +2,31 @@
 platforms:
   ubuntu1604:
     build_targets:
-    - "..."
+      - "//..."
     test_targets:
-    - "..."
+      - "//..."
   ubuntu1804:
     build_targets:
-    - "..."
+      - "//..."
     test_targets:
-    - "..."
+      - "--"
+      - "//..."
+      - "-//javatests/build/bazel/tests/integration:WorkspaceDriverIntegrationTest/bazel0.15.2"
+      - "-//javatests/build/bazel/tests/integration:WorkspaceDriverIntegrationTest/bazel0.16.0"
   macos:
     build_targets:
-    - "..."
+      - "//..."
     test_targets:
-    - "..."
+      - "//..."
   windows:
     build_targets:
-    - "..."
+      - "//..."
     build_flags:
-    - "--enable_runfiles"
+      - "--enable_runfiles"
     test_flags:
-    - "--enable_runfiles"
-    - "--test_tag_filters=-no_windows"
-    - "--test_env=JAVA_HOME" # For building Java binary inside test
-    - "--test_env=BAZEL_SH"  # Make sure Bazel binary inside test can find the correct Bash (MSYS2 instead of Git)
+      - "--enable_runfiles"
+      - "--test_tag_filters=-no_windows"
+      - "--test_env=JAVA_HOME" # For building Java binary inside test
+      - "--test_env=BAZEL_SH" # Make sure Bazel binary inside test can find the correct Bash (MSYS2 instead of Git)
     test_targets:
-    - "..."
+      - "//..."
