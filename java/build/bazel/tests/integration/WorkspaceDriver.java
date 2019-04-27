@@ -296,8 +296,8 @@ public class WorkspaceDriver {
   public static Stream<String> bazelJavaFlagsForSandboxedRun() {
     return Stream.of(
         "--host_javabase=@bazel_tools//tools/jdk:absolute_javabase",
-        "--java_toolchain=@bazel_tools//tools/jdk:toolchain_vanilla",
-        "--define=ABSOLUTE_JAVABASE="+ javaHome
+        "--java_toolchain=" + javaToolchain,
+        "--define=ABSOLUTE_JAVABASE=" + javaHome
     );
   }
 
@@ -338,8 +338,10 @@ public class WorkspaceDriver {
     }
     if (build.getErrorLines().stream().anyMatch(line -> line.contains("1.8."))) {
       return "@bazel_tools//tools/jdk:toolchain_hostjdk8";
-    } else {
+    } else if (build.getErrorLines().stream().anyMatch(line -> line.contains("1.9."))) {
       return "@bazel_tools//tools/jdk:toolchain_java9";
+    }  else {
+      return "@bazel_tools//tools/jdk:toolchain_vanilla";
     }
   }
 
