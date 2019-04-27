@@ -23,11 +23,13 @@ load(
 )
 
 def _bazel_java_integration_test_properties_impl(ctx):
+  java_runtime_info = ctx.attr._java_runtime[java_common.JavaRuntimeInfo]
   properties = [
       "bazel.version=" + ctx.attr.bazel_version,
       "bazel.workspace=" + ctx.workspace_name,
       "bazel.external.deps=" +
       ",".join([d.short_path for d in ctx.files.external_deps]),
+      "java_home_runfiles_path=" + "%s" % java_runtime_info.java_home_runfiles_path,
   ]
 
   ctx.actions.write(ctx.outputs.properties, "\n".join(properties))
@@ -36,6 +38,9 @@ bazel_java_integration_test_properties_ = rule(
     attrs = {
         "bazel_version": attr.string(mandatory = True),
         "external_deps": attr.label_list(allow_files = True),
+        "_java_runtime": attr.label(
+            default = Label("@bazel_tools//tools/jdk:current_java_runtime"),
+        ),
     },
     implementation = _bazel_java_integration_test_properties_impl,
     outputs = {

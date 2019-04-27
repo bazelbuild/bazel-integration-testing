@@ -116,27 +116,37 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
   /** Try (unsuccessfully) to download a dependency that was not specified as an external dep. */
   @Test
   public void testRepositoryCacheIsFrozen() throws Exception {
-    // net_sf_jopt_simple has a sha256 checksum that has not been imported through
-    // bazel_external_dependency_archive and so is unavailable.
-    driver.scratchFile(
-        "WORKSPACE",
-        "load(\"@bazel_tools//tools/build_defs/repo:java.bzl\", \"java_import_external\")",
-        "java_import_external(",
-        "    name = \"net_sf_jopt_simple\",",
-        "    licenses = [\"notice\"],  # The MIT License",
-        "    jar_sha256 = \"457877c79e038f390557db5f8e92c4436fb4f4b3ba63f28bc228500fee080193\",",
-        "    jar_urls = [",
-        "        \"http://a.host.does.not.exist/jopt-simple-5.0.2.jar\",",
-        "    ],",
-        ")");
+    //freezing of repository cache isn't supported on windows
+    if (OS.getCurrent() != OS.WINDOWS) {
+      // net_sf_jopt_simple has a sha256 checksum that has not been imported through
+      // bazel_external_dependency_archive and so is unavailable.
+      driver.scratchFile(
+          "WORKSPACE",
+          "load(\"@bazel_tools//tools/build_defs/repo:java.bzl\", \"java_import_external\")",
+          "java_import_external(",
+          "    name = \"net_sf_jopt_simple\",",
+          "    licenses = [\"notice\"],  # The MIT License",
+          "    jar_sha256 = \"457877c79e038f390557db5f8e92c4436fb4f4b3ba63f28bc228500fee080193\",",
+          "    jar_urls = [",
+          "        \"http://maven.ibiblio.org/maven2/net/sf/jopt-simple/jopt-simple/5.0.2/jopt-simple-5.0.2.jar\",",
+          "        \"http://repo1.maven.org/maven2/net/sf/jopt-simple/jopt-simple/5.0.2/jopt-simple-5.0.2.jar\",",
+          "    ],",
+          ")");
 
-    BazelCommand cmd = driver.bazel("build", "@net_sf_jopt_simple//jar").run();
+      BazelCommand cmd = driver.bazel("build", "@net_sf_jopt_simple//jar").run();
 
-    assertEquals(1, cmd.exitCode());
-    String err = String.join(",", cmd.errorLines());
-    assertTrue(
-        err.contains("(Permission denied)") // The repository cache was frozen (Mac OSX)
-            || err.contains("Unknown host")); // The block-network tag works (Linux)
+      assertEquals(1, cmd.exitCode());
+      String err = String.join(",", cmd.errorLines());
+      assertTrue(
+          err.contains("(Permission denied)") // The repository cache was frozen (Mac OSX)
+              || err.contains("Unknown host")); // The block-network tag works (Linux)
+    }
+  }
+
+  @Test
+  public void testRunningBazelQuery() throws Exception {
+    driver.scratchFile("BUILD.bazel", shTest("foo"));
+    driver.bazelWithoutJavaBaseConfig("query","//:foo").mustRunSuccessfully();
   }
 
   private List<String> shellTestingEnvironmentVariable(String key, String val) {

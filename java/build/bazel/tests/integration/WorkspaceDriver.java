@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,9 @@ public class WorkspaceDriver {
 
   private static RepositoryCache repositoryCache;
 
+  private static String javaToolchain;
+  private static String javaHome;
+
   /** Returns the current workspace path */
   public Path currentWorkspace() {
     return workspace;
@@ -56,6 +60,8 @@ public class WorkspaceDriver {
     setupTmp();
     bazelVersions = new HashMap<>();
     setupRepositoryCache();
+    javaHome = javaHomeFromProperties();
+    javaToolchain = javaToolchainFromProperties();
   }
 
   private static void setupRepositoryCache() throws IOException {
@@ -66,7 +72,9 @@ public class WorkspaceDriver {
         repositoryCache.put(Paths.get(dep));
       }
     }
-    // repositoryCache.freeze();
+    //freeze doesn't work on Windows
+    if (OS.getCurrent() != OS.WINDOWS)
+      repositoryCache.freeze();
   }
 
   private static void setupTmp() throws IOException {
@@ -252,6 +260,7 @@ public class WorkspaceDriver {
     }
   }
 
+  @SuppressWarnings("WeakerAccess")
   public static class BazelWorkspaceDriverException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
@@ -262,12 +271,78 @@ public class WorkspaceDriver {
   }
 
   /** Returns a builder for invoking bazel. */
+  @SuppressWarnings("WeakerAccess")
+  public BazelCommand.Builder bazelWithoutJavaBaseConfig(String arg, String... args) {
+    return bazelWithoutJavaBaseConfig(concat(arg, args));
+  }
+
+  @SuppressWarnings("WeakerAccess")
+  public BazelCommand.Builder bazelWithoutJavaBaseConfig(List<String> args) {
+    return bazel(args, false);
+  }
+
+  /** Returns a builder for invoking bazel. */
   public BazelCommand.Builder bazel(String arg, String... args) {
-    return bazel(Stream.concat(Stream.of(arg), Stream.of(args)).collect(Collectors.toList()));
+    return bazel(concat(arg, args));
   }
 
   /** Returns a builder for invoking bazel. */
   public BazelCommand.Builder bazel(List<String> args) {
-    return new BazelCommand.Builder(this, tmp, repositoryCache, args);
+    return bazel(args, true);
   }
+
+  /** Needed for custom workspace driver implementations*/
+  @SuppressWarnings("WeakerAccess")
+  public static Stream<String> bazelJavaFlagsForSandboxedRun() {
+    return Stream.of(
+        "--host_javabase=@bazel_tools//tools/jdk:absolute_javabase",
+        "--java_toolchain=" + javaToolchain,
+        "--define=ABSOLUTE_JAVABASE=" + javaHome
+    );
+  }
+
+  private BazelCommand.Builder bazel(List<String> args, boolean addJavaBaseConfigFlags) {
+    return new BazelCommand.Builder(this, tmp, repositoryCache,
+        concat(args, maybeJavaBaseConfigFlags(addJavaBaseConfigFlags)));
+  }
+
+  private static List<String> concat(String arg, String[] args) {
+    return Stream.concat(Stream.of(arg), Stream.of(args)).collect(Collectors.toList());
+  }
+
+  private static List<String> concat(List<String> a, List<String> b) {
+    return Stream.concat(a.stream(), b.stream()).collect(Collectors.toList());
+  }
+
+  private List<String> maybeJavaBaseConfigFlags(boolean addJavaBaseConfigFlags) {
+    return addJavaBaseConfigFlags ?
+        bazelJavaFlagsForSandboxedRun().collect(Collectors.toList()) :
+        Collections.emptyList();
+  }
+
+  private static String javaToolchainFromProperties() {
+    return javaToolchainFromJavaHome(javaHome);
+  }
+
+  private static String javaHomeFromProperties() {
+    return Paths.get(properties.getProperty("java_home_runfiles_path")).toAbsolutePath()
+        .toString();
+  }
+
+  private static String javaToolchainFromJavaHome(String javaHome) {
+    final Command build = Command.builder().addArguments(javaHome + "/bin/java", "-version").build();
+    try {
+      build.run();
+    } catch (IOException | InterruptedException e) {
+      e.printStackTrace();
+    }
+    if (build.getErrorLines().stream().anyMatch(line -> line.contains("1.8."))) {
+      return "@bazel_tools//tools/jdk:toolchain_hostjdk8";
+    } else if (build.getErrorLines().stream().anyMatch(line -> line.contains("1.9."))) {
+      return "@bazel_tools//tools/jdk:toolchain_java9";
+    }  else {
+      return "@bazel_tools//tools/jdk:toolchain_vanilla";
+    }
+  }
+
 }
