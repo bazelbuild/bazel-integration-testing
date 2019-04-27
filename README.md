@@ -2,9 +2,9 @@ Bazel-integration-testing
 =================================
 **Because your build infra also needs build (and tests)**
 
-Bazel CI | Travis CI
-:---: | :---:
-[![Build status](https://badge.buildkite.com/b0041826d71f5484c22145f44b3eac12357f51feb6ba6abb57.svg?branch=master)](https://buildkite.com/bazel/bazel-integration-testing-postsubmit) | [![Build Status](https://travis-ci.org/bazelbuild/bazel-integration-testing.svg?branch=master)](https://travis-ci.org/bazelbuild/bazel-integration-testing)
+Bazel CI
+:---:
+[![Build status](https://badge.buildkite.com/b0041826d71f5484c22145f44b3eac12357f51feb6ba6abb57.svg?branch=master)](https://buildkite.com/bazel/bazel-integration-testing-postsubmit)
 
 
 ## Problem statement  
