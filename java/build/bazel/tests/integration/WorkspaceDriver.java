@@ -296,7 +296,7 @@ public class WorkspaceDriver {
   public static Stream<String> bazelJavaFlagsForSandboxedRun() {
     return Stream.of(
         "--host_javabase=@bazel_tools//tools/jdk:absolute_javabase",
-        "--java_toolchain=" + javaToolchain,
+        "--java_toolchain=@bazel_tools//tools/jdk:toolchain_vanilla",
         "--define=ABSOLUTE_JAVABASE="+ javaHome
     );
   }
