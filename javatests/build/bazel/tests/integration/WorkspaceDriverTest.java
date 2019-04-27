@@ -14,16 +14,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class WorkspaceDriverTest {
   private WorkspaceDriver driver = new WorkspaceDriver();
+  private static Properties properties;
 
   @BeforeClass
   public static void setUpClass() throws IOException {
     WorkspaceDriver.setUpClass();
+    //Properties is Some after call to WorkspaceDriver#setupClass
+    //noinspection OptionalGetWithoutIsPresent
+    properties = WorkspaceDriver.globalBazelProperties().get();
   }
 
   @Before
@@ -155,7 +160,7 @@ public class WorkspaceDriverTest {
   }
 
   private String jarNameAccordingToCurrentBazelVersion() {
-    return "bazel" + WorkspaceDriver.properties.getProperty("bazel.version") + ".jar";
+    return "bazel" + properties.getProperty("bazel.version") + ".jar";
   }
 
 }
