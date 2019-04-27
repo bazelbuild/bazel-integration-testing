@@ -306,11 +306,11 @@ public class WorkspaceDriver {
         concat(args, maybeJavaBaseConfigFlags(addJavaBaseConfigFlags)));
   }
 
-  private List<String> concat(String arg, String[] args) {
+  private static List<String> concat(String arg, String[] args) {
     return Stream.concat(Stream.of(arg), Stream.of(args)).collect(Collectors.toList());
   }
 
-  private List<String> concat(List<String> a, List<String> b) {
+  private static List<String> concat(List<String> a, List<String> b) {
     return Stream.concat(a.stream(), b.stream()).collect(Collectors.toList());
   }
 
