@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -38,7 +39,7 @@ public class WorkspaceDriver {
   private static Path runfileDirectory = Paths.get(System.getenv("TEST_SRCDIR"));
   // TODO: Don't have them as writable package-private when we have a better way
   // to share configuration across the WorkspaceDriver instances.
-  @Deprecated static Properties properties;
+  private static Properties properties;
 
   private Path currentBazel = null;
 
@@ -64,6 +65,9 @@ public class WorkspaceDriver {
     javaToolchain = javaToolchainFromProperties();
   }
 
+  public static Optional<Properties> globalBazelProperties() {
+    return Optional.ofNullable(properties);
+  }
   private static void setupRepositoryCache() throws IOException {
     String externalDeps = properties.getProperty("bazel.external.deps");
     repositoryCache = new RepositoryCache(tmp.resolve("cache"));
