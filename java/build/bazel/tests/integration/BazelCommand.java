@@ -163,15 +163,23 @@ public class BazelCommand {
     }
 
     /**
+     * Runs the command, throws an exception if the command returns a different exit code than requested,
+     * and returns an object to inspect the invocation result.
+     */
+    public BazelCommand mustRunAndReturnExitCode(int exitCode) throws IOException, InterruptedException {
+      BazelCommand cmd = run();
+      if (cmd.exitCode() != exitCode) {
+        throw new RuntimeException(cmd + "==> exit code != " + exitCode);
+      }
+      return cmd;
+    }
+
+    /**
      * Runs the command, throws an exception if the command does not succeed, and returns an object
      * to inspect the invocation result.
      */
     public BazelCommand mustRunSuccessfully() throws IOException, InterruptedException {
-      BazelCommand cmd = run();
-      if (cmd.exitCode() != 0) {
-        throw new RuntimeException(cmd + "==> non-zero exit code");
-      }
-      return cmd;
+      return mustRunAndReturnExitCode(0);
     }
   }
 }
