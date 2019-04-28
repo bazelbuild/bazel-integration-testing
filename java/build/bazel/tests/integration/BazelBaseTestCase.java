@@ -15,7 +15,6 @@
 package build.bazel.tests.integration;
 
 import java.io.IOException;
-import java.util.Properties;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
