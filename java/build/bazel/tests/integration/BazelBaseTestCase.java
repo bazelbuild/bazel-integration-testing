@@ -23,14 +23,10 @@ import org.junit.BeforeClass;
 public abstract class BazelBaseTestCase {
 
   protected WorkspaceDriver driver = new WorkspaceDriver();
-  protected static Properties properties;
 
   @BeforeClass
   public static void setUpClass() throws IOException {
     WorkspaceDriver.setUpClass();
-    //Properties is Some after call to WorkspaceDriver#setupClass
-    //noinspection OptionalGetWithoutIsPresent
-    properties = WorkspaceDriver.globalBazelProperties().get();
   }
 
   @Before

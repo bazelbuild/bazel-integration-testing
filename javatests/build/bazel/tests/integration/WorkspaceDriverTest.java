@@ -21,14 +21,10 @@ import org.junit.Test;
 
 public class WorkspaceDriverTest {
   private WorkspaceDriver driver = new WorkspaceDriver();
-  private static Properties properties;
 
   @BeforeClass
   public static void setUpClass() throws IOException {
     WorkspaceDriver.setUpClass();
-    //Properties is Some after call to WorkspaceDriver#setupClass
-    //noinspection OptionalGetWithoutIsPresent
-    properties = WorkspaceDriver.globalBazelProperties().get();
   }
 
   @Before
@@ -160,7 +156,7 @@ public class WorkspaceDriverTest {
   }
 
   private String jarNameAccordingToCurrentBazelVersion() {
-    return "bazel" + properties.getProperty("bazel.version") + ".jar";
+    return "bazel" + WorkspaceDriver.globalBazelProperties().getProperty("bazel.version") + ".jar";
   }
 
 }
