@@ -63,9 +63,12 @@ public class WorkspaceDriver {
     javaToolchain = javaToolchainFromProperties();
   }
 
-  public static Properties globalBazelProperties() {
-    return Optional.ofNullable(properties)
-        .orElseThrow(() -> new IllegalStateException("Need to call setupClass() before calling globalBazelProperties()"));
+  /**
+   * @return The global properties passed by the starlark rule.
+   * Will be null if setupClass wasn't called before calling globalBazelProperties()
+   */
+  static Properties globalBazelProperties() {
+    return properties;
   }
   private static void setupRepositoryCache() throws IOException {
     String externalDeps = properties.getProperty("bazel.external.deps");
