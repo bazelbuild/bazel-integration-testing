@@ -175,7 +175,7 @@ public class BazelCommand {
      * and returns an object to inspect the invocation result.
      */
     public BazelCommand mustRunAndReturnExitCode(int exitCode) throws IOException, InterruptedException {
-      BazelCommand cmd = run();
+      BazelCommand cmd = runQuietly();
       if (cmd.exitCode() != exitCode) {
         throw new RuntimeException(cmd + "==> exit code != " + exitCode);
       }
