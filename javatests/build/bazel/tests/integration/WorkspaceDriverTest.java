@@ -155,7 +155,7 @@ public class WorkspaceDriverTest {
   }
 
   private String jarNameAccordingToCurrentBazelVersion() {
-    return "bazel" + WorkspaceDriver.properties.getProperty("bazel.version") + ".jar";
+    return "bazel" + WorkspaceDriver.globalBazelProperties().getProperty("bazel.version") + ".jar";
   }
 
 }

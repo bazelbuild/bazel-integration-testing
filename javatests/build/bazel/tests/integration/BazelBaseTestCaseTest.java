@@ -36,7 +36,7 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   public void testVersion() throws Exception {
     BazelCommand cmd = driver.bazel("info", "release").mustRunSuccessfully();
     assertThat(cmd.outputLines())
-        .contains("release " + WorkspaceDriver.properties.getProperty("bazel.version"));
+        .contains("release " + WorkspaceDriver.globalBazelProperties().getProperty("bazel.version"));
   }
 
   @Test
