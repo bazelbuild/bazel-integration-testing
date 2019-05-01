@@ -106,6 +106,7 @@ def bazel_java_integration_test(
     # flag to allow bazel_integration_testing own tests to work
     add_bazel_data_dependency = True,
     versions = BAZEL_VERSIONS,
+    tags = [],
     **kwargs):
   """A wrapper around java_test that create several java tests, one per version
      of Bazel.
@@ -145,10 +146,13 @@ def bazel_java_integration_test(
         test_class = test_class,
         deps = deps,
         runtime_deps = runtime_deps,
+        tags = tags,
         **kwargs)
   native.test_suite(
       name = name,
-      tests = [":%s/bazel%s" % (name, version) for version in versions])
+      tests = [":%s/bazel%s" % (name, version) for version in versions],
+      tags = tags,
+    )
 
 def bazel_java_integration_test_deps(versions = BAZEL_VERSIONS):
   bazel_binaries(versions)

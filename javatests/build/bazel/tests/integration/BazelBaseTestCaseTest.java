@@ -59,24 +59,40 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   @Test
+  public void testTestSuitePropagatesTags() throws Exception {
+    loadIntegrationTestRuleIntoWorkspace();
+    setupPassingTestWithTags("IntegrationTestSuiteTest", "manual");
+    // --enable_runfiles has no effect on Linux and macOS, but it enables runfiles symlink tree on Windows.
+    // exit code 4 means testing was requested but NO tests were found
+    // which means manual propagated to the test suite as well as the specific tests
+    driver.bazel("test", "//...", "--enable_runfiles").mustRunAndReturnExitCode(4);
+  }
+
+  @Test
   public void testJvmFlags() {
     org.hamcrest.MatcherAssert.assertThat(System.getProperty("foo.bar"), is("true"));
   }
 
+  private void setupPassingTestWithTags(final String testName, final String tag) throws IOException {
+    writePassingTestJavaSource(testName);
+    writeTestBuildFile(testName, "'" + tag + "'");
+
+  }
   private void setupPassingTest(final String testName) throws IOException {
     writePassingTestJavaSource(testName);
-    writeTestBuildFile(testName);
+    writeTestBuildFile(testName, "");
   }
 
-  private void writeTestBuildFile(final String testName) throws IOException {
+  private void writeTestBuildFile(final String testName, final String tag) throws IOException {
     driver.scratchFile(
         "BUILD",
-        "load('//:bazel_integration_test.bzl', 'bazel_java_integration_test')",
+        "load('//tools:bazel_java_integration_test.bzl', 'bazel_java_integration_test')",
         "",
         "bazel_java_integration_test(",
         "    name = '" + testName + "',",
         "    test_class = '" + testName + "',",
         "    srcs = ['" + testName + ".java'],",
+        "    tags = [" + tag + "],",
         // inside the sandbox we don't have access to full bazel
         // and we don't need it since it's prepared in advance for us
         "    add_bazel_data_dependency = False,",
@@ -103,17 +119,10 @@ public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
   }
 
   private void setupRuleSkylarkFiles() throws IOException {
-    driver.copyFromRunfiles(
-        "build_bazel_integration_testing/bazel_integration_test.bzl", "bazel_integration_test.bzl");
     driver.copyDirectoryFromRunfiles(
         "build_bazel_integration_testing/tools", "build_bazel_integration_testing");
-    driver.scratchFile(
-        "go/bazel_integration_test.bzl",
-        "RULES_GO_COMPATIBLE_BAZEL_VERSION = []\n"
-            + "def bazel_go_integration_test(name, srcs, deps=[], versions=RULES_GO_COMPATIBLE_BAZEL_VERSION, **kwargs):\n"
-            + "  pass");
-    // In order to make //go a package it must have a build file (even if it's empty).
-    driver.scratchFile("go/BUILD.bazel", "");
+    //overwrite it since it relates to targets we don't need
+    driver.scratchFile("tools/BUILD","");
   }
 
   private void writePassingTestJavaSource(final String testName) throws IOException {
