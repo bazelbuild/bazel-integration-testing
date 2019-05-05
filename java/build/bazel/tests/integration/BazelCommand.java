@@ -158,14 +158,14 @@ public class BazelCommand {
 
     /** Runs the command, prints its output to console and
      * returns an object to inspect the invocation result. */
-    public BazelCommand run() throws IOException, InterruptedException {
-      BazelCommand command = runQuietly();
+    public BazelCommand runVerbose() throws IOException, InterruptedException {
+      BazelCommand command = run();
       System.out.println(command.toString());
       return command;
     }
 
     /** Runs the command and returns an object to inspect the invocation result. */
-    public BazelCommand runQuietly() throws IOException, InterruptedException {
+    public BazelCommand run() throws IOException, InterruptedException {
       Command cmd = build();
       return new BazelCommand(cmd, args, cmd.run(), driver);
     }
@@ -175,7 +175,7 @@ public class BazelCommand {
      * and returns an object to inspect the invocation result.
      */
     public BazelCommand mustRunAndReturnExitCode(int exitCode) throws IOException, InterruptedException {
-      BazelCommand cmd = runQuietly();
+      BazelCommand cmd = run();
       if (cmd.exitCode() != exitCode) {
         throw new RuntimeException(cmd + "==> exit code != " + exitCode);
       }
