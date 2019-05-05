@@ -156,6 +156,14 @@ public class BazelCommand {
           .build();
     }
 
+    /** Runs the command, prints its output to console and
+     * returns an object to inspect the invocation result. */
+    public BazelCommand runVerbose() throws IOException, InterruptedException {
+      BazelCommand command = run();
+      System.out.println(command.toString());
+      return command;
+    }
+
     /** Runs the command and returns an object to inspect the invocation result. */
     public BazelCommand run() throws IOException, InterruptedException {
       Command cmd = build();
