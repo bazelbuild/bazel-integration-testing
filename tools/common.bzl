@@ -25,7 +25,7 @@ def _zfill(v, l = 5):
 def _unfill(v, l = 5):
     """unfill takes a zfilled string and returns it to the original value"""
     return [
-        int(v[l * i:l * (i + 1)])
+        str(int(v[l * i:l * (i + 1)]))
         for i in range(len(v) // l)
     ]
 
