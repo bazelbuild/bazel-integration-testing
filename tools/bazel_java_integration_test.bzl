@@ -28,8 +28,8 @@ def _bazel_java_integration_test_properties_impl(ctx):
       "bazel.version=" + ctx.attr.bazel_version,
       "bazel.workspace=" + ctx.workspace_name,
       "bazel.external.deps=" +
-      ",".join([d.short_path for d in ctx.files.external_deps]),
-      "java_home_runfiles_path=" + "%s" % java_runtime_info.java_home_runfiles_path,
+      ",".join([d.path for d in ctx.files.external_deps]),
+      "java_home_runfiles_path=%s" % java_runtime_info.java_home,
   ]
 
   ctx.actions.write(ctx.outputs.properties, "\n".join(properties))

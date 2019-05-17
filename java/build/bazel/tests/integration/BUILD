@@ -10,6 +10,7 @@ java_library(
         "WorkspaceDriver.java",
         "OS.java",
     ],
+    deps = ["@bazel_tools//tools/java/runfiles"],
     visibility = ["//visibility:public"],
 )
 

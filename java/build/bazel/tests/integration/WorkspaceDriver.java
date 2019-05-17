@@ -14,6 +14,7 @@
 
 package build.bazel.tests.integration;
 
+import com.google.devtools.build.runfiles.Runfiles;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -99,9 +100,13 @@ public class WorkspaceDriver {
   }
 
   private static void loadProperties() throws IOException {
+    String testWs = System.getenv("TEST_WORKSPACE");
     String configFile = System.getProperty("bazel.configuration");
+    Runfiles runfiles = Runfiles.create();
+    String path = runfiles.rlocation(testWs + "/" + configFile);
+
     properties = new Properties();
-    try (InputStream is = new FileInputStream(configFile)) {
+    try (InputStream is = new FileInputStream(path)) {
       properties.load(is);
     }
   }
