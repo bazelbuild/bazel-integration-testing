@@ -27,7 +27,7 @@ import org.junit.Test;
 // suppress since same parameter value is ok for tests readability, tests should encapsulate and not
 // hide
 @SuppressWarnings("SameParameterValue")
-public final class BazelBaseTestCaseTest extends BazelBaseTestCase {
+public final class BBTestCaseTest extends BazelBaseTestCase {
 
   private static final String WORKSPACE_NAME =
       "workspace(name = 'build_bazel_integration_testing')";

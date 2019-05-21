@@ -51,5 +51,5 @@ public class ExampleTest {
 ```  
 In your test you should work with the `WorkspaceDriver` which has many useful utility methods for working with scratch workspaces.  
 These include, but are not limited to, `copyFromRunfiles`/`scratchFile`/`workspaceDirectoryContents`(useful for verbose error messages) and of course `bazelCommand` which allows you to run `bazel build` / `bazel test` / `bazel query` and more.  
-The [WorkspaceDriverIntegrationTest](../javatests/build/bazel/tests/integration/WorkspaceDriverIntegrationTest.java) has a few examples of realistic tests which sets up the environment and asserts Bazel's outputs (exit code, stderr, etc).  
-[WorkspaceDriverTest](../javatests/build/bazel/tests/integration/WorkspaceDriverTest.java) and [BazelBaseTestCaseTest](../javatests/build/bazel/tests/integration/BazelBaseTestCaseTest.java) show some more of the features.
+The [WorkspaceDriverIntegrationTest](../javatests/build/bazel/tests/integration/WDIntegrationTest.java) has a few examples of realistic tests which sets up the environment and asserts Bazel's outputs (exit code, stderr, etc).  
+[WorkspaceDriverTest](../javatests/build/bazel/tests/integration/WorkspaceDriverTest.java) and [BazelBaseTestCaseTest](../javatests/build/bazel/tests/integration/BBTestCaseTest.java) show some more of the features.

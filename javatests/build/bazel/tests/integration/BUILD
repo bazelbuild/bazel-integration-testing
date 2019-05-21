@@ -1,11 +1,11 @@
 load("//:bazel_integration_test.bzl", "bazel_java_integration_test")
 load("//tools:common.bzl", "GET_LATEST_BAZEL_VERSIONS")
 
-# We only run BazelBaseTestCaseTest with Bazel version >= 0.21.0,
+# We only run BBTestCaseTest with Bazel version >= 0.21.0,
 # where --enable_runfiles is supported.
 bazel_java_integration_test(
-    name = "BazelBaseTestCaseTest",
-    srcs = ["BazelBaseTestCaseTest.java"],
+    name = "BBTestCaseTest",
+    srcs = ["BBTestCaseTest.java"],
     data = [
         "//:all_bzl",
     ],
@@ -38,8 +38,8 @@ bazel_java_integration_test(
 )
 
 bazel_java_integration_test(
-    name = "WorkspaceDriverIntegrationTest",
-    srcs = ["WorkspaceDriverIntegrationTest.java"],
+    name = "WDIntegrationTest",
+    srcs = ["WDIntegrationTest.java"],
     external_deps = [
         "@test_archive",
         "@test_archive2",

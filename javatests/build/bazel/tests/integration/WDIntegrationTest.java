@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.junit.Test;
 
-public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
+public class WDIntegrationTest extends BazelBaseTestCase {
   @Test
   public void testWorkspaceWithBazelRcFile() throws Exception {
     String testName = "TestMe";
@@ -163,7 +163,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
 
   private void writeWorkspaceFileWithRepositories(String... repos) throws IOException {
     Stream<String> reposDec =
-        Arrays.stream(repos).map(WorkspaceDriverIntegrationTest::repositoryDeclarationFor);
+        Arrays.stream(repos).map(WDIntegrationTest::repositoryDeclarationFor);
 
     driver.scratchFile(
         "./WORKSPACE",
