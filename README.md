@@ -35,17 +35,14 @@ In order to use `bazel_java_integration_test`, `bazel_go_integration_test`, or `
 you must add the following to your WORKSPACE file:
 
 ```python
-
-bazel_integation_testing_version="404010b3763262526d3a0e09073d8a8f22ed3d4b"
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
-             name = "io_bazel_bazel_integation_testing",
-             url = "https://github.com/bazelbuild/bazel-integation-testing/archive/%s.zip"%bazel_integation_testing_version,
-             type = "zip",
-             strip_prefix= "bazel-integation-testing-%s" % bazel_integation_testing_version,
-             sha256 = "9561123fbef215f949e086067069f9dc6fa2cff31a7896c8cf16757cddd78b1f",
-             )
+    name = "build_bazel_integration_testing",
+    url = "https://github.com/bazelbuild/bazel-integation-testing/archive/13a7d5112aaae5572544c609f364d430962784b1.zip",
+    type = "zip",
+    strip_prefix= "bazel-integation-testing-13a7d5112aaae5572544c609f364d430962784b1",
+    sha256 = "9561123fbef215f949e086067069f9dc6fa2cff31a7896c8cf16757cddd78b1f",
+)
 
 
 load("@build_bazel_integration_testing//tools:repositories.bzl", "bazel_binaries")
