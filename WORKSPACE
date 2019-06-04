@@ -17,6 +17,14 @@ http_archive(
          sha256 = bazel_toolchains_sha256,
 )
 
+load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
+
+# Creates toolchain configuration for remote execution with BuildKite CI
+# for rbe_ubuntu1604
+rbe_autoconfig(
+    name = "buildkite_config",
+)
+
 ## Sanity checks
 
 git_repository(
