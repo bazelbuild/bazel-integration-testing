@@ -110,9 +110,9 @@ probably better to use an http_archive rule:
 # http_archive(
 #     name = "com_github_kubernetes_charts",
 #     build_file_content = "...",
-#     sha256 = "a3d6f8ee7db572fed090376b53561d76cdac41417b9373cbce2b8587543a8a0b",
-#     strip_prefix = "charts-790457b26dcfdc4ad868ef64115ae0f10f0af0dd",
-#     urls = ["https://github.com/kubernetes/charts/archive/790457b26dcfdc4ad868ef64115ae0f10f0af0dd.tar.gz"],
+#     sha256 = "936ae81bb5e7d85503bac5059f61c8643b1ed96e7eba19d73a8cfeff42fe80d5",
+#     strip_prefix = "charts-f8a6ecb0f17f905578e509c48c2c2f9c03ad3a59",
+#     urls = ["https://github.com/kubernetes/charts/archive/f8a6ecb0f17f905578e509c48c2c2f9c03ad3a59.tar.gz"],
 # )
 # ```
 """
