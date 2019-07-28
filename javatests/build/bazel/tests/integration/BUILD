@@ -53,12 +53,9 @@ bazel_java_integration_test(
 bazel_java_integration_test(
     name = "RBEExampleTest",
     srcs = ["RBEExampleTest.java"],
-    deps = ["//java/build/bazel/tests/integration"],
-    versions = [
-        "0.22.0",
-        "0.23.2",
-    ],
     external_deps = [
         "@bazel_toolchains_test",
     ],
+    versions = GET_LATEST_BAZEL_VERSIONS(),
+    deps = ["//java/build/bazel/tests/integration"],
 )

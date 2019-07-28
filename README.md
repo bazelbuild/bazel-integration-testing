@@ -56,6 +56,13 @@ bazel_java_integration_test_deps()
 ```
 
 ## Usage
+
+## Update list of default Bazel versions
+
+```
+bazel run //updater -- --output "$(pwd)/tools/bazel_hash_dict.bzl"
+```
+
 ### [Jvm](java/README.md)  
 ### Go
 TODO

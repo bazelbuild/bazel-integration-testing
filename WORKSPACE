@@ -5,16 +5,18 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Remote execution infra
 # Required configuration for remote build execution
-bazel_toolchains_version="0.26.1"
-bazel_toolchains_sha256="c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d"
+bazel_toolchains_version = "0.26.1"
+
+bazel_toolchains_sha256 = "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d"
+
 http_archive(
-         name = "bazel_toolchains",
-         urls = [
-           "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz"%bazel_toolchains_version,
-           "https://github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz"%bazel_toolchains_version
-         ],
-         strip_prefix = "bazel-toolchains-%s"%bazel_toolchains_version,
-         sha256 = bazel_toolchains_sha256,
+    name = "bazel_toolchains",
+    sha256 = bazel_toolchains_sha256,
+    strip_prefix = "bazel-toolchains-%s" % bazel_toolchains_version,
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz" % bazel_toolchains_version,
+        "https://github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz" % bazel_toolchains_version,
+    ],
 )
 
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
@@ -35,7 +37,7 @@ git_repository(
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
-versions.check("0.6.0")
+versions.check("0.26.0")
 
 ## Linting
 
@@ -47,21 +49,21 @@ format_repositories()
 
 ## Python
 
-http_archive(
-    name = "com_google_python_gflags",
-    build_file_content = """
-py_library(
-    name = "gflags",
-    srcs = [
-        "gflags.py",
-        "gflags_validators.py",
-    ],
-    visibility = ["//visibility:public"],
+git_repository(
+    name = "io_abseil_py",
+    commit = "9d73fdaa23a6b6726aa5731390f388c0c6250ee5",
+    remote = "https://github.com/abseil/abseil-py",
 )
-""",
-    sha256 = "344990e63d49b9b7a829aec37d5981d558fea12879f673ee7d25d2a109eb30ce",
-    strip_prefix = "python-gflags-python-gflags-2.0",
-    url = "https://github.com/google/python-gflags/archive/python-gflags-2.0.zip",
+
+http_archive(
+    name = "six_archive",
+    build_file = "@io_abseil_py//third_party:six.BUILD",
+    sha256 = "105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a",
+    strip_prefix = "six-1.10.0",
+    urls = [
+        "http://mirror.bazel.build/pypi.python.org/packages/source/s/six/six-1.10.0.tar.gz",
+        "https://pypi.python.org/packages/source/s/six/six-1.10.0.tar.gz",
+    ],
 )
 
 ## Java
@@ -141,12 +143,12 @@ bazel_external_dependency_archive(
 )
 
 bazel_external_dependency_archive(
-   name = "bazel_toolchains_test",
-   srcs = {
-       "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d": [
-           "https://github.com/bazelbuild/bazel-toolchains/archive/0.26.1.tar.gz",
-       ],
-   }
+    name = "bazel_toolchains_test",
+    srcs = {
+        "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d": [
+            "https://github.com/bazelbuild/bazel-toolchains/archive/0.26.1.tar.gz",
+        ],
+    },
 )
 
 ## Your new language here!
