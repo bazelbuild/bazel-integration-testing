@@ -58,6 +58,7 @@ bazel_java_integration_test(
         "0.22.0",
         "0.23.2",
     ],
+    tags = ["manual"],
     external_deps = [
         "@bazel_toolchains_test",
     ],
