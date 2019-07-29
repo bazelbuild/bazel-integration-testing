@@ -110,6 +110,15 @@ func (b *TestingBazel) ScratchFileWithMode(p, content string, mode os.FileMode) 
 	return nil
 }
 
+// GetTmpDir returns the path to the temp dir that will be used by this Bazel
+// invocation. Prever using ScratchFile, ScratchDir, etc. if possible but if 
+// you're doing something extremely complicated, you can directly refer to the
+// tmpDir.
+func (b *TestingBazel) GetTmpDir() string {
+	return b.tmpDir
+}
+
+
 // GetBazel returns the path to the Bazel binary that is available.
 func (b *TestingBazel) GetBazel() string {
 	return b.bazel
