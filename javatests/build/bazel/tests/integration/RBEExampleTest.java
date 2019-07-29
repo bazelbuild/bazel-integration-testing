@@ -56,8 +56,8 @@ public class RBEExampleTest extends BazelBaseTestCase {
 
   private static List<String> remoteCompatibleToolchainFlags() {
     return Arrays.asList(
-        "build --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/1.1/bazel_0.22.0/default:toolchain",
-        "build --extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/1.1/bazel_0.22.0/cpp:cc-toolchain-clang-x86_64-default",
+        "build --crosstool_top=@bazel_toolchains//configs/ubuntu16_04_clang/latest:crosstool_top_default",
+        "build --extra_toolchains=@bazel_toolchains//configs/ubuntu16_04_clang/latest:toolchain_default",
         "build --extra_execution_platforms=//toolchains:rbe_ubuntu1604");
   }
 
