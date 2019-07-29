@@ -6,24 +6,18 @@ platforms:
     test_targets:
       - "--"
       - "//..."
-      - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.22.0"
-      - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.23.2"
   ubuntu1804:
     build_targets:
     - "//..."
     test_targets:
       - "--"
       - "//..."
-      - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.22.0"
-      - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.23.2"
   macos:
     build_targets:
     - "//..."
     test_targets:
       - "--"
       - "//..."
-      - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.22.0"
-      - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.23.2"
   windows:
     build_targets:
     - "//..."
@@ -37,8 +31,6 @@ platforms:
     test_targets:
     - "--"
     - "//..."
-    - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.22.0"
-    - "-//javatests/build/bazel/tests/integration:RBEExampleTest/bazel0.23.2"
   rbe_ubuntu1604:
     build_targets:
     - "//..."
