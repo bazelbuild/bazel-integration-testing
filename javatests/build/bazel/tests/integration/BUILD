@@ -58,6 +58,7 @@ bazel_java_integration_test(
     srcs = ["RBEExampleTest.java"],
     external_deps = [
         "@bazel_toolchains_test",
+        "@rules_java_remote_archives",
     ],
     tags = ["manual"],
     versions = GET_LATEST_BAZEL_VERSIONS(),
