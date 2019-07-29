@@ -56,6 +56,7 @@ bazel_java_integration_test(
     external_deps = [
         "@bazel_toolchains_test",
     ],
+    tags = ["manual"],
     versions = GET_LATEST_BAZEL_VERSIONS(),
     deps = ["//java/build/bazel/tests/integration"],
 )
