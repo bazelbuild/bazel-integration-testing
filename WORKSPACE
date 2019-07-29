@@ -150,5 +150,16 @@ bazel_external_dependency_archive(
         ],
     },
 )
+bazel_external_dependency_archive(
+    name = "rules_java_remote_archives",
+    srcs = {
+        "cc470e529fafb6165b5be3929ff2d99b38429b386ac100878687416603a67889": [
+            "https://mirror.bazel.build/bazel_coverage_output_generator/releases/coverage_output_generator-v1.0.zip",
+        ],
+        "96e223094a12c842a66db0bb7bb6866e88e26e678f045842911f9bd6b47161f5": [
+            "https://mirror.bazel.build/bazel_java_tools/releases/javac11/v4.0/java_tools_javac11_linux-v4.0.zip",
+        ],
+    },
+)
 
 ## Your new language here!

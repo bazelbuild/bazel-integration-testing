@@ -9,6 +9,9 @@ bazel_java_integration_test(
     data = [
         "//:all_bzl",
     ],
+    external_deps = [
+        "@rules_java_remote_archives",
+    ],
     jvm_flags = ["-Dfoo.bar=true"],
     versions = GET_LATEST_BAZEL_VERSIONS(),
     deps = [
