@@ -15,7 +15,10 @@
 load("//tools:bazel_hash_dict.bzl", "BAZEL_HASH_DICT")
 load(":common.bzl", "BAZEL_VERSIONS")
 
-_BAZEL_BINARY_PACKAGE = "http://releases.bazel.build/{version}/release/bazel-{version}{installer}-{platform}.{extension}"
+_BAZEL_BINARY_PACKAGES = [
+  "http://releases.bazel.build/{version}/release/bazel-{version}{installer}-{platform}.{extension}",
+  "https://github.com/bazelbuild/bazel/releases/download/{version}/bazel-{version}{installer}-{platform}.{extension}",
+]
 
 def _get_platform_name(rctx):
   os_name = rctx.os.name.lower()
@@ -42,8 +45,8 @@ def _get_installer(rctx):
     extension = "sh"
     installer = "-installer"
 
-  url = _BAZEL_BINARY_PACKAGE.format(version=version, installer=installer, platform=platform, extension=extension)
-  args = {"url": url, "type": "zip"}
+  urls = [url.format(version=version, installer=installer, platform=platform, extension=extension) for url in _BAZEL_BINARY_PACKAGES]
+  args = {"url": urls, "type": "zip"}
   if version in BAZEL_HASH_DICT and platform in BAZEL_HASH_DICT[version]:
     args["sha256"] = BAZEL_HASH_DICT[version][platform]
   rctx.download_and_extract(**args)
