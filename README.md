@@ -38,16 +38,36 @@ you must add the following to your WORKSPACE file:
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
     name = "build_bazel_integration_testing",
-    url = "https://github.com/bazelbuild/bazel-integation-testing/archive/13a7d5112aaae5572544c609f364d430962784b1.zip",
+    url = "https://github.com/bazelbuild/bazel-integration-testing/archive/3a6136e8f6287b04043217d94d97ba17edcb7feb.zip",
     type = "zip",
-    strip_prefix= "bazel-integation-testing-13a7d5112aaae5572544c609f364d430962784b1",
-    sha256 = "9561123fbef215f949e086067069f9dc6fa2cff31a7896c8cf16757cddd78b1f",
+    strip_prefix= "bazel-integration-testing-3a6136e8f6287b04043217d94d97ba17edcb7feb",
+    sha256 = "bfc43a94d42e08c89a26a4711ea396a0a594bd5d55394d76aae861b299628dca",
 )
 
 
 load("@build_bazel_integration_testing//tools:repositories.bzl", "bazel_binaries")
 #depend on the Bazel binaries, also accepts an array of versions
 bazel_binaries()
+
+http_archive(
+    name = "io_bazel_rules_go",
+    sha256 = "f04d2373bcaf8aa09bccb08a98a57e721306c8f6043a2a0ee610fd6853dcde3d",
+    urls = [
+        "https://github.com/bazelbuild/rules_go/releases/download/0.18.6/rules_go-0.18.6.tar.gz",
+    ],
+)
+
+http_archive(
+    name = "bazel_gazelle",
+    sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
+    urls = [
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz",
+    ],
+)
+
+load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies")
+
+go_rules_dependencies()
 ```
 For JVM tests one would like to call the below instead of the above call to `bazel_binaries` since it does that plus more dependencies needed for `java_test`:
 ```python
