@@ -1,7 +1,7 @@
 ## Usage
 ### BUILD.bazel
 ```python
-load("//:bazel_integration_test.bzl", "bazel_java_integration_test")
+load("@build_bazel_integration_testing//:bazel_integration_test.bzl", "bazel_java_integration_test")
 bazel_java_integration_test(
     name = "MyTest",
     srcs = ["MyTest.java"],
@@ -20,6 +20,17 @@ Where `MyScalaTestSrc` is a `scala_library` you add yourself and has `com.exampl
 **Note** your test class must be run by JUnit as its run by `java_test`.  
 Very simplistic example:
 ```java
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
+import build.bazel.tests.integration.BazelCommand;
+import build.bazel.tests.integration.WorkspaceDriver;
+
+import java.io.IOException;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
 public class ExampleTest {
   private WorkspaceDriver driver = new WorkspaceDriver();
 
@@ -38,14 +49,12 @@ public class ExampleTest {
     driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
     driver.scratchExecutableFile("foo/bar.sh", "echo \"boom\"", "exit -1");
 
-    Command cmd = driver.bazelCommand("test", "//foo:bar").build();
+    BazelCommand cmd = driver.bazel("test", "//foo:bar").run();
 
-    int returnCode = cmd.run();
-
-    assertNotEquals("bazel test return code", 0, returnCode);
+    assertNotEquals("bazel test return code", 0, cmd.exitCode());
     assertTrue(
         "stderr contains boom failure",
-        cmd.getErrorLines().stream().anyMatch(x -> x.contains("boom")));
+        cmd.errorLines().stream().anyMatch(x -> x.contains("boom")));
   }
 }
 ```  
