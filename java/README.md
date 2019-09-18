@@ -46,6 +46,7 @@ public class ExampleTest {
 
   @Test
   public void bazelFailure() throws Exception {
+    driver.scratchFile(".bazelrc", "build --test_output=all");
     driver.scratchFile("foo/BUILD", "sh_test(name = \"bar\",\n" + "srcs = [\"bar.sh\"])");
     driver.scratchExecutableFile("foo/bar.sh", "echo \"boom\"", "exit -1");
 
@@ -54,7 +55,7 @@ public class ExampleTest {
     assertNotEquals("bazel test return code", 0, cmd.exitCode());
     assertTrue(
         "stderr contains boom failure",
-        cmd.errorLines().stream().anyMatch(x -> x.contains("boom")));
+        cmd.outputLines().stream().anyMatch(x -> x.contains("boom")));
   }
 }
 ```  
