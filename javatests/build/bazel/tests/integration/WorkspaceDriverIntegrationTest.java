@@ -174,7 +174,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
   private void addExternalRepositoryFor(final String repoName, final String repoJarName)
       throws IOException {
     driver.copyFromRunfiles(
-        "build_bazel_integration_testing/external/" + repoName + "/jar/" + repoJarName,
+        "build_bazel_integration_testing/external/" + repoName + "/" + repoJarName,
         "external/" + repoName + "/jar/" + repoJarName);
     driver.scratchFile("external/" + repoName + "/WORKSPACE", "");
     driver.scratchFile(

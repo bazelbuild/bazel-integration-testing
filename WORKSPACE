@@ -5,16 +5,18 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Remote execution infra
 # Required configuration for remote build execution
-bazel_toolchains_version="0.26.1"
-bazel_toolchains_sha256="c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d"
+bazel_toolchains_version = "0.26.1"
+
+bazel_toolchains_sha256 = "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d"
+
 http_archive(
-         name = "bazel_toolchains",
-         urls = [
-           "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz"%bazel_toolchains_version,
-           "https://github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz"%bazel_toolchains_version
-         ],
-         strip_prefix = "bazel-toolchains-%s"%bazel_toolchains_version,
-         sha256 = bazel_toolchains_sha256,
+    name = "bazel_toolchains",
+    sha256 = bazel_toolchains_sha256,
+    strip_prefix = "bazel-toolchains-%s" % bazel_toolchains_version,
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz" % bazel_toolchains_version,
+        "https://github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz" % bazel_toolchains_version,
+    ],
 )
 
 load("@bazel_toolchains//rules:rbe_repo.bzl", "rbe_autoconfig")
@@ -66,14 +68,26 @@ py_library(
 
 ## Java
 
-maven_jar(
+load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
+
+jvm_maven_import_external(
     name = "com_google_truth",
     artifact = "com.google.truth:truth:jar:0.31",
+    artifact_sha256 = "abf21a12d26fbed5a1468f7f47699cc70c3f3832a7cc728b402880a3e5911963",
+    server_urls = [
+        "https://jcenter.bintray.com/",
+        "https://repo1.maven.org/maven2",
+    ],
 )
 
-maven_jar(
+jvm_maven_import_external(
     name = "com_spotify_hamcrest_optional",
     artifact = "com.spotify:hamcrest-optional:jar:1.1.1",
+    artifact_sha256 = "8362a0a818c4fe41563841d3ef9411475e07dd43e65d1b89063eeefa237256ea",
+    server_urls = [
+        "https://jcenter.bintray.com/",
+        "https://repo1.maven.org/maven2",
+    ],
 )
 
 ## golang
@@ -96,7 +110,7 @@ http_archive(
     ],
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
+load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
 
 go_rules_dependencies()
 
@@ -141,12 +155,12 @@ bazel_external_dependency_archive(
 )
 
 bazel_external_dependency_archive(
-   name = "bazel_toolchains_test",
-   srcs = {
-       "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d": [
-           "https://github.com/bazelbuild/bazel-toolchains/archive/0.26.1.tar.gz",
-       ],
-   }
+    name = "bazel_toolchains_test",
+    srcs = {
+        "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d": [
+            "https://github.com/bazelbuild/bazel-toolchains/archive/0.26.1.tar.gz",
+        ],
+    },
 )
 
 ## Your new language here!
