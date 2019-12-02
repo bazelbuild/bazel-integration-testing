@@ -22,6 +22,8 @@ load(
     "bazel_binaries",
 )
 
+load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
+
 def _bazel_java_integration_test_properties_impl(ctx):
   java_runtime_info = ctx.attr._java_runtime[java_common.JavaRuntimeInfo]
   properties = [
@@ -157,18 +159,32 @@ def bazel_java_integration_test(
 def bazel_java_integration_test_deps(versions = BAZEL_VERSIONS):
   bazel_binaries(versions)
 
-  # TODO(dmarting): Use http_file and relies on a mirror instead of maven_jar
-  native.maven_jar(
+  jvm_maven_import_external(
       name = "com_google_guava",
       artifact = "com.google.guava:guava:jar:21.0",
+      artifact_sha256 = "972139718abc8a4893fa78cba8cf7b2c903f35c97aaf44fa3031b0669948b480",
+      server_urls = [
+          "https://jcenter.bintray.com/",
+          "https://repo1.maven.org/maven2",
+      ],
   )
 
-  native.maven_jar(
+  jvm_maven_import_external(
       name = "org_hamcrest_core",
       artifact = "org.hamcrest:hamcrest-core:jar:1.3",
+      artifact_sha256 = "66fdef91e9739348df7a096aa384a5685f4e875584cce89386a7a47251c4d8e9",
+      server_urls = [
+          "https://jcenter.bintray.com/",
+          "https://repo1.maven.org/maven2",
+      ],
   )
 
-  native.maven_jar(
+  jvm_maven_import_external(
       name = "org_junit",
       artifact = "junit:junit:jar:4.11",
+      artifact_sha256 = "90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe",
+      server_urls = [
+          "https://jcenter.bintray.com/",
+          "https://repo1.maven.org/maven2",
+      ],
   )

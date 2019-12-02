@@ -17,3 +17,4 @@ BAZEL_HASH_DICT = {
         "windows-x86_64": "a91c8c2b8d31709e74310e31d0a11ba237c4f4dcff7adc0e1102fbb66a489ffe",
     },
 }
+
