@@ -37,7 +37,7 @@ git_repository(
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
 
-versions.check("0.6.0")
+versions.check("0.26.0")
 
 ## Linting
 
@@ -49,21 +49,21 @@ format_repositories()
 
 ## Python
 
-http_archive(
-    name = "com_google_python_gflags",
-    build_file_content = """
-py_library(
-    name = "gflags",
-    srcs = [
-        "gflags.py",
-        "gflags_validators.py",
-    ],
-    visibility = ["//visibility:public"],
+git_repository(
+    name = "io_abseil_py",
+    commit = "9d73fdaa23a6b6726aa5731390f388c0c6250ee5",
+    remote = "https://github.com/abseil/abseil-py",
 )
-""",
-    sha256 = "344990e63d49b9b7a829aec37d5981d558fea12879f673ee7d25d2a109eb30ce",
-    strip_prefix = "python-gflags-python-gflags-2.0",
-    url = "https://github.com/google/python-gflags/archive/python-gflags-2.0.zip",
+
+http_archive(
+    name = "six_archive",
+    build_file = "@io_abseil_py//third_party:six.BUILD",
+    sha256 = "105f8d68616f8248e24bf0e9372ef04d3cc10104f1980f54d57b2ce73a5ad56a",
+    strip_prefix = "six-1.10.0",
+    urls = [
+        "http://mirror.bazel.build/pypi.python.org/packages/source/s/six/six-1.10.0.tar.gz",
+        "https://pypi.python.org/packages/source/s/six/six-1.10.0.tar.gz",
+    ],
 )
 
 ## Java

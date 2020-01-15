@@ -14,25 +14,28 @@
 """Generate a Skylark file containing a map of hash of bazel installers."""
 from __future__ import print_function
 
-import gflags
-import urllib2
+from urllib.request import urlopen
+from urllib.error import HTTPError
 import sys
+
+from absl import app
+from absl import flags
 
 _URL_FORMAT = "http://releases.bazel.build/{version}/release/bazel-{version}-installer-{platform}.sh.sha256"
 _URL_EXISTS = "http://releases.bazel.build/{version}/release/index.html"
 
-gflags.DEFINE_string("output", "bazel_hash_dict.bzl", "The output file")
+flags.DEFINE_string("output", "bazel_hash_dict.bzl", "The output file")
 
-gflags.DEFINE_string("map_name", "BAZEL_HASH_DICT",
-                     "The name of the generated map in the output file")
+flags.DEFINE_string("map_name", "BAZEL_HASH_DICT",
+                    "The name of the generated map in the output file")
 
-gflags.DEFINE_multistring("platforms", ["darwin-x86_64", "linux-x86_64"],
+flags.DEFINE_multi_string("platforms", ["darwin-x86_64", "linux-x86_64", "windows-x86_64"],
                           "List of platforms to download SHA-256.")
 
-gflags.DEFINE_string("minimum_version", "0.15.2",
-                     "The lowest version of Bazel supported")
+flags.DEFINE_string("minimum_version", "0.28.0",
+                    "The lowest version of Bazel supported")
 
-FLAGS = gflags.FLAGS
+FLAGS = flags.FLAGS
 
 #versions bazel team decided to skip and not cut
 skipped_versions = [[0, 17, 0]]
@@ -52,22 +55,25 @@ def get_hash_map(f):
       int(splitted_version[2])
   ]
   while True:
+    v = "%s.%s.%s" % (version[0], version[1], version[2])
     try:
-      v = "%s.%s.%s" % (version[0], version[1], version[2])
       print("Getting SHA-256 for version " + v)
       # Force 404 before we actually add the information
-      urllib2.urlopen(_URL_EXISTS.format(version = v)).read()
+      urlopen(_URL_EXISTS.format(version = v)).read()
       f.write("    \"%s\": {\n" % v)
       for platform in FLAGS.platforms:
-        r = urllib2.urlopen(
+        r = urlopen(
             _URL_FORMAT.format(version = v, platform = platform))
-        f.write("        \"%s\": \"%s\",\n" % (platform,
-                                               r.read().split(" ", 1)[0]))
+
+        content = r.read().decode("utf-8")
+        components = content.split(" ", 1)
+
+        f.write("        \"%s\": \"%s\",\n" % (platform, components[0]))
       f.write("    },\n")
       version[2] += 1
-    except urllib2.HTTPError as e:
+    except HTTPError as e:
       if e.code == 404:
-        print("  ==> Not a Bazel version")
+        print("%s  ==> Not a Bazel version" % v)
         # Current version does not exists, increase the lowest non null version number
         if skipped_version(version):
           version[2] += 1
@@ -104,4 +110,4 @@ def main(unused_argv):
 
 
 if __name__ == "__main__":
-  main(FLAGS(sys.argv))
+  app.run(main)
