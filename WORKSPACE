@@ -5,13 +5,13 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Remote execution infra
 # Required configuration for remote build execution
-bazel_toolchains_version = "0.26.1"
+bazel_toolchains_version = "2.0.2"
 
 bazel_toolchains_sha256 = "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d"
 
 http_archive(
     name = "bazel_toolchains",
-    sha256 = bazel_toolchains_sha256,
+    #sha256 = bazel_toolchains_sha256,
     strip_prefix = "bazel-toolchains-%s" % bazel_toolchains_version,
     urls = [
         "https://mirror.bazel.build/github.com/bazelbuild/bazel-toolchains/archive/%s.tar.gz" % bazel_toolchains_version,
