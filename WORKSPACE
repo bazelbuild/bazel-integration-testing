@@ -5,9 +5,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Remote execution infra
 # Required configuration for remote build execution
-bazel_toolchains_version = "0.26.1"
+bazel_toolchains_version = "2.0.2"
 
-bazel_toolchains_sha256 = "c6159396a571280c71d072a38147d43dcb44f78fc15976d0d47e6d0bf015458d"
+bazel_toolchains_sha256 = "a653c9d318e42b14c0ccd7ac50c4a2a276c0db1e39743ab88b5aa2f0bc9cf607"
 
 http_archive(
     name = "bazel_toolchains",
@@ -134,12 +134,10 @@ bazel_external_dependency_archive(
     name = "test_archive",
     srcs = {
         "90a8e1603eeca48e7e879f3afbc9560715322985f39a274f6f6070b43f9d06fe": [
-            "http://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar",
-            "http://maven.ibiblio.org/maven2/junit/junit/4.11/junit-4.11.jar",
+            "https://repo1.maven.org/maven2/junit/junit/4.11/junit-4.11.jar",
         ],
         "e0de160b129b2414087e01fe845609cd55caec6820cfd4d0c90fabcc7bdb8c1e": [
-            "http://repo1.maven.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar",
-            "http://maven.ibiblio.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar",
+            "https://repo1.maven.org/maven2/com/beust/jcommander/1.72/jcommander-1.72.jar",
         ],
     },
 )
@@ -148,8 +146,7 @@ bazel_external_dependency_archive(
     name = "test_archive2",
     srcs = {
         "91c77044a50c481636c32d916fd89c9118a72195390452c81065080f957de7ff": [
-            "http://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
-            "http://maven.ibiblio.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
+            "https://repo1.maven.org/maven2/javax/inject/javax.inject/1/javax.inject-1.jar",
         ],
     },
 )
