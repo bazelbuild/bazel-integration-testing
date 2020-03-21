@@ -49,25 +49,6 @@ load("@build_bazel_integration_testing//tools:repositories.bzl", "bazel_binaries
 #depend on the Bazel binaries, also accepts an array of versions
 bazel_binaries()
 
-http_archive(
-    name = "io_bazel_rules_go",
-    sha256 = "f04d2373bcaf8aa09bccb08a98a57e721306c8f6043a2a0ee610fd6853dcde3d",
-    urls = [
-        "https://github.com/bazelbuild/rules_go/releases/download/0.18.6/rules_go-0.18.6.tar.gz",
-    ],
-)
-
-http_archive(
-    name = "bazel_gazelle",
-    sha256 = "7fc87f4170011201b1690326e8c16c5d802836e3a0d617d8f75c3af2b23180c4",
-    urls = [
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/0.18.2/bazel-gazelle-0.18.2.tar.gz",
-    ],
-)
-
-load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies")
-
-go_rules_dependencies()
 ```
 For JVM tests one would like to call the below instead of the above call to `bazel_binaries` since it does that plus more dependencies needed for `java_test`:
 ```python
@@ -78,7 +59,18 @@ bazel_java_integration_test_deps()
 ## Usage
 ### [Jvm](java/README.md)  
 ### Go
-TODO
+
+[`rules_go`](https://github.com/bazelbuild/rules_go) already supports,
+natively, an integration testing framework for validating your rules. If you
+need to write integration tests, please refer to the
+[godoc](https://godoc.org/github.com/bazelbuild/rules_go/go/tools/bazel_testing)
+and associated
+[`go_bazel_test` rule.](https://github.com/bazelbuild/rules_go/blob/master/go/tools/bazel_testing/def.bzl).
+For example usage, `rules_go` itself is tested using this rule and many
+packages inside of the
+[`tests`](https://github.com/bazelbuild/rules_go/blob/master/tests/) package
+can be used as examples.
+
 ### Python
 TODO
 
