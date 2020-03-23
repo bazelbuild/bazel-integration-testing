@@ -149,6 +149,20 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     driver.bazelWithoutJavaBaseConfig("query","//:foo").mustRunSuccessfully();
   }
 
+  @Test
+  public void testExecutable() throws Exception {
+    driver
+        .executable("foo/bar", "qux")
+        .manifest(
+            "build_bazel_integration_testing/testdata/java_executable_with_runfiles.manifest.txt")
+        .scratch();
+
+    Command cmd = driver.bazelCommand("run", "//foo/bar:qux", "--", "hello", "world").build();
+
+    int returnCode = cmd.run();
+    assertEquals(0, returnCode);
+  }
+
   private List<String> shellTestingEnvironmentVariable(String key, String val) {
     return Arrays.asList("#!/bin/bash", "test \"$" + key + "\" = \"" + val + "\"", "");
   }

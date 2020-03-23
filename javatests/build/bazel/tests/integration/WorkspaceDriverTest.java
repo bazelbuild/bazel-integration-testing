@@ -96,7 +96,27 @@ public class WorkspaceDriverTest {
     Optional<String> actualScratchFileContent =
         findPath(driver.workspaceDirectoryContents(), path).map(this::readFileContent);
     org.hamcrest.MatcherAssert.assertThat(
-        actualScratchFileContent, is(optionalWithValue(equalTo(content))));
+        actualScratchFileContent, is(optionalWithValue(equalTo(content + "\n"))));
+  }
+
+  @Test
+  public void appendToScratchFileShouldCreateFileAndWorkspaceContentsContainThatFile()
+      throws IOException {
+    String content = "somecontent";
+    String path = "somePath";
+
+    driver.appendToScratchFile(path, content);
+
+    Optional<String> actualScratchFileContent =
+        findPath(driver.workspaceDirectoryContents(), path).map(this::readFileContent);
+    org.hamcrest.MatcherAssert.assertThat(
+        actualScratchFileContent, is(optionalWithValue(equalTo(content + "\n"))));
+
+    driver.appendToScratchFile(path, "foobar");
+    actualScratchFileContent =
+        findPath(driver.workspaceDirectoryContents(), path).map(this::readFileContent);
+    org.hamcrest.MatcherAssert.assertThat(
+        actualScratchFileContent, is(optionalWithValue(equalTo(content + "\nfoobar\n"))));
   }
 
   @Test

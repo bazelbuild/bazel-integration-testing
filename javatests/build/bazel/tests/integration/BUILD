@@ -40,6 +40,7 @@ bazel_java_integration_test(
 bazel_java_integration_test(
     name = "WorkspaceDriverIntegrationTest",
     srcs = ["WorkspaceDriverIntegrationTest.java"],
+    data = ["//testdata:java_executable_with_runfiles"],
     external_deps = [
         "@test_archive",
         "@test_archive2",

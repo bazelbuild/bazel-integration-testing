@@ -6,6 +6,7 @@ java_library(
     srcs = [
         "BazelCommand.java",
         "Command.java",
+        "ExecutableBuilder.java",
         "RepositoryCache.java",
         "WorkspaceDriver.java",
         "OS.java",

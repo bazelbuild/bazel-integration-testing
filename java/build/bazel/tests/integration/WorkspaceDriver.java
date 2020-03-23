@@ -19,8 +19,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -237,6 +239,15 @@ public class WorkspaceDriver {
     writeToFile(path, content);
   }
 
+  /** Append lines to a file under {@code path}, creating it if it does not exist. */
+  public void appendToScratchFile(String path, String... content) throws IOException {
+    appendToScratchFile(path, Arrays.asList(content));
+  }
+
+  public void appendToScratchFile(String path, Iterable<String> content) throws IOException {
+    writeToFile(path, content, StandardOpenOption.APPEND, StandardOpenOption.CREATE);
+  }
+
   public void scratchExecutableFile(String path, String... content) throws IOException {
     scratchExecutableFile(path, Arrays.asList(content));
   }
@@ -246,9 +257,20 @@ public class WorkspaceDriver {
     dest.toFile().setExecutable(true, false);
   }
 
-  private Path writeToFile(String path, Iterable<String> content) throws IOException {
+  /**
+   * Scratch all the files needed for importing an executable and its runfiles.
+   *
+   * <p>See rule {@code bazel_executable} in {@code //tools:import.bzl}.
+   */
+  public ExecutableBuilder executable(String packageName, String targetName) {
+    return new ExecutableBuilder(this, packageName, targetName);
+  }
+
+  private Path writeToFile(String path, Iterable<String> content, OpenOption... options)
+      throws IOException {
     Path dest = createParentDirectoryIfNotExists(path);
-    Files.write(dest, String.join("\n", content).getBytes(StandardCharsets.UTF_8));
+    Files.write(
+        dest, (String.join("\n", content) + "\n").getBytes(StandardCharsets.UTF_8), options);
     return dest;
   }
 
