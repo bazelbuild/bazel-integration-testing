@@ -35,10 +35,6 @@ load(
     "//tools:import.bzl",
     bazel_external_dependency_archive_ = "bazel_external_dependency_archive",
 )
-load(
-    "//go:bazel_integration_test.bzl",
-    bazel_go_integration_test_ = "bazel_go_integration_test",
-)
 
 print(
     "WARNING: bazel_integration_test.bzl is deprecated and will go away in " +
@@ -59,5 +55,3 @@ bazel_java_integration_test_deps = bazel_java_integration_test_deps_
 bazel_py_integration_test = bazel_py_integration_test_
 
 bazel_external_dependency_archive = bazel_external_dependency_archive_
-
-bazel_go_integration_test = bazel_go_integration_test_
