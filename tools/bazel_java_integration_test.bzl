@@ -21,6 +21,10 @@ load(
     ":repositories.bzl",
     "bazel_binaries",
 )
+load(
+    "@bazel_tools//tools/build_defs/repo:java.bzl",
+    "java_import_external",
+)
 
 load("@bazel_tools//tools/build_defs/repo:jvm.bzl", "jvm_maven_import_external")
 
@@ -186,5 +190,18 @@ def bazel_java_integration_test_deps(versions = BAZEL_VERSIONS):
       server_urls = [
           "https://jcenter.bintray.com/",
           "https://repo1.maven.org/maven2",
+      ],
+  )
+
+  # buildeventstream protos
+  # NOTE: this is a temporary location for the jar.  We could have built the proto
+  # dependency from source (e.g., github.com/bazelbuild/bazel), but downloading the whole
+  # of Bazel seems like overkill.
+  java_import_external(
+      name = "io_bazel_bep",
+      licenses = ["notice"],  # Apache 2.0
+      jar_sha256 = "9861e24a9d3a9d8ca1355b2c76e87450647a478cf9b5d547319c2d2d173388c0",
+      jar_urls = [
+          "https://github.com/bazelbuild/intellij/raw/983a509e55b78aaa5323adc9e2742db783d90d57/proto/proto_deps.jar",
       ],
   )

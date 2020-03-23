@@ -14,15 +14,26 @@
 
 package build.bazel.tests.integration;
 
+import com.google.devtools.build.lib.buildeventstream.BuildEventStreamProtos;
+import com.google.devtools.build.lib.buildeventstream.BuildEventStreamProtos.BuildEvent;
+import com.google.devtools.build.lib.buildeventstream.BuildEventStreamProtos.BuildEventId.IdCase;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** This class holds the result of a Bazel invocation. */
@@ -32,11 +43,21 @@ public class BazelCommand {
   private final List<String> args;
   private final int exitCode;
   private final WorkspaceDriver driver;
+  private final Path buildEventFile;
+  // Lazy evaluation:
+  private List<BuildEvent> buildEvents = null;
+  private Map<String, Path> artifacts = null;
 
-  private BazelCommand(Command delegate, List<String> args, int exitCode, WorkspaceDriver driver) {
+  private BazelCommand(
+      Command delegate,
+      List<String> args,
+      int exitCode,
+      Path buildEventFile,
+      WorkspaceDriver driver) {
     this.delegate = delegate;
     this.args = args;
     this.exitCode = exitCode;
+    this.buildEventFile = buildEventFile;
     this.driver = driver;
   }
 
@@ -60,25 +81,132 @@ public class BazelCommand {
    * method can be used for troubleshooting and error reporting.
    */
   public String toString() {
-    String description =
-        "BAZEL COMMAND: "
-            + args
-            + "\n"
-            + "EXIT CODE: "
-            + exitCode
-            + "\nSTDOUT:\n    "
-            + String.join("\n    ", outputLines())
-            + "\nSTDERR:\n    "
-            + String.join("\n    ", errorLines())
-            + "\nWORKSPACE CONTENTS:\n    "
-            + driver
+    StringBuilder description = new StringBuilder();
+
+    description
+        .append("BAZEL COMMAND: ")
+        .append(args)
+        .append("\n")
+        .append("EXIT CODE: ")
+        .append(exitCode)
+        .append("\nSTDOUT:\n    ")
+        .append(String.join("\n    ", outputLines()))
+        .append("\nSTDERR:\n    ")
+        .append(String.join("\n    ", errorLines()))
+        .append("\nWORKSPACE CONTENTS:\n    ")
+        .append(
+            driver
                 .workspaceDirectoryContents()
                 .stream()
                 .map(Path::toString)
-                .collect(Collectors.joining("\n    "))
-            + "\n";
+                .collect(Collectors.joining("\n    ", "\nWORKSPACE CONTENTS:\n    ", "\n")));
 
-    return description;
+    Map<String, Path> artifacts = artifacts();
+    description.append(
+        artifacts
+            .entrySet()
+            .stream()
+            .map(it -> it.getKey() + "(" + it.getValue() + ")")
+            .collect(Collectors.joining("\n    ", "ARTIFACTS:\n    ", "\n")));
+
+    Map<String, TestResult> testResults = testResults();
+    if (!testResults.isEmpty()) {
+      description.append("\nTESTS:");
+      for (TestResult testResult : testResults.values()) {
+        String logs;
+        try {
+          logs = testResult.content(TestResult.TEST_LOG);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+        description
+            .append("\n  ")
+            .append(testResult.label())
+            .append("\n    ")
+            .append(logs == null ? "  <logs: unavailable>" : logs);
+      }
+    }
+
+    return description.toString();
+  }
+
+  /** Returns a map of artifact names to paths. */
+  public Map<String, Path> artifacts() {
+    if (artifacts == null) {
+      artifacts =
+          buildEvents()
+              .stream()
+              .flatMap(ev -> ev.getNamedSetOfFiles().getFilesList().stream())
+              .collect(
+                  Collectors.toMap(
+                      BuildEventStreamProtos.File::getName, BazelCommand::bepFileToPath));
+    }
+    return artifacts;
+  }
+
+  /**
+   * Returns an optional of the path to an artifact with a given name, or an empty optional if the
+   * artifact could not be found.
+   */
+  public Optional<Path> artifact(String name) {
+    return Optional.ofNullable(artifacts().get(name));
+  }
+
+  /** Returns a map of target labels to test results. */
+  public Map<String, TestResult> testResults() {
+    return buildEvents()
+        .stream()
+        .filter(ev -> ev.getId().getIdCase() == IdCase.TEST_RESULT)
+        .map(
+            ev ->
+                new TestResult(
+                    ev.getId().getTestResult().getLabel(),
+                    ev.getTestResult()
+                        .getTestActionOutputList()
+                        .stream()
+                        .map(BazelCommand::bepFileToPath)
+                        .collect(Collectors.toList())))
+        .collect(Collectors.toMap(TestResult::label, x -> x));
+  }
+
+  /** Ensures that there is one and only one test result and returns it. */
+  public TestResult testResult() {
+    Map<String, TestResult> testResults = testResults();
+    Iterator<Entry<String, TestResult>> it = testResults.entrySet().iterator();
+    if (!it.hasNext()) {
+      throw new RuntimeException("no test result was found");
+    }
+    TestResult testResult = it.next().getValue();
+    if (it.hasNext()) {
+      throw new RuntimeException(
+          "multiple test results were found: targets: " + String.join(", ", testResults.keySet()));
+    }
+    return testResult;
+  }
+
+  /** Returns the raw build event stream, for custom processing. */
+  public List<BuildEvent> buildEvents() {
+    if (buildEvents == null) {
+      buildEvents = new ArrayList<>();
+      try (InputStream inputStream = new FileInputStream(buildEventFile.toFile())) {
+        BuildEvent event;
+        while ((event = BuildEvent.parseDelimitedFrom(inputStream)) != null) {
+          buildEvents.add(event);
+        }
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    return buildEvents;
+  }
+
+  /** Converts a Build Event Protocol file to a {@link java.nio.file.Path}. */
+  private static Path bepFileToPath(BuildEventStreamProtos.File bepFile) {
+    try {
+      return Paths.get(new URI(bepFile.getUri()));
+    } catch (URISyntaxException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static class Builder {
@@ -86,6 +214,7 @@ public class BazelCommand {
     private final Path outputUserRoot;
     private final RepositoryCache repositoryCache;
     private final List<String> args;
+    private Path buildEventFile;
     private Path bazelrcFile = null;
     private Map<String, String> environment = new HashMap<>();
     private Path workingDirectory = Paths.get("");
@@ -134,6 +263,8 @@ public class BazelCommand {
                   "--max_idle_secs=10",
                   "--bazelrc=" + bazelRcPath));
 
+      buildEventFile = Files.createTempFile(outputUserRoot, "bep", ".bp");
+
       // This would split the args "run //target -- hello world" into
       // "run //target" and "-- hello world" ("hello world" being passed to the executable
       // to run).
@@ -141,9 +272,12 @@ public class BazelCommand {
       if (terminator == -1) {
         command.addAll(args);
         command.addAll(repositoryCache.bazelOptions());
+        // Notice that this option entails a 1s penalty on the execution time.
+        command.add("--build_event_binary_file=" + buildEventFile.toAbsolutePath());
       } else {
         command.addAll(args.subList(0, terminator));
         command.addAll(repositoryCache.bazelOptions());
+        command.add("--build_event_binary_file=" + buildEventFile.toAbsolutePath());
         command.addAll(args.subList(terminator, args.size()));
       }
 
@@ -167,7 +301,7 @@ public class BazelCommand {
     /** Runs the command and returns an object to inspect the invocation result. */
     public BazelCommand run() throws IOException, InterruptedException {
       Command cmd = build();
-      return new BazelCommand(cmd, args, cmd.run(), driver);
+      return new BazelCommand(cmd, args, cmd.run(), buildEventFile, driver);
     }
 
     /**

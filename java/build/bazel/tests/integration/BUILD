@@ -7,10 +7,14 @@ java_library(
         "BazelCommand.java",
         "Command.java",
         "RepositoryCache.java",
+        "TestResult.java",
         "WorkspaceDriver.java",
         "OS.java",
     ],
     visibility = ["//visibility:public"],
+    deps = [
+        "@io_bazel_bep//jar",
+    ],
 )
 
 java_library(

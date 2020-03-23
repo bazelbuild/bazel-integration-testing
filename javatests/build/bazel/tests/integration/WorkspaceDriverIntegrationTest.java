@@ -1,15 +1,21 @@
 package build.bazel.tests.integration;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -149,6 +155,83 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
     driver.bazelWithoutJavaBaseConfig("query","//:foo").mustRunSuccessfully();
   }
 
+  @Test
+  public void testBEPBuild() throws Exception {
+    addExternalRepositoryFor("org_junit", "junit-4.11.jar");
+    writeWorkspaceFileWithRepositories("org_junit");
+
+    driver.scratchFile(
+        "BUILD.bazel",
+        Stream.concat(testLabelNamed("BuildMe").stream(), testLabelNamed("BuildMe2").stream())
+            .collect(Collectors.toList()));
+    driver.scratchFile("BuildMe.java", passingTestNamed("BuildMe"));
+    driver.scratchFile("BuildMe2.java", passingTestNamed("BuildMe2"));
+
+    BazelCommand cmd = driver.bazel("build", "//:BuildMe", "//:BuildMe2").mustRunSuccessfully();
+
+    Optional<Path> buildMe = cmd.artifact("BuildMe");
+    assertTrue(buildMe.isPresent());
+    assertTrue(Files.exists(buildMe.get()));
+
+    Optional<Path> buildMe2 = cmd.artifact("BuildMe2");
+    assertTrue(buildMe2.isPresent());
+    assertTrue(Files.exists(buildMe2.get()));
+
+    assertTrue(!cmd.artifact("NotPresent").isPresent());
+  }
+
+  @Test
+  public void testBEPTest() throws Exception {
+    addExternalRepositoryFor("org_junit", "junit-4.11.jar");
+    writeWorkspaceFileWithRepositories("org_junit");
+
+    driver.scratchFile(
+        "BUILD.bazel",
+        Stream.concat(testLabelNamed("TestMe").stream(), testLabelNamed("TestMe2").stream())
+            .collect(Collectors.toList()));
+    driver.scratchFile("TestMe.java", passingTestNamed("TestMe"));
+    driver.scratchFile("TestMe2.java", passingTestNamed("TestMe2"));
+
+    BazelCommand cmd = driver.bazel("test", "//:TestMe").mustRunSuccessfully();
+    testTestBuildEvents("//:TestMe", cmd.testResult());
+
+    cmd = driver.bazel("test", "//:TestMe", "//:TestMe2").mustRunSuccessfully();
+
+    Map<String, TestResult> testResults = cmd.testResults();
+    String[] keys = new String[testResults.size()];
+    testResults.keySet().toArray(keys);
+    Arrays.sort(keys);
+    assertArrayEquals(new String[] {"//:TestMe", "//:TestMe2"}, keys);
+    testTestBuildEvents("//:TestMe", testResults.get("//:TestMe"));
+    testTestBuildEvents("//:TestMe2", testResults.get("//:TestMe2"));
+
+    try {
+      cmd.testResult();
+      fail("expected exception to be thrown");
+    } catch (RuntimeException e) {
+      assertTrue(e.getMessage().contains("multiple test results were found"));
+    }
+  }
+
+  private void testTestBuildEvents(String expectedLabel, TestResult testResult) throws IOException {
+    assertEquals(expectedLabel, testResult.label());
+
+    Optional<Path> testLog = testResult.file(TestResult.TEST_LOG);
+    assertTrue(testLog.isPresent());
+    assertEquals(TestResult.TEST_LOG, testLog.get().getFileName());
+    assertTrue(testResult.content(TestResult.TEST_LOG).contains("Foo bar"));
+
+    Optional<Path> testXml = testResult.file(TestResult.TEST_XML);
+    assertTrue(testXml.isPresent());
+    assertEquals(TestResult.TEST_XML, testXml.get().getFileName());
+    assertTrue(testResult.content(TestResult.TEST_XML).startsWith("<?xml"));
+
+    assertTrue(!testResult.file(TestResult.COVERAGE_DAT).isPresent());
+    assertEquals("", testResult.content(TestResult.COVERAGE_DAT));
+    assertTrue(!testResult.file(TestResult.BASELINE_COVERAGE_DAT).isPresent());
+    assertEquals("", testResult.content(TestResult.BASELINE_COVERAGE_DAT));
+  }
+
   private List<String> shellTestingEnvironmentVariable(String key, String val) {
     return Arrays.asList("#!/bin/bash", "test \"$" + key + "\" = \"" + val + "\"", "");
   }
@@ -223,6 +306,7 @@ public class WorkspaceDriverIntegrationTest extends BazelBaseTestCase {
             "public class " + name + " {",
             "  @Test",
             "  public void testSuccess() {",
+            "    System.out.println(\"Foo bar\");",
             "  }",
             "}");
     return Stream.of(prefix, additionalDepsList, suffix)
