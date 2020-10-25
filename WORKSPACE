@@ -32,7 +32,7 @@ rbe_autoconfig(
 git_repository(
     name = "bazel_skylib",
     remote = "https://github.com/bazelbuild/bazel-skylib",
-    tag = "1.0.2",
+    tag = "1.0.3",
 )
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
