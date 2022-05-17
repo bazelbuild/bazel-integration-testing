@@ -1,7 +1,7 @@
 ARCHIVED: Bazel-integration-testing
 =================================
 
-NOTE: This repository has moved to https://github.com/bazelbuild/bazel-integration-testing.
+NOTE: This repository has moved to https://github.com/bazel-contrib/rules_bazel_integration_test.
 
 **Because your build infra also needs build (and tests)**
 
